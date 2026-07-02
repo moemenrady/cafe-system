@@ -13,8 +13,9 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
+        $roles = explode('|', $role);
         // لو المستخدم مش مسجل دخول أو صلاحيته مش مطابقة للصلاحية المطلوبة
-        if (!$request->user() || $request->user()->role !== $role) {
+        if (!$request->user() || !in_array($request->user()->role, $roles)) {
             abort(403, 'غير مصرح لك بدخول هذه الصفحة.');
         }
 

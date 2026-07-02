@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 
-use App\Models\Sale; // الموديل الذي تستخدمه لحفظ الفواتير
 use Illuminate\Http\Request;
 
 class SalesInvoiceController extends Controller
@@ -27,20 +26,19 @@ class SalesInvoiceController extends Controller
     public function show($id)
     {
         // جلب الفاتورة مع العلاقات المحددة في الموديلات لديك
-        $invoice = Sale::with(['user', 'items.menu'])->findOrFail($id);
+        $invoice = Invoice::with(['creator', 'items.menu'])->findOrFail($id);
 
         return response()->json([
-            'invoice_number' => $invoice->id,
-            'cashier' => $invoice->user->name ?? 'غير معروف',
+            'invoice_number' => $invoice->invoice_number,
+            'cashier' => $invoice->creator->name ?? 'غير معروف',
             'created_at' => $invoice->created_at->format('Y-m-d h:i A'),
-            'paid_amount' => number_format($invoice->paid_amount, 2),
-            'total' => number_format($invoice->total_price, 2),
+            'total' => number_format($invoice->total, 2),
             'items' => $invoice->items->map(function ($item) {
                 return [
                     'name' => $item->menu->name ?? 'منتج محذوف',
                     'quantity' => $item->quantity,
-                    'price' => number_format($item->price, 2),
-                    'total' => number_format($item->price * $item->quantity, 2),
+                    'price' => number_format($item->item_price, 2),
+                    'total' => number_format($item->total, 2),
                 ];
             })
         ]);

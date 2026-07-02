@@ -19,11 +19,69 @@ class InvoiceController extends Controller
      */
     public function movements()
     {
-        $movements = InvoiceTransaction::with(['creator', 'invoice'])
+        $movements = InvoiceTransaction::with(['creator', 'invoice', 'invoice.items.menu'])
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(10);
 
-        return view('admin.movements.index', compact('movements'));
+        // Calculate statistics
+        $stats = [
+            'total' => InvoiceTransaction::count(),
+            'updates' => InvoiceTransaction::where('action', 'update')->count(),
+            'creates' => InvoiceTransaction::where('action', 'create')->count(),
+            'deletes' => InvoiceTransaction::where('action', 'delete')->count(),
+            'today' => InvoiceTransaction::whereDate('created_at', today())->count(),
+        ];
+
+        return view('admin.movements.index', compact('movements', 'stats'));
+    }
+
+    /**
+     * Get detailed invoice data for modal
+     */
+    public function getInvoiceDetails($id)
+    {
+        try {
+            $invoice = Invoice::with(['items.menu', 'creator'])->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'created_at' => $invoice->created_at->format('Y-m-d - h:i A'),
+                    'total' => number_format($invoice->total, 2),
+                    'discount' => number_format($invoice->discount ?? 0, 2),
+                    'subtotal' => number_format(($invoice->total + ($invoice->discount ?? 0)), 2),
+                    'payment_method' => $this->getPaymentMethodLabel($invoice->payment_method),
+                    'creator' => $invoice->creator->name ?? 'غير معروف',
+                    'note' => $invoice->note ?? 'لا يوجد',
+                    'items' => $invoice->items->map(function ($item) {
+                        return [
+                            'id' => $item->id,
+                            'name' => $item->menu->name ?? 'منتج غير معروف',
+                            'quantity' => $item->quantity,
+                            'price' => number_format($item->item_price, 2),
+                            'total' => number_format($item->total, 2)
+                        ];
+                    })
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ في تحميل البيانات'
+            ], 500);
+        }
+    }
+
+    private function getPaymentMethodLabel($method)
+    {
+        $methods = [
+            'cash' => '💰 كاش',
+            'InstaPay' => '📱 InstaPay',
+            'card' => '💳 بطاقة'
+        ];
+        return $methods[$method] ?? $method;
     }
 
     public function update(Request $request, $id)
@@ -36,7 +94,7 @@ class InvoiceController extends Controller
         ]);
 
         $invoice = Invoice::with('items')->findOrFail($id);
-        $user = auth()->user(); 
+        $user = auth()->user();
         $oldDataSnapshot = $invoice->toArray();
 
         DB::beginTransaction();
@@ -99,7 +157,7 @@ class InvoiceController extends Controller
             if ($user && $user->role === 'supervisor') {
                 InvoiceTransaction::create([
                     'invoice_id' => $invoice->id,
-                    'action' => 'edit',
+                    'action' => 'update',
                     'old_data' => $oldDataSnapshot,
                     'new_data' => $invoice->load('items')->toArray(),
                     'description' => "قام المشرف [{$user->name}] بتعديل الفاتورة رقم {$invoice->invoice_number}",
@@ -116,7 +174,7 @@ class InvoiceController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             // 🌟 هذا الكود سيجبر لارافيل على إرسال نص الخطأ الحقيقي للمتصفح
             return response()->json([
                 'success' => false,

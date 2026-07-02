@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,7 +11,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
-        $this->call(UserTableSeeder::class);
+        $this->call([
+            UserSeeder::class,
+            CafeSystemSeeder::class, // 🌟 تأكد أن هذا الاسم هو المكتوب لتجنب خطأ السطر 15 السابق
+        ]);
     }
 }

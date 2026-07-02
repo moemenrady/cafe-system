@@ -1,15 +1,38 @@
 <?php
 
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-Route::get('/welcome', function () {
-    return view('welcome', compact("", "", ""));
-});
+/*
+|--------------------------------------------------------------------------
+| Public & Guest Routes (الروابط العامة والزوار)
+|--------------------------------------------------------------------------
+*/
+Route::get('/welcome', function () { return view('welcome'); });
 Route::get('/demo', [UserController::class, "index"]);
 
+Route::middleware('guest')->group(function () {
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+});
 
+/*
+|--------------------------------------------------------------------------
+| Authenticated Shared Routes (الروابط العامة بعد تسجيل الدخول)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/', function () { return view('dashboard'); })->name('dashboard');
+});
 
-
-require __DIR__ . '/auth.php';
-require __DIR__ . '/dashboard.php';
+/*
+|--------------------------------------------------------------------------
+| Load Sub-Routing Files (استدعاء ملفات الروابط الفرعية المقسمة)
+|--------------------------------------------------------------------------
+*/
+require __DIR__.'/sales.php';
+require __DIR__.'/inventory.php';
+require __DIR__.'/shifts.php';
+require __DIR__.'/admin.php';

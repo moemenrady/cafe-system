@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tagmedix - @yield('title')</title>
+    <title>Enterprise Cafe - @yield('title')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
 
     <script>
         tailwind.config = {
@@ -20,9 +19,13 @@
                         sans: ['Inter', 'sans-serif']
                     },
                     colors: {
-                        sidebar: '#111827',
-                        activeGold: '#8A704C',
-                        bodyBg: '#F3F4F6'
+                        sidebar: '#1F2937',
+                        /* --dark-parts */
+                        cafePrimary: '#7DD3FC',
+                        /* --primary */
+                        cafeSecondary: '#BAE6FD',
+                        /* --secondary */
+                        bodyBg: '#F8FCFF' /* --bg-color */
                     }
                 }
             }
@@ -30,6 +33,18 @@
     </script>
 
     <style>
+        :root {
+            --primary: #7DD3FC;
+            --dark-parts: #1F2937;
+            --secondary: #BAE6FD;
+            --bg-color: #F8FCFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.5);
+        }
+
         body.ar {
             font-family: Cairo, sans-serif;
         }
@@ -38,26 +53,68 @@
             font-family: Inter, sans-serif;
         }
 
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.97) translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
         ::-webkit-scrollbar {
-            height: 6px;
-            width: 6px;
+            height: 5px;
+            width: 5px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: var(--bg-color);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+            background: var(--secondary);
+            border-radius: 10px;
         }
 
         .active-tab {
-            background-color: #8A704C !important;
-            color: white !important;
+            background-color: rgba(125, 211, 252, 0.15) !important;
+            color: #7DD3FC !important;
+            border-left: 3px solid #7DD3FC;
         }
 
-        /* تأثيرات القائمة المنسدلة */
+        html[dir="rtl"] .active-tab {
+            border-left: none;
+            border-right: 3px solid #7DD3FC;
+        }
+
         .dropdown-enter {
             opacity: 0;
             transform: scale(0.95) translateY(10px);
@@ -71,264 +128,239 @@
     </style>
 </head>
 
-<body class="bg-bodyBg font-sans text-gray-800 flex h-screen overflow-hidden">
+<body class="bg-bodyBg text-gray-800 flex h-screen overflow-hidden">
 
-
-
-
-    <div id="test" class="test"></div>
-
-
-
-    <!-- Mobile Overlay -->
     <div id="mobileOverlay"
-        class="fixed inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity opacity-0 duration-300"></div>
+        class="fixed inset-0 bg-black/40 z-20 hidden md:hidden transition-opacity opacity-0 duration-300"></div>
 
-    <!-- Sidebar -->
     <aside id="sidebar"
-        class="fixed inset-y-0 left-0 z-30 w-64 bg-sidebar text-gray-400 flex flex-col transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out h-full border-r border-gray-800 shadow-2xl md:shadow-none">
+        class="fixed inset-y-0 right-0 md:left-auto z-30 w-64 bg-sidebar text-gray-400 flex flex-col transform translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out h-full border-l md:border-l-0 border-gray-800 shadow-2xl md:shadow-none">
 
-        <!-- Sidebar Header (Logo & Close Btn) -->
-        <div class="flex items-center justify-between p-6">
-            <div class="text-white font-bold text-xl tracking-wider flex items-center gap-3">
-                <i class="fa-solid fa-layer-group text-activeGold"></i>
-                <span data-ar="تاج ميديكس" data-en="TAGMEDIX">تاج ميديكس</span>
-            </div>
-            <!-- Close button for mobile -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-800">
+            <a href="{{ route('dashboard') }}"
+                class="text-white font-bold text-lg tracking-wide flex items-center gap-3">
+                <div
+                    class="w-8 h-8 rounded-xl bg-cafePrimary flex items-center justify-center text-sidebar animate-pulse">
+                    <i class="fa-solid fa-mug-hot text-sm"></i>
+                </div>
+                <span data-ar="نظام الكافيه" data-en="Cafe System">نظام الكافيه</span>
+            </a>
             <button id="closeSidebarBtn" class="md:hidden text-gray-400 hover:text-white transition">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium pb-4">
-            <a
-                href=""class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('dashboard') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-chart-line w-5"></i>
-                <span data-ar="لوحة التحكم" data-en="Dashboard">لوحة التحكم</span>
+        <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1.5 text-xs font-medium">
+
+            <a href="{{ route('inventory.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('inventory*') ? 'active-tab' : '' }}">
+                <i class="fa-solid fa-boxes-stacked text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="المخزن" data-en="Inventory">المخزن</span>
             </a>
 
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('inventory.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-boxes-stacked w-5"></i>
-                <span data-ar="المخزون" data-en="Inventory">المخزون</span>
+            <a href="{{ route('categories.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('categories*') ? 'active-tab' : '' }}">
+                <i class="fa-solid fa-layer-group text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="الأقسام" data-en="Categories">الأقسام</span>
             </a>
 
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('orders.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-clipboard-list w-5"></i>
-                <span data-ar="الطلبات" data-en="Orders">الطلبات</span>
+            <a href="{{ route('menu.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('menu*') ? 'active-tab' : '' }}">
+                <i class="fa-solid fa-utensils text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="المينيو" data-en="Menu">المينيو</span>
             </a>
 
-            <a href=""
-                class="flex items-center justify-between px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('production.*') ? 'active-tab' : '' }}">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-industry w-5"></i>
-                    <span data-ar="مسار عمل الطلبات" data-en="Orders Work Flow">مسار عمل الطلبات</span>
+            <a href="{{ route('pos.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('pos*') ? 'active-tab' : '' }}">
+                <i class="fa-solid fa-cash-register text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="البيع" data-en="POS / Sales">البيع</span>
+            </a>
+
+            <a href="{{ route('sales-invoices.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('sales-invoices*') ? 'active-tab' : '' }}">
+                <i
+                    class="fa-solid fa-file-invoice-dollar text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="فواتير المبيعات" data-en="Sales Invoices">فواتير المبيعات</span>
+            </a>
+
+            <a href="{{ route('expenses.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('expenses*') ? 'active-tab' : '' }}">
+                <i class="fa-solid fa-wallet text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="المصروفات" data-en="Expenses">المصروفات</span>
+            </a>
+
+            <a href="{{ route('customers.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('customers*') ? 'active-tab' : '' }}">
+                <i class="fa-solid fa-users text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="العملاء" data-en="Customers">العملاء</span>
+            </a>
+
+            <a href="{{ route('withdrawals.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('withdrawals*') ? 'active-tab' : '' }}">
+                <i
+                    class="fa-solid fa-hand-holding-dollar text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="مسحوبات الموظفين" data-en="Staff Withdrawals">مسحوبات الموظفين</span>
+            </a>
+
+            @if (auth()->user() && auth()->user()->role === 'supervisor')
+                <a href="{{ route('shifts.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-xl hover:bg-yellow-500/20 transition-all duration-200 mt-4 {{ request()->is('shifts*') ? 'active-tab' : '' }}">
+                    <i class="fa-solid fa-clock-history"></i>
+                    <span data-ar="الشيفتات" data-en="Shifts">الشيفتات</span>
+                </a>
+            @endif
+
+            @if (auth()->user() && auth()->user()->role === 'admin')
+                <div class="pt-4 border-t border-gray-800/60 mt-4 space-y-1.5">
+                    <p class="px-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+                        data-ar="لوحة الإدارة" data-en="Admin Panel">لوحة الإدارة</p>
+
+                    <a href="{{ route('admin.movements') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('admin/movements*') ? 'active-tab' : '' }}">
+                        <i
+                            class="fa-solid fa-shield-halved text-yellow-400 group-hover:scale-110 transition-transform"></i>
+                        <span data-ar="حركات المشرفين" data-en="Supervisor Movements">حركات المشرفين</span>
+                    </a>
+
+                    <a href="{{ route('employees.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('employees*') ? 'active-tab' : '' }}">
+                        <i
+                            class="fa-solid fa-users-gear text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                        <span data-ar="إدارة الموظفين" data-en="Staff Management">إدارة الموظفين</span>
+                    </a>
+
+                    <a href="{{ route('management.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('management*') ? 'active-tab' : '' }}">
+                        <i
+                            class="fa-solid fa-folder-tree text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                        <span data-ar="الإدارة" data-en="Management">الإدارة</span>
+                    </a>
+
+                    <a href="{{ route('purchase-invoices.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('purchase-invoices*') ? 'active-tab' : '' }}">
+                        <i
+                            class="fa-solid fa-file-invoice text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                        <span data-ar="فواتير الشراء" data-en="Purchase Invoices">فواتير الشراء</span>
+                    </a>
+
+                    <a href="{{ route('recipes.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('recipes*') ? 'active-tab' : '' }}">
+                        <i class="fa-solid fa-receipt text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                        <span data-ar="الوصفات" data-en="Recipes">الوصفات</span>
+                    </a>
+
+                    <a href="{{ route('settings.index') }}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('settings*') ? 'active-tab' : '' }}">
+                        <i class="fa-solid fa-sliders text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                        <span data-ar="الاعدادات" data-en="Settings">الاعدادات</span>
+                    </a>
                 </div>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('payments.*') ? 'active-tab' : '' }}">
-                <i class="fa-regular fa-credit-card w-5"></i>
-                <span data-ar="المدفوعات" data-en="Payments">المدفوعات</span>
-            </a>
-
-            <a href=""
-                class="testt">
-                <i class="fa-solid fa-file-invoice-dollar w-5"></i>
-                <span data-ar="الرواتب" data-en="Payroll">الرواتب</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('suppliers.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-truck-field w-5"></i>
-                <span data-ar="الموردون" data-en="Suppliers">الموردون</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('returns.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-rotate-left w-5"></i>
-                <span data-ar="المرتجعات" data-en="Returns">المرتجعات</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('finished-goods.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-box-open w-5"></i>
-                <span data-ar="المنتجات النهائية" data-en="Finished Goods">المنتجات النهائية</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('reports.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-chart-bar w-5"></i>
-                <span data-ar="التقارير" data-en="Reports">التقارير</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('users.*') ? 'active-tab' : '' }}">
-                <i class="fa-regular fa-user w-5"></i>
-                <span data-ar="المستخدمون" data-en="Users">المستخدمون</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('employees.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-users w-5"></i>
-                <span data-ar="الموظفون" data-en="Employees">الموظفون</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('settings.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-gear w-5"></i>
-                <span data-ar="الإعدادات" data-en="Settings">الإعدادات</span>
-            </a>
-
-            <a href=""
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:text-white transition {{ request()->routeIs('order_classifications.*') ? 'active-tab' : '' }}">
-                <i class="fa-solid fa-tags w-5"></i>
-                <span data-ar="تصنيفات الطلبات" data-en="Order Classifications">تصنيفات الطلبات</span>
-            </a>
+            @endif
         </nav>
 
-        <!-- Profile & Logout Section -->
         <div class="p-4 mt-auto border-t border-gray-800 relative">
-
-            <!-- User Info Trigger -->
             <div id="profileDropdownBtn"
-                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 cursor-pointer transition select-none">
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-800 cursor-pointer transition select-none">
                 <div
-                    class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-xs shrink-0">
-                    <i class="fa-solid fa-user"></i>
+                    class="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center text-cafePrimary text-xs shrink-0">
+                    <i class="fa-solid fa-user-tie"></i>
                 </div>
                 <div class="flex-1 overflow-hidden">
-                    <p class="text-white text-sm font-medium truncate" data-ar="المدير" data-en="Admin">المدير</p>
-                    <p class="text-[11px] text-gray-500 truncate" data-ar="مدير النظام" data-en="Super Admin">مدير
-                        النظام</p>
+                    <p class="text-white text-xs font-semibold truncate">{{ auth()->user()->name ?? 'مستخدم' }}</p>
+                    <p class="text-[10px] text-gray-500 truncate" data-ar="صلاحية الحساب" data-en="Account Role">
+                        صلاحية الحساب</p>
                 </div>
-                <i class="fa-solid fa-chevron-up text-gray-500 text-xs transition-transform duration-200"
+                <i class="fa-solid fa-chevron-up text-gray-500 text-[10px] transition-transform duration-200"
                     id="profileChevron"></i>
             </div>
 
-            <!-- Dropdown Menu -->
             <div id="profileDropdown"
-                class="absolute bottom-[80px] left-4 right-4 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden hidden dropdown-enter">
-                <div class="p-2 space-y-1">
-                    <a href=""
-                        class="flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition">
-                        <i class="fa-solid fa-user-pen w-4 text-center"></i>
-                        <span data-ar="تعديل الملف الشخصي" data-en="Edit Profile">تعديل الملف الشخصي</span>
-                    </a>
-
-                    <div class="h-px bg-gray-700 my-1"></div>
-
-                    <!-- Laravel Logout Form -->
+                class="absolute bottom-[75px] left-4 right-4 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden hidden dropdown-enter">
+                <div class="p-1.5 space-y-0.5">
                     <form method="POST" action="{{ route('logout') ?? '#' }}">
                         @csrf
                         <button type="submit"
-                            class="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-md transition text-left rtl:text-right">
-                            <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+                            class="w-full flex items-center gap-3 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-lg transition text-right rtl:text-right">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-center"></i>
                             <span data-ar="تسجيل الخروج" data-en="Logout">تسجيل الخروج</span>
                         </button>
                     </form>
                 </div>
             </div>
-
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 flex flex-col h-full overflow-hidden w-full">
 
-        <!-- Header -->
-        <header class="bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10 shrink-0">
+        <header
+            class="bg-white border-b border-gray-100 p-4 flex justify-between items-center z-10 shrink-0 shadow-sm">
             <div class="flex items-center gap-4">
-                <!-- Hamburger Menu Button (Mobile/Tablet only) -->
-                <button id="openSidebarBtn"
-                    class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none p-1">
+                <button id="openSidebarBtn" class="md:hidden text-gray-600 hover:text-gray-900 p-1">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800" data-ar="لوحة التحكم" data-en="Dashboard">لوحة التحكم
-                    </h1>
-                    <p class="text-sm text-gray-500 hidden sm:block" data-ar="مرحباً بعودتك" data-en="Welcome back">
-                        مرحباً بعودتك</p>
+                    <h1 class="text-md font-bold text-gray-800">@yield('page_title', 'لوحة التحكم')</h1>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 md:gap-4">
-                <button
-                    class="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-                    <span class="hidden sm:inline" data-ar="اليوم" data-en="Today">اليوم</span>
-                    <i class="fa-regular fa-calendar sm:mx-1"></i>
-                </button>
+            <div class="flex items-center gap-3">
                 <button id="languageBtn"
-                    class="border rounded-lg px-4 py-2 text-sm transition hover:bg-gray-50 font-medium">
+                    class="border border-gray-200 rounded-xl px-4 py-2 text-xs transition hover:bg-gray-50 font-semibold shadow-sm flex items-center gap-2">
                     🇪🇬 العربية
                 </button>
                 <button class="relative p-2 text-gray-400 hover:text-gray-600 transition">
-                    <i class="fa-regular fa-bell text-lg md:text-xl"></i>
-                    <span
-                        class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
                 </button>
             </div>
         </header>
 
-        <!-- Dynamic Content Area -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 relative">
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 relative animate-fade-in">
             @yield('content')
         </div>
-
     </main>
 
-    <!-- Scripts section -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar Elements
             const sidebar = document.getElementById('sidebar');
             const openBtn = document.getElementById('openSidebarBtn');
             const closeBtn = document.getElementById('closeSidebarBtn');
             const overlay = document.getElementById('mobileOverlay');
-
-            // Profile Dropdown Elements
             const profileBtn = document.getElementById('profileDropdownBtn');
             const profileDropdown = document.getElementById('profileDropdown');
             const profileChevron = document.getElementById('profileChevron');
+            const html = document.getElementById("htmlRoot");
+            const btn = document.getElementById("languageBtn");
 
-            // Toggle Sidebar Function
             function toggleSidebar() {
-                const isOpen = !sidebar.classList.contains('-translate-x-full');
+                const isRtl = html.dir === "rtl";
+                const isOpen = isRtl ? !sidebar.classList.contains('translate-x-full') : !sidebar.classList
+                    .contains('-translate-x-full');
 
                 if (isOpen) {
-                    sidebar.classList.add('-translate-x-full');
+                    sidebar.classList.add(isRtl ? 'translate-x-full' : '-translate-x-full');
                     overlay.classList.remove('opacity-100');
-                    overlay.classList.add('opacity-0');
-                    setTimeout(() => overlay.classList.add('hidden'), 300); // Wait for transition
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
                 } else {
                     overlay.classList.remove('hidden');
-                    // Small delay to allow display:block to apply before transition
                     setTimeout(() => {
-                        sidebar.classList.remove('-translate-x-full');
-                        overlay.classList.remove('opacity-0');
+                        sidebar.classList.remove(isRtl ? 'translate-x-full' : '-translate-x-full');
                         overlay.classList.add('opacity-100');
                     }, 10);
                 }
             }
 
-            // Sidebar Event Listeners
-            openBtn.addEventListener('click', toggleSidebar);
-            closeBtn.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
+            if (openBtn) openBtn.addEventListener('click', toggleSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', toggleSidebar);
+            if (overlay) overlay.addEventListener('click', toggleSidebar);
 
-            // Toggle Profile Dropdown
             profileBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const isHidden = profileDropdown.classList.contains('hidden');
-
                 if (isHidden) {
                     profileDropdown.classList.remove('hidden');
-                    // Trigger animation
                     setTimeout(() => {
-                        profileDropdown.classList.remove('dropdown-enter');
+                        profileDropdown.removeClassName = 'dropdown-enter';
                         profileDropdown.classList.add('dropdown-enter-active');
                         profileChevron.classList.add('rotate-180');
                     }, 10);
@@ -340,48 +372,45 @@
                 }
             });
 
-            // Close dropdown when clicking anywhere outside
-            document.addEventListener('click', function(e) {
-                if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target) && !
-                    profileDropdown.classList.contains('hidden')) {
+            document.addEventListener('click', function() {
+                if (!profileDropdown.classList.contains('hidden')) {
                     profileDropdown.classList.add('dropdown-enter');
                     profileDropdown.classList.remove('dropdown-enter-active');
                     profileChevron.classList.remove('rotate-180');
                     setTimeout(() => profileDropdown.classList.add('hidden'), 200);
                 }
             });
+
+            function applyLanguage(lang) {
+                localStorage.setItem("lang", lang);
+                html.lang = lang;
+                html.dir = lang === "ar" ? "rtl" : "ltr";
+                document.body.classList.remove("ar", "en");
+                document.body.classList.add(lang);
+
+                if (lang === 'en') {
+                    sidebar.classList.remove('right-0', 'translate-x-full');
+                    sidebar.classList.add('left-0', '-translate-x-full');
+                } else {
+                    sidebar.classList.remove('left-0', '-translate-x-full');
+                    sidebar.classList.add('right-0', 'translate-x-full');
+                }
+
+                document.querySelectorAll("[data-ar]").forEach(el => {
+                    el.innerHTML = lang === "ar" ? el.dataset.ar : el.dataset.en;
+                });
+                btn.innerHTML = lang === "ar" ? "🇪🇬 العربية" : "🇺🇸 English";
+            }
+
+            const saved = localStorage.getItem("lang") || "ar";
+            applyLanguage(saved);
+
+            btn.onclick = () => {
+                const current = localStorage.getItem("lang");
+                applyLanguage(current === "ar" ? "en" : "ar");
+            }
         });
-
-        // Language Switcher Logic
-        const html = document.getElementById("htmlRoot");
-        const btn = document.getElementById("languageBtn");
-
-        function applyLanguage(lang) {
-            localStorage.setItem("lang", lang);
-            html.lang = lang;
-            html.dir = lang === "ar" ? "rtl" : "ltr";
-
-            document.body.classList.remove("ar", "en");
-            document.body.classList.add(lang);
-
-            // Update all texts
-            document.querySelectorAll("[data-ar]").forEach(el => {
-                el.innerHTML = lang === "ar" ? el.dataset.ar : el.dataset.en;
-            });
-
-            // Update button text
-            btn.innerHTML = lang === "ar" ? "🇪🇬 العربية" : "🇺🇸 English";
-        }
-
-        const saved = localStorage.getItem("lang") || "ar";
-        applyLanguage(saved);
-
-        btn.onclick = () => {
-            const current = localStorage.getItem("lang");
-            applyLanguage(current === "ar" ? "en" : "ar");
-        }
     </script>
-
     @stack('scripts')
 </body>
 

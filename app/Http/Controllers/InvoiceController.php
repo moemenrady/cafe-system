@@ -1,0 +1,216 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Invoice;
+use App\Models\Menu;
+use App\Models\InventoryItem;
+use App\Models\InvoiceItem;
+use App\Models\InvoiceTransaction;
+use App\Helpers\InvoiceNumberHelper;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
+class InvoiceController extends Controller
+{
+    /**
+     * شاشة الرقابة - عرض حركات وتعديلات المشرفين
+     */
+    public function movements()
+    {
+        $movements = InvoiceTransaction::with(['creator', 'invoice'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.movements.index', compact('movements'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.menu_id' => 'required|exists:menu,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'discount' => 'nullable|numeric|min:0',
+        ]);
+
+        $invoice = Invoice::with('items')->findOrFail($id);
+        $user = auth()->user(); 
+        $oldDataSnapshot = $invoice->toArray();
+
+        DB::beginTransaction();
+        try {
+            foreach ($invoice->items as $oldItem) {
+                $product = Menu::with('recipes.inventoryItem')->find($oldItem->menu_id);
+                if ($product) {
+                    foreach ($product->recipes as $recipe) {
+                        $recipe->inventoryItem->increment('quantity', $recipe->quantity_used * $oldItem->quantity);
+                    }
+                }
+            }
+
+            $invoice->items()->delete();
+
+            $totalInvoicePrice = 0;
+            $compiledItems = [];
+
+            foreach ($request->items as $itemData) {
+                $product = Menu::with('recipes.inventoryItem')->findOrFail($itemData['menu_id']);
+                $quantity = $itemData['quantity'];
+                $itemPrice = $product->price;
+                $itemTotal = $itemPrice * $quantity;
+
+                $totalInvoicePrice += $itemTotal;
+
+                foreach ($product->recipes as $recipe) {
+                    $inventoryItem = $recipe->inventoryItem;
+                    $neededQty = $recipe->quantity_used * $quantity;
+
+                    if ($inventoryItem->quantity < $neededQty) {
+                        throw new \Exception("المخزن لا يكفي من [{$inventoryItem->name}] لتلبية التعديل الجديد.");
+                    }
+                    $inventoryItem->decrement('quantity', $neededQty);
+                }
+
+                $compiledItems[] = [
+                    'invoice_id' => $invoice->id,
+                    'menu_id' => $product->id,
+                    'quantity' => $quantity,
+                    'item_price' => $itemPrice,
+                    'total' => $itemTotal,
+                ];
+            }
+
+            $discount = $request->input('discount', $invoice->discount);
+            $finalTotal = $totalInvoicePrice - $discount;
+
+            $invoice->update([
+                'total' => $finalTotal < 0 ? 0 : $finalTotal,
+                'discount' => $discount,
+                'profit' => $totalInvoicePrice - $discount,
+            ]);
+
+            foreach ($compiledItems as $compiledItem) {
+                InvoiceItem::create($compiledItem);
+            }
+
+            // 🌟 التعديل الجوهري: استخدام الفحص المباشر للحقل لتجنب الخطأ القاتل
+            if ($user && $user->role === 'supervisor') {
+                InvoiceTransaction::create([
+                    'invoice_id' => $invoice->id,
+                    'action' => 'edit',
+                    'old_data' => $oldDataSnapshot,
+                    'new_data' => $invoice->load('items')->toArray(),
+                    'description' => "قام المشرف [{$user->name}] بتعديل الفاتورة رقم {$invoice->invoice_number}",
+                    'created_by' => $user->id,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تعديل الفاتورة بنجاح.',
+                'data' => $invoice
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            // 🌟 هذا الكود سيجبر لارافيل على إرسال نص الخطأ الحقيقي للمتصفح
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage() . ' | الملف: ' . $e->getFile() . ' | السطر: ' . $e->getLine()
+            ], 500);
+        }
+    }
+
+    public function show($id)
+    {
+        $invoice = Invoice::with(['items.menu', 'creator'])->findOrFail($id);
+        return response()->json([
+            'invoice_number' => $invoice->invoice_number,
+            'created_at' => $invoice->created_at->format('Y-m-d - h:i A'),
+            'total' => number_format($invoice->total, 2),
+            'payment_method' => $invoice->payment_method == 'cash' ? 'كاش' : $invoice->payment_method,
+            'creator' => $invoice->creator,
+            'items' => $invoice->items
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'client_id' => 'nullable|exists:customers,id',
+            'discount' => 'nullable|numeric|min:0',
+            'payment_method' => 'required|in:cash,InstaPay,card',
+            'items' => 'required|array|min:1',
+            'items.*.menu_id' => 'required|exists:menu,id',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $totalInvoicePrice = 0;
+            $totalInvoiceProfit = 0;
+            $compiledItems = [];
+
+            foreach ($request->items as $itemData) {
+                $product = Menu::with('recipes.inventoryItem')->findOrFail($itemData['menu_id']);
+                $quantity = $itemData['quantity'];
+                $itemPrice = $product->price;
+                $itemTotal = $itemPrice * $quantity;
+                $totalInvoicePrice += $itemTotal;
+
+                foreach ($product->recipes as $recipe) {
+                    $inventoryItem = $recipe->inventoryItem;
+                    $neededQty = $recipe->quantity_used * $quantity;
+                    if ($inventoryItem->quantity < $neededQty) {
+                        throw new \Exception("لا توجد كمية كافية من [{$inventoryItem->name}].");
+                    }
+                    $inventoryItem->decrement('quantity', $neededQty);
+                }
+
+                $compiledItems[] = [
+                    'menu_id' => $product->id,
+                    'quantity' => $quantity,
+                    'item_price' => $itemPrice,
+                    'total' => $itemTotal,
+                ];
+            }
+
+            $discount = $request->input('discount', 0);
+            $finalTotal = max(0, $totalInvoicePrice - $discount);
+
+            $invoice = Invoice::create([
+                'invoice_number' => InvoiceNumberHelper::generate(),
+                'total' => $finalTotal,
+                'discount' => $discount,
+                'client_id' => $request->client_id,
+                'profit' => $totalInvoicePrice - $discount,
+                'payment_method' => $request->payment_method,
+                'created_by' => Auth::id() ?? 1,
+            ]);
+
+            foreach ($compiledItems as $compiledItem) {
+                $compiledItem['invoice_id'] = $invoice->id;
+                InvoiceItem::create($compiledItem);
+            }
+
+            InvoiceTransaction::create([
+                'invoice_id' => $invoice->id,
+                'action' => 'create',
+                'old_data' => null,
+                'new_data' => $invoice->load('items')->toArray(),
+                'description' => "تم إنشاء الفاتورة بواسطة الموظف " . ($invoice->created_by),
+                'created_by' => $invoice->created_by,
+            ]);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'تم الحفظ.', 'data' => $invoice], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+}

@@ -202,7 +202,17 @@
                 <span data-ar="مسحوبات الموظفين" data-en="Staff Withdrawals">مسحوبات الموظفين</span>
             </a>
 
-            @if (auth()->user() && auth()->user()->role === 'supervisor')
+            <!-- 📜 قسم الوصفات: يظهر للأدمن، المشرف، والباريستا فقط ويختفي عن الكاشير والعميل -->
+            @if (auth()->user() && in_array(auth()->user()->role, ['admin', 'supervisor', 'barista']))
+                <a href="{{ route('recipes.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('recipes*') ? 'active-tab' : '' }}">
+                    <i class="fa-solid fa-receipt text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                    <span data-ar="الوصفات" data-en="Recipes">الوصفات</span>
+                </a>
+            @endif
+
+            <!-- ⏰ قسم الشيفتات: يظهر للمشرف والأدمن لمتابعة الحسابات -->
+            @if (auth()->user() && in_array(auth()->user()->role, ['admin', 'supervisor']))
                 <a href="{{ route('shifts.index') }}"
                     class="flex items-center gap-3 px-4 py-3 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-xl hover:bg-yellow-500/20 transition-all duration-200 mt-4 {{ request()->is('shifts*') ? 'active-tab' : '' }}">
                     <i class="fa-solid fa-clock-history"></i>
@@ -210,6 +220,7 @@
                 </a>
             @endif
 
+            <!-- 🔒 لوحة التحكم الخاصة بالمالك فقط (Admin Panel) -->
             @if (auth()->user() && auth()->user()->role === 'admin')
                 <div class="pt-4 border-t border-gray-800/60 mt-4 space-y-1.5">
                     <p class="px-4 pb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider"
@@ -241,12 +252,6 @@
                         <i
                             class="fa-solid fa-file-invoice text-cafePrimary group-hover:scale-110 transition-transform"></i>
                         <span data-ar="فواتير الشراء" data-en="Purchase Invoices">فواتير الشراء</span>
-                    </a>
-
-                    <a href="{{ route('recipes.index') }}"
-                        class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('recipes*') ? 'active-tab' : '' }}">
-                        <i class="fa-solid fa-receipt text-cafePrimary group-hover:scale-110 transition-transform"></i>
-                        <span data-ar="الوصفات" data-en="Recipes">الوصفات</span>
                     </a>
 
                     <a href="{{ route('settings.index') }}"
@@ -360,7 +365,7 @@
                 if (isHidden) {
                     profileDropdown.classList.remove('hidden');
                     setTimeout(() => {
-                        profileDropdown.removeClassName = 'dropdown-enter';
+                        profileDropdown.classList.remove('dropdown-enter');
                         profileDropdown.classList.add('dropdown-enter-active');
                         profileChevron.classList.add('rotate-180');
                     }, 10);

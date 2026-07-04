@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Menu;
 use App\Models\InventoryItem;
+use App\Models\InventoryMovement; // 🌟 استدعاء موديل الحركات الجديد
 use App\Models\InvoiceItem;
 use App\Models\InvoiceTransaction;
 use App\Helpers\InvoiceNumberHelper;
@@ -99,11 +100,23 @@ class InvoiceController extends Controller
 
         DB::beginTransaction();
         try {
+            // 1. إرجاع الكميات القديمة للمخزن وتسجيل حركة الموجب (sale_update)
             foreach ($invoice->items as $oldItem) {
                 $product = Menu::with('recipes.inventoryItem')->find($oldItem->menu_id);
                 if ($product) {
                     foreach ($product->recipes as $recipe) {
-                        $recipe->inventoryItem->increment('quantity', $recipe->quantity_used * $oldItem->quantity);
+                        $returnedQty = $recipe->quantity_used * $oldItem->quantity;
+                        $recipe->inventoryItem->increment('quantity', $returnedQty);
+
+                        // 🌟 تسجيل حركة إرجاع المخزن بسبب تعديل الفاتورة
+                        InventoryMovement::create([
+                            'inventory_item_id' => $recipe->inventoryItem->id,
+                            'type' => 'sale_update',
+                            'quantity' => $returnedQty, // بالموجب لأن الرصيد زاد
+                            'balance_after' => $recipe->inventoryItem->quantity,
+                            'invoice_id' => $invoice->id,
+                            'user_id' => Auth::id() ?? 1
+                        ]);
                     }
                 }
             }
@@ -112,7 +125,9 @@ class InvoiceController extends Controller
 
             $totalInvoicePrice = 0;
             $compiledItems = [];
+            $movementsToLog = [];
 
+            // 2. فحص وتطبيق الخصم الجديد وتسجيل حركة السالب للمخزن
             foreach ($request->items as $itemData) {
                 $product = Menu::with('recipes.inventoryItem')->findOrFail($itemData['menu_id']);
                 $quantity = $itemData['quantity'];
@@ -129,6 +144,14 @@ class InvoiceController extends Controller
                         throw new \Exception("المخزن لا يكفي من [{$inventoryItem->name}] لتلبية التعديل الجديد.");
                     }
                     $inventoryItem->decrement('quantity', $neededQty);
+
+                    // 🌟 تجهيز بيانات الحركة الجديدة بالسالب
+                    $movementsToLog[] = [
+                        'inventory_item_id' => $inventoryItem->id,
+                        'type' => 'sale',
+                        'quantity' => -$neededQty, // بالسالب لأن المخزون نقص
+                        'balance_after' => $inventoryItem->quantity,
+                    ];
                 }
 
                 $compiledItems[] = [
@@ -153,7 +176,13 @@ class InvoiceController extends Controller
                 InvoiceItem::create($compiledItem);
             }
 
-            // 🌟 التعديل الجوهري: استخدام الفحص المباشر للحقل لتجنب الخطأ القاتل
+            // 🌟 حفظ الحركات الجديدة في قاعدة البيانات بعد التأكد من تعديل الفاتورة
+            foreach ($movementsToLog as $movement) {
+                $movement['invoice_id'] = $invoice->id;
+                $movement['user_id'] = Auth::id() ?? 1;
+                InventoryMovement::create($movement);
+            }
+
             if ($user && $user->role === 'supervisor') {
                 InvoiceTransaction::create([
                     'invoice_id' => $invoice->id,
@@ -169,13 +198,12 @@ class InvoiceController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'تم تعديل الفاتورة بنجاح.',
+                'message' => 'تم تعديل الفاتورة بنجاح وتحديث حركة المخزن.',
                 'data' => $invoice
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // 🌟 هذا الكود سيجبر لارافيل على إرسال نص الخطأ الحقيقي للمتصفح
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage() . ' | الملف: ' . $e->getFile() . ' | السطر: ' . $e->getLine()
@@ -196,6 +224,66 @@ class InvoiceController extends Controller
         ]);
     }
 
+    public function destroy($id)
+    {
+        $invoice = Invoice::with('items')->findOrFail($id);
+        $user = auth()->user();
+        $oldDataSnapshot = $invoice->toArray();
+
+        DB::beginTransaction();
+        try {
+            // 1. إرجاع المكونات والخامات القديمة للمخزن وتسجيل حركة موجب (sale_cancel)
+            foreach ($invoice->items as $item) {
+                $product = Menu::with('recipes.inventoryItem')->find($item->menu_id);
+                if ($product) {
+                    foreach ($product->recipes as $recipe) {
+                        $returnedQty = $recipe->quantity_used * $item->quantity;
+                        $recipe->inventoryItem->increment('quantity', $returnedQty);
+
+                        // 🌟 تسجيل حركة إعادة المخزن بسبب إلغاء وحذف الفاتورة
+                        InventoryMovement::create([
+                            'inventory_item_id' => $recipe->inventoryItem->id,
+                            'type' => 'sale_cancel', // إلغاء عملية بيع
+                            'quantity' => $returnedQty, // بالموجب لأن المخزن زاد
+                            'balance_after' => $recipe->inventoryItem->quantity,
+                            'invoice_id' => $invoice->id,
+                            'user_id' => Auth::id() ?? 1
+                        ]);
+                    }
+                }
+            }
+
+            // 2. تسجيل حركة الحذف في شاشة الرقابة (Audit Log) للمشرفين
+            if ($user && $user->role === 'supervisor') {
+                InvoiceTransaction::create([
+                    'invoice_id' => $invoice->id,
+                    'action' => 'delete',
+                    'old_data' => $oldDataSnapshot,
+                    'new_data' => null,
+                    'description' => "قام المشرف [{$user->name}] بحذف وإلغاء الفاتورة رقم {$invoice->invoice_number} بالكامل وإعادة موادها للمخزن.",
+                    'created_by' => $user->id,
+                ]);
+            }
+
+            // 3. مسح أصناف الفاتورة ثم الفاتورة نفسها
+            $invoice->items()->delete();
+            $invoice->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم حذف وإلغاء الفاتورة بنجاح، وإعادة المواد الخام للمخزن.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'error' => 'حدث خطأ أثناء محاولة الحذف: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -210,8 +298,8 @@ class InvoiceController extends Controller
         DB::beginTransaction();
         try {
             $totalInvoicePrice = 0;
-            $totalInvoiceProfit = 0;
             $compiledItems = [];
+            $movementsToLog = []; // مصفوفة مؤقتة لجمع الحركات
 
             foreach ($request->items as $itemData) {
                 $product = Menu::with('recipes.inventoryItem')->findOrFail($itemData['menu_id']);
@@ -227,6 +315,14 @@ class InvoiceController extends Controller
                         throw new \Exception("لا توجد كمية كافية من [{$inventoryItem->name}].");
                     }
                     $inventoryItem->decrement('quantity', $neededQty);
+
+                    // 🌟 جمع بيانات الحركة الحالية وتخزين رصيد المخزن الفوري بعد الحذف
+                    $movementsToLog[] = [
+                        'inventory_item_id' => $inventoryItem->id,
+                        'type' => 'sale',
+                        'quantity' => -$neededQty, // القيمة سالبة لأنها استهلاك
+                        'balance_after' => $inventoryItem->quantity
+                    ];
                 }
 
                 $compiledItems[] = [
@@ -255,17 +351,24 @@ class InvoiceController extends Controller
                 InvoiceItem::create($compiledItem);
             }
 
-            InvoiceTransaction::create([
-                'invoice_id' => $invoice->id,
-                'action' => 'create',
-                'old_data' => null,
-                'new_data' => $invoice->load('items')->toArray(),
-                'description' => "تم إنشاء الفاتورة بواسطة الموظف " . ($invoice->created_by),
-                'created_by' => $invoice->created_by,
-            ]);
+            // 🌟 حفظ حركات المخزن وربطها بمعرف الفاتورة الجديد والمستخدم
+            foreach ($movementsToLog as $movement) {
+                $movement['invoice_id'] = $invoice->id;
+                $movement['user_id'] = Auth::id() ?? 1;
+                InventoryMovement::create($movement);
+            }
+
+            // InvoiceTransaction::create([
+            //     'invoice_id' => $invoice->id,
+            //     'action' => 'create',
+            //     'old_data' => null,
+            //     'new_data' => $invoice->load('items')->toArray(),
+            //     'description' => "تم إنشاء الفاتورة بواسطة الموظف " . ($invoice->created_by),
+            //     'created_by' => $invoice->created_by,
+            // ]);
 
             DB::commit();
-            return response()->json(['success' => true, 'message' => 'تم الحفظ.', 'data' => $invoice], 201);
+            return response()->json(['success' => true, 'message' => 'تم الحفظ بنجاح وتسجيل حركة المخزون.', 'data' => $invoice], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);

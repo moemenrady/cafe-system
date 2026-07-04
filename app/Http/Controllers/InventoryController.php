@@ -3,19 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\InventoryItem;
+use App\Models\InventoryMovement; // 🌟 استدعاء موديل الحركات الجديد
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class InventoryController extends Controller
 {
-    public function movements()
-    {
-        // جلب الحركات مرتبة من الأحدث مع المشرف المسؤول (creator / user) والفاتورة
-        $movements = InvoiceTransaction::with(['creator', 'invoice'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-
-        return view('admin.movements.index', compact('movements'));
-    }
     public function index()
     {
         $items = InventoryItem::latest()->get();
@@ -27,6 +21,9 @@ class InventoryController extends Controller
         return view('inventory.create');
     }
 
+    /**
+     * عند إضافة خامة جديدة تماماً
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -36,9 +33,27 @@ class InventoryController extends Controller
             'reorder_level' => 'required|numeric|min:0',
         ]);
 
-        InventoryItem::create($request->all());
+        DB::beginTransaction();
+        try {
+            $item = InventoryItem::create($request->all());
 
-        return redirect()->route('inventory.index')->with('success', 'تم إضافة المادة الخام بنجاح');
+            // 🌟 تسجيل أول حركة للمادة الخام (رصيد افتتاحي / توريد أول مرة)
+            if ($item->quantity > 0) {
+                InventoryMovement::create([
+                    'inventory_item_id' => $item->id,
+                    'type' => 'restock', // توريد جديد
+                    'quantity' => $item->quantity, // كمية موجبة
+                    'balance_after' => $item->quantity,
+                    'user_id' => Auth::id() ?? 1,
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('inventory.index')->with('success', 'تم إضافة المادة الخام بنجاح وتسجيل الرصيد الافتتاحي.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'حدث خطأ أثناء الحفظ.');
+        }
     }
 
     public function edit($id)
@@ -46,12 +61,59 @@ class InventoryController extends Controller
         $inventoryItem = InventoryItem::findOrFail($id);
         return view('inventory.edit', compact('inventoryItem'));
     }
+    public function adjust(Request $request, $id)
+{
+    $request->validate([
+        'type' => 'required|in:restock,waste',
+        'amount' => 'required|numeric|min:0.01',
+    ]);
 
+    $item = InventoryItem::findOrFail($id);
+    $amount = $request->amount;
+
+    DB::beginTransaction();
+    try {
+        if ($request->type === 'restock') {
+            // توريد زيادة للمخزن
+            $item->increment('quantity', $amount);
+            $newQty = $item->quantity;
+            $logQty = $amount; // قيمة موجبة
+            $message = "تم تسجيل توريد ({$amount} {$item->unit}) بنجاح لصنف [{$item->name}].";
+        } else {
+            // تسجيل تالف / فساد (Waste)
+            if ($item->quantity < $amount) {
+                return redirect()->back()->with('error', "الكمية المراد إهلاكها أكبر من المتاح في المخزن حالياً ({$item->quantity})!");
+            }
+            $item->decrement('quantity', $amount);
+            $newQty = $item->quantity;
+            $logQty = -$amount; // قيمة سالبة لأنها عجز/هالك
+            $message = "تم تسجيل إهلاك وتلف ({$amount} {$item->unit}) لصنف [{$item->name}].";
+        }
+
+        // تسجيل الحركة في السجل الهجين للرقابة
+        InventoryMovement::create([
+            'inventory_item_id' => $item->id,
+            'type' => $request->type,
+            'quantity' => $logQty,
+            'balance_after' => $newQty,
+            'user_id' => auth()->id() ?? 1,
+        ]);
+
+        DB::commit();
+        return redirect()->route('inventory.index')->with('success', $message);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'حدث خطأ غير متوقع أثناء تحديث المخزون.');
+    }
+}
+
+    /**
+     * 🌟 دالة التعديل الذكية: تحسب الفرق وتسجله في الحركات
+     */
     public function update(Request $request, $id)
     {
         $inventoryItem = InventoryItem::findOrFail($id);
 
-        // تم ضبط الـ Validation لاستثناء السجل الحالي من شرط التكرار، مع إضافة حد الطلب
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:inventory_items,name,' . $id,
             'quantity' => 'required|numeric|min:0',
@@ -59,15 +121,55 @@ class InventoryController extends Controller
             'reorder_level' => 'required|numeric|min:0',
         ]);
 
-        $inventoryItem->update($validated);
+        DB::beginTransaction();
+        try {
+            // 1. الاحتفاظ بالكمية القديمة قبل التحديث
+            $oldQuantity = $inventoryItem->quantity;
 
-        return redirect()->route('inventory.index')->with('success', 'تم تحديث البيانات بنجاح');
+            // 2. تحديث البيانات بالقيم الجديدة
+            $inventoryItem->update($validated);
+            $newQuantity = $inventoryItem->quantity;
+
+            // 3. حساب الفرق (الكمية الجديدة - الكمية القديمة)
+            $difference = $newQuantity - $oldQuantity;
+
+            // إذا تغيرت الكمية فعلياً، نسجل الحركة
+            if ($difference != 0) {
+                InventoryMovement::create([
+                    'inventory_item_id' => $inventoryItem->id,
+                    // إذا كان الفرق موجب يعني زيادة (restock)، وإذا كان سالب يعني عجز/هالك (waste)
+                    'type' => $difference > 0 ? 'restock' : 'waste',
+                    'quantity' => $difference, // ستخزن بالإشارة (+ أو -) تلقائياً
+                    'balance_after' => $newQuantity,
+                    'user_id' => Auth::id() ?? 1,
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('inventory.index')->with('success', 'تم تحديث البيانات بنجاح وتحديث دفتر حركات المخزن.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'حدث خطأ أثناء تعديل البيانات.');
+        }
     }
 
+    /**
+     * 🌟 دالة الحذف الآمنة (حماية السيستم من الانهيار)
+     */
     public function destroy($id)
     {
         $item = InventoryItem::findOrFail($id);
+
+        // 🛡️ حماية: نتحقق إذا كانت المادة الخام مربوطة بأي منتج في المنيو (Recipes)
+        // إذا كان لها علاقة، نمنع الحذف حتى لا تضرب فواتير الكاشير
+        if ($item->recipes()->count() > 0) {
+            return redirect()->route('inventory.index')->with('error', "لا يمكن حذف [{$item->name}] لأنها مرتبطة بمكونات مشروبات في المنيو! قم بإزالتها من المنيو أولاً.");
+        }
+
+        // إذا كانت آمنة وغير مربوطة بشيء، يتم الحذف
+        // ملحوظة: جدول الـ movements سيحذف حركاتها تلقائياً بسبب onDelete('cascade') في الميجريشن
         $item->delete();
-        return redirect()->route('inventory.index')->with('success', 'تم حذف المادة الخام بنجاح');
+
+        return redirect()->route('inventory.index')->with('success', 'تم حذف المادة الخام بنجاح من المخزن.');
     }
 }

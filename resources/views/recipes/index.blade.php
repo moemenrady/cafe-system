@@ -9,10 +9,13 @@
         <h2 class="text-lg font-bold text-gray-800" data-ar="مكونات المشروبات" data-en="Drink Recipes">مكونات المشروبات</h2>
         <p class="text-xs text-gray-400 mt-1" data-ar="ربط منتجات المينيو بالخامات لخصمها تلقائياً عند البيع" data-en="Link menu items to inventory to auto-deduct upon sales">ربط منتجات المينيو بالخامات لخصمها تلقائياً عند البيع</p>
     </div>
-    <a href="{{ route('recipes.create') }}" class="bg-cafePrimary text-sidebar px-4 py-2.5 rounded-xl font-bold text-xs hover:bg-sky-400 transition flex items-center gap-2 shadow-sm shadow-sky-200">
-        <i class="fa-solid fa-plus"></i>
-        <span data-ar="إضافة مكون لوصفة" data-en="Add Ingredient">إضافة مكون لوصفة</span>
-    </a>
+    
+    @if(auth()->user() && auth()->user()->role === 'admin')
+        <a href="{{ route('recipes.create') }}" class="bg-cafePrimary text-sidebar px-4 py-2.5 rounded-xl font-bold text-xs hover:bg-sky-400 transition flex items-center gap-2 shadow-sm shadow-sky-200">
+            <i class="fa-solid fa-plus"></i>
+            <span data-ar="إضافة مكون لوصفة" data-en="Add Ingredient">إضافة مكون لوصفة</span>
+        </a>
+    @endif
 </div>
 
 @if(session('success'))
@@ -23,7 +26,8 @@
 @endif
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @forelse($menus as $item)        <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+    @forelse($menus as $item)
+        <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between">
             <div>
                 <div class="flex items-center gap-3 mb-4">
                     @if($item->image)
@@ -53,13 +57,16 @@
                                 <span class="font-bold text-gray-900 bg-white border px-2 py-0.5 rounded-lg text-[11px]">
                                     {{ floatval($recipe->quantity_used) }} {{ $recipe->inventoryItem->unit ?? '' }}
                                 </span>
-                                <form action="{{ route('recipes.destroy', $recipe->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المكون؟')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-400 hover:text-red-600 transition p-1">
-                                        <i class="fa-regular fa-trash-can text-sm"></i>
-                                    </button>
-                                </form>
+                                
+                                @if(auth()->user() && auth()->user()->role === 'admin')
+                                    <form action="{{ route('recipes.destroy', $recipe->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المكون؟')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-400 hover:text-red-600 transition p-1">
+                                            <i class="fa-regular fa-trash-can text-sm"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     @empty

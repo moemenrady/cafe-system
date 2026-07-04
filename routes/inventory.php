@@ -10,6 +10,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('menu', MenuController::class);
     Route::resource('inventory', InventoryController::class);
+    Route::post('/inventory/{id}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
     Route::resource('expenses', ExpenseController::class);
     Route::resource('withdrawals', StaffWithdrawalController::class);
 });

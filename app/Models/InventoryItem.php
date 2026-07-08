@@ -10,6 +10,10 @@ class InventoryItem extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // السماح بإدخال هذه الحقول مباشرة من الفورم
-    protected $fillable = ['name', 'quantity', 'unit', 'reorder_level'];
+    protected $fillable = ['name', 'quantity', 'unit', 'reorder_level', 'unit_price'];
+
+    public function recipes()
+    {
+        return $this->hasMany(Recipe::class, 'inventory_item_id');
+    }
 }

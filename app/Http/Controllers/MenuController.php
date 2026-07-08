@@ -11,7 +11,10 @@ class MenuController extends Controller
 {
     public function index()
     {
-        $menus = Menu::with('category')->latest()->get();
+        $menus = Menu::with([
+            'category',
+            'recipes.inventoryItem'
+        ])->latest()->get();
         return view('menu.index', compact('menus'));
     }
 

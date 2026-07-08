@@ -10,11 +10,9 @@ return new class extends Migration
     {
         Schema::create('recipes', function (Blueprint $table) {
             $table->id();
-            
             // التعديل هنا: بما أن الجدول الآن اسمه 'menu' وليس 'menu_items'،
             // يجب تحديد الجدول يدوياً لأن لارافيل بيبحث افتراضياً عن 'menu_items'
             $table->foreignId('menu_item_id')->constrained('menu')->onDelete('cascade');
-            
             $table->foreignId('inventory_item_id')->constrained('inventory_items')->onDelete('cascade');
             $table->decimal('quantity_used', 10, 2);
             $table->timestamps();

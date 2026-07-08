@@ -1,17 +1,18 @@
 {{-- resources/views/landing.blade.php --}}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise Cafe POS | Smart Management</title>
-    
+
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Bootstrap 5 (RTL) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
-    
+
     <!-- FontAwesome & AOS Animation -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -19,6 +20,7 @@
     <style>
         :root {
             --primary: #7DD3FC;
+            --dark-parts: #1F2937;
             --secondary: #BAE6FD;
             --bg-color: #F8FCFF;
             --text-main: #1F2937;
@@ -64,10 +66,12 @@
             box-shadow: 0 4px 15px rgba(125, 211, 252, 0.4);
             transition: all 0.3s;
         }
+
         .btn-glass:hover {
             color: var(--text-main);
             transform: scale(1.05);
         }
+
         .btn-outline-glass {
             background: transparent;
             border: 2px solid var(--primary);
@@ -77,6 +81,7 @@
             padding: 0.75rem 1.5rem;
             transition: all 0.3s;
         }
+
         .btn-outline-glass:hover {
             background: var(--primary);
             color: var(--text-main);
@@ -97,7 +102,10 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
         }
-        .module-card { cursor: pointer; }
+
+        .module-card {
+            cursor: pointer;
+        }
 
         /* Timeline / Workflow */
         .workflow-timeline {
@@ -107,6 +115,7 @@
             flex-wrap: wrap;
             position: relative;
         }
+
         .workflow-timeline::before {
             content: '';
             position: absolute;
@@ -118,6 +127,7 @@
             z-index: -1;
             opacity: 0.5;
         }
+
         .workflow-step {
             background: #fff;
             border: 2px solid var(--primary);
@@ -140,9 +150,15 @@
             animation: skeleton-loading 1.5s infinite;
             border-radius: 0.5rem;
         }
+
         @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
 
         /* Features List */
@@ -159,13 +175,15 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-glass sticky-top py-3">
         <div class="container">
             <a class="navbar-brand fw-bold fs-4" href="#">
-                <i class="fa-solid fa-mug-hot text-primary-custom me-2"></i> POS<span class="text-gradient">System</span>
+                <i class="fa-solid fa-mug-hot text-primary-custom me-2"></i> POS<span
+                    class="text-gradient">System</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -192,17 +210,22 @@
                 <div class="col-lg-6 order-2 order-lg-1 text-center text-lg-end" data-aos="fade-left">
                     <h1 class="display-4 fw-bold mb-3">Enterprise Cafe POS</h1>
                     <h2 class="text-gradient mb-4">أدر مقهاك باحترافية وسهولة</h2>
-                    <p class="lead text-muted mb-5">نظام متكامل يجمع بين نقاط البيع، إدارة المخزون، وشاشات المطبخ في واجهة واحدة سريعة وموثوقة.</p>
+                    <p class="lead text-muted mb-5">نظام متكامل يجمع بين نقاط البيع، إدارة المخزون، وشاشات المطبخ في
+                        واجهة واحدة سريعة وموثوقة.</p>
                     <div class="d-flex justify-content-center justify-content-lg-start gap-3">
-                        <button class="btn btn-glass btn-lg"><i class="fa-solid fa-rocket me-2"></i> إطلاق الديمو</button>
-                        <button class="btn btn-outline-glass btn-lg"><i class="fa-solid fa-list-check me-2"></i> عرض الخصائص</button>
+                        <button class="btn btn-glass btn-lg"><i class="fa-solid fa-rocket me-2"></i> إطلاق
+                            الديمو</button>
+                        <button class="btn btn-outline-glass btn-lg"><i class="fa-solid fa-list-check me-2"></i> عرض
+                            الخصائص</button>
                     </div>
                 </div>
                 <div class="col-lg-6 order-1 order-lg-2 mb-5 mb-lg-0" data-aos="zoom-in">
                     <!-- Placeholder for Illustration -->
                     <div class="glass-card p-4 text-center position-relative">
-                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="POS Dashboard" class="img-fluid rounded-4 shadow-sm">
-                        <div class="position-absolute top-0 start-0 translate-middle p-3 bg-white rounded-circle shadow-lg">
+                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                            alt="POS Dashboard" class="img-fluid rounded-4 shadow-sm">
+                        <div
+                            class="position-absolute top-0 start-0 translate-middle p-3 bg-white rounded-circle shadow-lg">
                             <i class="fa-solid fa-check text-success fs-3"></i>
                         </div>
                     </div>
@@ -217,22 +240,59 @@
             <div class="row g-4">
                 @php
                     $stats = [
-                        ['title' => "Today's Sales", 'val' => '12450', 'prefix' => 'EGP ', 'icon' => 'fa-wallet', 'color' => '#10B981'],
-                        ['title' => 'Orders Today', 'val' => '145', 'prefix' => '', 'icon' => 'fa-receipt', 'color' => '#3B82F6'],
-                        ['title' => 'Customers', 'val' => '82', 'prefix' => '', 'icon' => 'fa-users', 'color' => '#8B5CF6'],
-                        ['title' => 'Low Stock', 'val' => '6', 'prefix' => '', 'icon' => 'fa-box-open', 'color' => '#EF4444'],
-                        ['title' => 'Branches', 'val' => '3', 'prefix' => '', 'icon' => 'fa-store', 'color' => '#F59E0B'],
-                        ['title' => 'Employees Online', 'val' => '12', 'prefix' => '', 'icon' => 'fa-user-clock', 'color' => '#06B6D4'],
+                        [
+                            'title' => "Today's Sales",
+                            'val' => '12450',
+                            'prefix' => 'EGP ',
+                            'icon' => 'fa-wallet',
+                            'color' => '#10B981',
+                        ],
+                        [
+                            'title' => 'Orders Today',
+                            'val' => '145',
+                            'prefix' => '',
+                            'icon' => 'fa-receipt',
+                            'color' => '#3B82F6',
+                        ],
+                        [
+                            'title' => 'Customers',
+                            'val' => '82',
+                            'prefix' => '',
+                            'icon' => 'fa-users',
+                            'color' => '#8B5CF6',
+                        ],
+                        [
+                            'title' => 'Low Stock',
+                            'val' => '6',
+                            'prefix' => '',
+                            'icon' => 'fa-box-open',
+                            'color' => '#EF4444',
+                        ],
+                        [
+                            'title' => 'Branches',
+                            'val' => '3',
+                            'prefix' => '',
+                            'icon' => 'fa-store',
+                            'color' => '#F59E0B',
+                        ],
+                        [
+                            'title' => 'Employees Online',
+                            'val' => '12',
+                            'prefix' => '',
+                            'icon' => 'fa-user-clock',
+                            'color' => '#06B6D4',
+                        ],
                     ];
                 @endphp
-                @foreach($stats as $stat)
-                <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                    <div class="glass-card text-center p-3">
-                        <i class="fa-solid {{ $stat['icon'] }} fs-3 mb-2" style="color: {{ $stat['color'] }}"></i>
-                        <h6 class="text-muted mb-1">{{ $stat['title'] }}</h6>
-                        <h4 class="fw-bold mb-0">{{ $stat['prefix'] }}<span class="counter" data-target="{{ $stat['val'] }}">0</span></h4>
+                @foreach ($stats as $stat)
+                    <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                        <div class="glass-card text-center p-3">
+                            <i class="fa-solid {{ $stat['icon'] }} fs-3 mb-2" style="color: {{ $stat['color'] }}"></i>
+                            <h6 class="text-muted mb-1">{{ $stat['title'] }}</h6>
+                            <h4 class="fw-bold mb-0">{{ $stat['prefix'] }}<span class="counter"
+                                    data-target="{{ $stat['val'] }}">0</span></h4>
+                        </div>
                     </div>
-                </div>
                 @endforeach
             </div>
         </div>
@@ -262,14 +322,15 @@
                         ['icon' => '⚙️', 'title' => 'Settings', 'desc' => 'الإعدادات'],
                     ];
                 @endphp
-                @foreach($modules as $mod)
-                <div class="col-6 col-md-4 col-lg-3" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 50 }}">
-                    <div class="glass-card module-card text-center p-4 h-100" onclick="openInteractiveDemo('{{ $mod['title'] }}')">
-                        <div class="fs-1 mb-2">{{ $mod['icon'] }}</div>
-                        <h5 class="fw-bold">{{ $mod['title'] }}</h5>
-                        <p class="text-muted small mb-0">{{ $mod['desc'] }}</p>
+                @foreach ($modules as $mod)
+                    <div class="col-6 col-md-4 col-lg-3" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 50 }}">
+                        <div class="glass-card module-card text-center p-4 h-100"
+                            onclick="openInteractiveDemo('{{ $mod['title'] }}')">
+                            <div class="fs-1 mb-2">{{ $mod['icon'] }}</div>
+                            <h5 class="fw-bold">{{ $mod['title'] }}</h5>
+                            <p class="text-muted small mb-0">{{ $mod['desc'] }}</p>
+                        </div>
                     </div>
-                </div>
                 @endforeach
             </div>
         </div>
@@ -281,14 +342,18 @@
             <h2 class="fw-bold mb-5">نظرة شاملة على لوحة القيادة</h2>
             <div class="glass-card p-2 p-md-4 d-inline-block position-relative shadow-lg w-100">
                 <!-- Using a placeholder for the mockup -->
-                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Dashboard Mockup" class="img-fluid rounded-4 w-100" style="max-height: 600px; object-fit: cover; opacity: 0.9;">
-                
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+                    alt="Dashboard Mockup" class="img-fluid rounded-4 w-100"
+                    style="max-height: 600px; object-fit: cover; opacity: 0.9;">
+
                 <!-- Floating Elements to simulate UI -->
-                <div class="position-absolute top-0 start-0 m-4 glass-card p-3 d-none d-md-block" data-aos="fade-right" data-aos-delay="300">
+                <div class="position-absolute top-0 start-0 m-4 glass-card p-3 d-none d-md-block"
+                    data-aos="fade-right" data-aos-delay="300">
                     <i class="fa-solid fa-chart-line text-success fs-4 mb-2"></i>
                     <h6 class="fw-bold mb-0">المبيعات ترتفع بـ 24%</h6>
                 </div>
-                <div class="position-absolute bottom-0 end-0 m-4 glass-card p-3 d-none d-md-block" data-aos="fade-left" data-aos-delay="500">
+                <div class="position-absolute bottom-0 end-0 m-4 glass-card p-3 d-none d-md-block"
+                    data-aos="fade-left" data-aos-delay="500">
                     <i class="fa-solid fa-bell text-warning fs-4 mb-2"></i>
                     <h6 class="fw-bold mb-0">3 طلبات جديدة للتوصيل</h6>
                 </div>
@@ -302,15 +367,31 @@
             <h2 class="fw-bold text-center mb-5" data-aos="fade-up">كل ما تحتاجه وأكثر</h2>
             <div class="row g-3">
                 @php
-                    $features = ['Multi Branch', 'Multi Warehouse', 'Offline Mode', 'QR Menu', 'Kitchen Screen', 'Barcode', 'Receipt Printer', 'Customer Display', 'Coupons', 'Discounts', 'Taxes', 'Delivery', 'Reservations', 'Analytics', 'Audit Logs'];
+                    $features = [
+                        'Multi Branch',
+                        'Multi Warehouse',
+                        'Offline Mode',
+                        'QR Menu',
+                        'Kitchen Screen',
+                        'Barcode',
+                        'Receipt Printer',
+                        'Customer Display',
+                        'Coupons',
+                        'Discounts',
+                        'Taxes',
+                        'Delivery',
+                        'Reservations',
+                        'Analytics',
+                        'Audit Logs',
+                    ];
                 @endphp
-                @foreach($features as $feat)
-                <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up">
-                    <div class="glass-card p-3 feature-item d-flex align-items-center">
-                        <i class="fa-solid fa-circle-check fs-5"></i>
-                        <span class="fw-bold">{{ $feat }}</span>
+                @foreach ($features as $feat)
+                    <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up">
+                        <div class="glass-card p-3 feature-item d-flex align-items-center">
+                            <i class="fa-solid fa-circle-check fs-5"></i>
+                            <span class="fw-bold">{{ $feat }}</span>
+                        </div>
                     </div>
-                </div>
                 @endforeach
             </div>
         </div>
@@ -358,8 +439,9 @@
                     <h3 class="fw-bold mb-4">بنيت بأحدث التقنيات</h3>
                     <div class="d-flex flex-wrap gap-2">
                         @php $techs = ['Laravel', 'MySQL', 'Bootstrap', 'Chart.js', 'SweetAlert', 'Spatie Permission', 'Laravel Excel', 'Queue', 'Redis', 'Pusher']; @endphp
-                        @foreach($techs as $tech)
-                            <span class="badge bg-light text-dark border p-2 fs-6 rounded-pill glass-card">{{ $tech }}</span>
+                        @foreach ($techs as $tech)
+                            <span
+                                class="badge bg-light text-dark border p-2 fs-6 rounded-pill glass-card">{{ $tech }}</span>
                         @endforeach
                     </div>
                 </div>
@@ -367,10 +449,22 @@
                 <div class="col-lg-6" data-aos="fade-right">
                     <h3 class="fw-bold mb-4">لماذا نظامنا؟</h3>
                     <div class="row g-3 text-center">
-                        <div class="col-6"><div class="glass-card p-3"><i class="fa-solid fa-bolt text-warning fs-3 mb-2"></i><br>⚡ Fast</div></div>
-                        <div class="col-6"><div class="glass-card p-3"><i class="fa-solid fa-shield-halved text-success fs-3 mb-2"></i><br>🔒 Secure</div></div>
-                        <div class="col-6"><div class="glass-card p-3"><i class="fa-solid fa-chart-pie text-info fs-3 mb-2"></i><br>📊 Smart Analytics</div></div>
-                        <div class="col-6"><div class="glass-card p-3"><i class="fa-solid fa-cloud text-primary fs-3 mb-2"></i><br>☁ Cloud Ready</div></div>
+                        <div class="col-6">
+                            <div class="glass-card p-3"><i class="fa-solid fa-bolt text-warning fs-3 mb-2"></i><br>⚡
+                                Fast</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="glass-card p-3"><i
+                                    class="fa-solid fa-shield-halved text-success fs-3 mb-2"></i><br>🔒 Secure</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="glass-card p-3"><i
+                                    class="fa-solid fa-chart-pie text-info fs-3 mb-2"></i><br>📊 Smart Analytics</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="glass-card p-3"><i class="fa-solid fa-cloud text-primary fs-3 mb-2"></i><br>☁
+                                Cloud Ready</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -394,8 +488,11 @@
                     </div>
                 </div>
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="glass-card p-5 h-100 border-primary" style="transform: scale(1.05); box-shadow: 0 15px 35px rgba(125, 211, 252, 0.4);">
-                        <span class="badge bg-primary position-absolute top-0 start-50 translate-middle rounded-pill px-3 py-2">الأكثر طلباً</span>
+                    <div class="glass-card p-5 h-100 border-primary"
+                        style="transform: scale(1.05); box-shadow: 0 15px 35px rgba(125, 211, 252, 0.4);">
+                        <span
+                            class="badge bg-primary position-absolute top-0 start-50 translate-middle rounded-pill px-3 py-2">الأكثر
+                            طلباً</span>
                         <h4>Professional</h4>
                         <h2 class="fw-bold my-3">900 EGP<small class="fs-6 text-muted">/شهرياً</small></h2>
                         <ul class="list-unstyled mb-4 text-end">
@@ -445,16 +542,34 @@
                     <h3 class="fw-bold mb-4">الأسئلة الشائعة</h3>
                     <div class="accordion glass-card p-2" id="faqAccordion">
                         <div class="accordion-item bg-transparent border-0 border-bottom">
-                            <h2 class="accordion-header"><button class="accordion-button bg-transparent fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">هل يدعم النظام الفروع المتعددة؟</button></h2>
-                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion"><div class="accordion-body">نعم، يدعم إدارة فروع غير محدودة من لوحة تحكم مركزية واحدة.</div></div>
+                            <h2 class="accordion-header"><button class="accordion-button bg-transparent fw-bold"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faq1">هل يدعم النظام
+                                    الفروع المتعددة؟</button></h2>
+                            <div id="faq1" class="accordion-collapse collapse show"
+                                data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">نعم، يدعم إدارة فروع غير محدودة من لوحة تحكم مركزية واحدة.
+                                </div>
+                            </div>
                         </div>
                         <div class="accordion-item bg-transparent border-0 border-bottom">
-                            <h2 class="accordion-header"><button class="accordion-button collapsed bg-transparent fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">هل يدعم الطابعات ودرج الكاشير؟</button></h2>
-                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">بالتأكيد، متوافق مع كافة طابعات الإيصالات وأجهزة قراءة الباركود.</div></div>
+                            <h2 class="accordion-header"><button
+                                    class="accordion-button collapsed bg-transparent fw-bold" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq2">هل يدعم الطابعات ودرج
+                                    الكاشير؟</button></h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">بالتأكيد، متوافق مع كافة طابعات الإيصالات وأجهزة قراءة
+                                    الباركود.</div>
+                            </div>
                         </div>
                         <div class="accordion-item bg-transparent border-0">
-                            <h2 class="accordion-header"><button class="accordion-button collapsed bg-transparent fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">هل يعمل بدون إنترنت (Offline Mode)؟</button></h2>
-                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">نعم، يعمل الـ POS بدون إنترنت ويقوم بمزامنة البيانات فور عودة الاتصال.</div></div>
+                            <h2 class="accordion-header"><button
+                                    class="accordion-button collapsed bg-transparent fw-bold" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq3">هل يعمل بدون إنترنت (Offline
+                                    Mode)؟</button></h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">نعم، يعمل الـ POS بدون إنترنت ويقوم بمزامنة البيانات فور
+                                    عودة الاتصال.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -465,7 +580,8 @@
     <!-- 13. Footer -->
     <footer class="py-4 navbar-glass mt-5">
         <div class="container text-center">
-            <h4 class="fw-bold mb-3"><i class="fa-solid fa-mug-hot text-primary-custom me-2"></i> POS<span class="text-gradient">System</span></h4>
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-mug-hot text-primary-custom me-2"></i> POS<span
+                    class="text-gradient">System</span></h4>
             <div class="d-flex justify-content-center gap-3 mb-3">
                 <a href="#" class="text-muted text-decoration-none">Home</a>
                 <a href="#" class="text-muted text-decoration-none">Features</a>
@@ -493,15 +609,23 @@
                     <!-- Skeleton Loader -->
                     <div id="demoSkeleton">
                         <div class="row g-3">
-                            <div class="col-8"><div class="skeleton w-100 mb-2" style="height: 60px;"></div><div class="skeleton w-100" style="height: 400px;"></div></div>
-                            <div class="col-4"><div class="skeleton w-100 mb-3" style="height: 150px;"></div><div class="skeleton w-100" style="height: 300px;"></div></div>
+                            <div class="col-8">
+                                <div class="skeleton w-100 mb-2" style="height: 60px;"></div>
+                                <div class="skeleton w-100" style="height: 400px;"></div>
+                            </div>
+                            <div class="col-4">
+                                <div class="skeleton w-100 mb-3" style="height: 150px;"></div>
+                                <div class="skeleton w-100" style="height: 300px;"></div>
+                            </div>
                         </div>
                     </div>
                     <!-- Fake Content (Fades in after JS delay) -->
                     <div id="demoContent" class="d-none text-center py-5">
                         <i class="fa-solid fa-laptop-code fs-1 text-primary-custom mb-3"></i>
                         <h3 class="fw-bold">واجهة تفاعلية حية</h3>
-                        <p class="text-muted">هنا سيتم تحميل الـ Blade View الخاص بـ <span id="moduleName" class="fw-bold text-dark"></span> محمل ببيانات وهمية (Dummy Data) ليعيش العميل تجربة الاستخدام الحقيقية.</p>
+                        <p class="text-muted">هنا سيتم تحميل الـ Blade View الخاص بـ <span id="moduleName"
+                                class="fw-bold text-dark"></span> محمل ببيانات وهمية (Dummy Data) ليعيش العميل تجربة
+                            الاستخدام الحقيقية.</p>
                         <button class="btn btn-glass mt-3" data-bs-dismiss="modal">إغلاق وتجربة موديول آخر</button>
                     </div>
                 </div>
@@ -514,11 +638,14 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         // Initialize AOS Animation
-        AOS.init({ duration: 800, once: true });
+        AOS.init({
+            duration: 800,
+            once: true
+        });
 
         // Number Counter Animation
         const counters = document.querySelectorAll('.counter');
-        const speed = 200; 
+        const speed = 200;
         counters.forEach(counter => {
             const updateCount = () => {
                 const target = +counter.getAttribute('data-target');
@@ -533,21 +660,25 @@
             };
             // Observe to start animation only when scrolled into view
             let observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) { updateCount(); observer.disconnect(); }
+                if (entries[0].isIntersecting) {
+                    updateCount();
+                    observer.disconnect();
+                }
             });
             observer.observe(counter);
         });
 
         // Interactive Demo Modal Logic
         const interactiveModal = new bootstrap.Modal(document.getElementById('interactiveModal'));
+
         function openInteractiveDemo(moduleTitle) {
             document.getElementById('demoModalTitle').innerText = 'واجهة ' + moduleTitle;
             document.getElementById('moduleName').innerText = moduleTitle;
-            
+
             // Show skeleton, hide content
             document.getElementById('demoSkeleton').classList.remove('d-none');
             document.getElementById('demoContent').classList.add('d-none');
-            
+
             interactiveModal.show();
 
             // Simulate AJAX/View load delay (1.5 seconds)
@@ -559,4 +690,5 @@
         }
     </script>
 </body>
+
 </html>

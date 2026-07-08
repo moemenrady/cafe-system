@@ -17,12 +17,13 @@ return new class extends Migration
             $table->decimal('quantity', 10, 2)->default(0.00); // الكمية الحالية المتوفرة في المخزن
             $table->string('unit'); // الوحدة (جرام gm، مل ml، قطعة pcs، كيس bag)
             $table->decimal('reorder_level', 10, 2)->default(0.00); // الحد الأدنى (لو الكمية وصلت للرقم ده أو أقل، تعتبر من النواقص)
+            $table->decimal('unit_price', 10, 2)->default(0.00); // سعر الوحدة (مثلاً سعر الكيلو أو سعر اللتر أو سعر القطعة)
             $table->timestamps();
             $table->softDeletes(); // للحذف المؤقت عشان الأمان
-
             // تحسين الأداء عند البحث أو الفرز
             $table->index('name');
             $table->index('quantity');
+            $table->index('unit_price');
         });
     }
 

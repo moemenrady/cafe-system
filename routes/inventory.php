@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MenuController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\StaffWithdrawalController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/inventory/movements', [InventoryController::class, 'movements'])->name('inventory.movements');
     Route::resource('categories', CategoryController::class);
     Route::resource('menu', MenuController::class);
     Route::resource('inventory', InventoryController::class);

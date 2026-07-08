@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\RecipeController;
@@ -13,19 +14,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // تم تقديمها للأعلى ليتم قراءة مسار /recipes/create قبل المسار العام المفتوح
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/movements', [InvoiceController::class, 'movements'])->name('admin.movements');
-        
+
         // 🛠️ مسارات التحكم بالوصفات (خاص بالأدمن)
         Route::get('/recipes/create', [RecipeController::class, 'create'])->name('recipes.create');
         Route::post('/recipes', [RecipeController::class, 'store'])->name('recipes.store');
         Route::get('/recipes/{recipe}/edit', [RecipeController::class, 'edit'])->name('recipes.edit');
         Route::put('/recipes/{recipe}', [RecipeController::class, 'update'])->name('recipes.update');
         Route::delete('/recipes/{recipe}', [RecipeController::class, 'destroy'])->name('recipes.destroy');
-
+        Route::put('/recipes/update/{recipe}', [RecipeController::class, 'update'])->name('recipes.update');
         Route::resource('purchase-invoices', PurchaseInvoiceController::class);
-        
-        Route::get('/employees', function () { return view('employees.index'); })->name('employees.index');
-        Route::get('/settings', function () { return view('settings.index'); })->name('settings.index');
-        Route::get('/management', function () { return view('management.index'); })->name('management.index');
+
+        Route::get('/employees', function () {
+            return view('employees.index');
+        })->name('employees.index');
+        Route::get('/settings', function () {
+            return view('settings.index');
+        })->name('settings.index');
+        Route::get('/management', function () {
+            return view('management.index');
+        })->name('management.index');
 
         // إدارة الحسابات والأمان (Admin & Secure Auth)
         Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -45,5 +52,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/recipes', [RecipeController::class, 'index'])->name('recipes.index');
         Route::get('/recipes/{recipe}', [RecipeController::class, 'show'])->name('recipes.show');
     });
-
 });

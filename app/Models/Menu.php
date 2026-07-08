@@ -26,4 +26,10 @@ class Menu extends Model
     {
         return $this->hasMany(Recipe::class, 'menu_item_id', 'id');
     }
+    public function getRecipeCostAttribute()
+    {
+        return $this->recipes->sum(function ($recipe) {
+            return $recipe->quantity_used * ($recipe->inventoryItem->unit_price ?? 0);
+        });
+    }
 }

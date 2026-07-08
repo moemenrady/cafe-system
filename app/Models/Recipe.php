@@ -20,4 +20,12 @@ class Recipe extends Model
     {
         return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
     }
+    public function getIngredientCostAttribute()
+    {
+        if (!$this->inventoryItem) {
+            return 0;
+        }
+
+        return $this->quantity_used * $this->inventoryItem->unit_price;
+    }
 }

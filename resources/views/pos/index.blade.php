@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
-@section('page_title', 'شاشة البيع السريع - POS')
+@section('page_title', 'شاشة الكاشير السريعة - POS')
 
 @section('content')
     <div class="container mx-auto px-4 relative pb-20 lg:pb-8" dir="rtl">
 
+        <!-- نافذة النجاح -->
         <div id="successModal"
             class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
             <div
@@ -14,16 +15,15 @@
                     class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 text-emerald-500 text-2xl animate-bounce">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
-                <h4 class="text-lg font-bold text-gray-800 mb-1">تم حفظ العملية!</h4>
-                <p class="text-xs text-gray-500">تم تسجيل الفاتورة وتحديث كميات المخزن بنجاح.</p>
+                <h4 class="text-lg font-bold text-gray-800 mb-1">تم إتمام الطلب بنجاح!</h4>
+                <p id="successOrderNumber" class="text-sm font-bold text-blue-600 mb-2"></p>
+                <p class="text-xs text-gray-500">تم إرسال الأوردر للمطبخ وتحديث المخزون.</p>
             </div>
         </div>
 
-        <form id="posForm" action="{{ route('invoices.store') }}" method="POST"
-            class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            @csrf
-            <input type="hidden" name="payment_method" value="cash">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
+            <!-- القسم الأيمن: المنتجات والبحث -->
             <div class="lg:col-span-8 space-y-4">
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-4 sticky top-4 z-10">
                     <div class="relative">
@@ -32,7 +32,7 @@
                         </span>
                         <input type="text" id="searchInput" oninput="filterItems()"
                             class="w-full bg-gray-50 text-gray-800 pr-11 pl-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none font-medium text-sm transition-all shadow-inner"
-                            placeholder="ابحث عن أي منتج باسمه فوراً...">
+                            placeholder="ابحث عن مشروب أو منتج بسرعة...">
                     </div>
 
                     <div class="flex flex-wrap gap-2 items-center border-t border-gray-50 pt-3">
@@ -62,7 +62,7 @@
                                 onclick="addItem('{{ $menu->id }}', '{{ $menu->name }}', {{ $menu->price }})"
                                 data-id="{{ $menu->id }}" data-name="{{ $menu->name }}"
                                 data-category="{{ $menu->category_id }}"
-                                class="menu-item-card bg-white hover:bg-blue-50/30 border border-gray-100 hover:border-blue-300 rounded-2xl flex flex-col overflow-hidden group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md h-40">
+                                class="menu-item-card bg-white hover:bg-blue-50/30 border border-gray-100 hover:border-blue-300 rounded-2xl flex flex-col overflow-hidden group transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md h-40 relative">
 
                                 @if ($menu->image)
                                     <div class="w-full h-20 bg-gray-100 overflow-hidden relative shrink-0">
@@ -98,8 +98,8 @@
                 </div>
             </div>
 
+            <!-- القسم الأيسر: تفاصيل الطلب والحساب -->
             <div class="lg:col-span-4 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] flex flex-col gap-4">
-
                 <div
                     class="bg-white rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 flex flex-col h-full overflow-hidden">
 
@@ -111,47 +111,84 @@
                             class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-xl">0 أصناف</span>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50/30" id="invoiceItems">
+                    <!-- نوع الطلب -->
+                    <div class="p-3 border-b border-gray-100 shrink-0">
+                        <div class="grid grid-cols-3 gap-2 bg-gray-100 p-1 rounded-xl">
+                            <button type="button" onclick="setOrderType('takeaway')" id="type_takeaway"
+                                class="order-type-btn bg-white shadow-sm text-blue-600 font-bold text-xs py-2 rounded-lg transition-all">تيك
+                                أواي</button>
+                            <button type="button" onclick="setOrderType('dine_in')" id="type_dine_in"
+                                class="order-type-btn text-gray-500 hover:text-gray-700 font-bold text-xs py-2 rounded-lg transition-all">صالة</button>
+                            <button type="button" onclick="setOrderType('delivery')" id="type_delivery"
+                                class="order-type-btn text-gray-500 hover:text-gray-700 font-bold text-xs py-2 rounded-lg transition-all">ديليفري</button>
+                        </div>
                     </div>
 
-                    <div class="p-4 bg-white border-t border-gray-100 shrink-0 space-y-4">
-
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 mb-1.5 block">قيمة الخصم الإضافي (ج.م)</label>
+                    <!-- الحقول الديناميكية حسب نوع الطلب -->
+                    <div id="dynamicFields" class="px-4 pt-3 pb-1 shrink-0 space-y-3 bg-blue-50/30 hidden">
+                        <!-- حقل الصالة -->
+                        <div id="field_dine_in" class="hidden">
                             <div class="relative">
-                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-400">
-                                    <i class="fa-solid fa-tags"></i>
-                                </span>
-                                <input type="number" name="discount" id="discountInput" value="0" min="0"
-                                    step="0.5" oninput="renderCart()"
-                                    class="w-full bg-red-50/30 text-red-600 font-bold pr-9 pl-4 py-2.5 rounded-xl border border-red-100 focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none text-sm transition-all"
-                                    placeholder="أدخل قيمة الخصم...">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"><i
+                                        class="fa-solid fa-utensils"></i></span>
+                                <input type="number" id="table_number" min="1"
+                                    class="w-full bg-white pr-9 pl-3 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none text-sm"
+                                    placeholder="رقم الترابيزة (مطلوب للصالة)">
                             </div>
                         </div>
 
-                        <div class="space-y-2 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
-                            <div class="flex justify-between text-sm text-gray-500 font-medium">
-                                <span>الإجمالي قبل الخصم:</span>
-                                <span id="subtotal" class="font-bold text-gray-700">0.00 ج.م</span>
+                        <!-- حقول الديليفري -->
+                        <div id="field_delivery" class="hidden space-y-2">
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"><i
+                                        class="fa-solid fa-phone"></i></span>
+                                <input type="text" id="customer_phone"
+                                    class="w-full bg-white pr-9 pl-3 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none text-sm"
+                                    placeholder="رقم هاتف العميل">
                             </div>
-                            <div class="flex justify-between items-center border-t border-gray-200/60 pt-2 mt-2">
-                                <span class="text-sm font-black text-gray-800">المطلوب سداده:</span>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"><i
+                                        class="fa-solid fa-map-location-dot"></i></span>
+                                <input type="text" id="delivery_address"
+                                    class="w-full bg-white pr-9 pl-3 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none text-sm"
+                                    placeholder="عنوان التوصيل بالكامل">
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"><i
+                                        class="fa-solid fa-motorcycle"></i></span>
+                                <input type="text" id="delivery_person"
+                                    class="w-full bg-white pr-9 pl-3 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none text-sm"
+                                    placeholder="اسم المندوب (اختياري)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- السلة -->
+                    <div class="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50/30 min-h-[150px]" id="invoiceItems">
+                        <!-- يتم إضافة المنتجات هنا عبر الجافاسكربت -->
+                    </div>
+
+                    <!-- الإجماليات وزر الدفع -->
+                    <div class="p-4 bg-white border-t border-gray-100 shrink-0 space-y-4">
+                        <div class="space-y-2 bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-black text-gray-800">الإجمالي المطلوب:</span>
                                 <span id="grandTotal" class="text-2xl font-black text-emerald-600 drop-shadow-sm">0.00
                                     ج.م</span>
                             </div>
                         </div>
 
-                        <button type="submit" id="submitBtn"
+                        <button type="button" onclick="submitOrder()" id="submitBtn" disabled
                             class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-500/30 transition-all text-center flex items-center justify-center gap-2 text-base group disabled:opacity-50 disabled:cursor-not-allowed">
                             <i
                                 class="fa-solid fa-cash-register group-hover:-translate-y-1 transition-transform duration-300"></i>
-                            تأكيد وطباعة الفاتورة
+                            إتمام الطلب وطباعة الفاتورة
                         </button>
                     </div>
                 </div>
-
             </div>
-        </form>
+
+        </div>
     </div>
 @endsection
 
@@ -159,8 +196,13 @@
     <script>
         let cart = {};
         let currentCategoryId = 'all';
+        let currentOrderType = 'takeaway'; // الافتراضي تيك أواي
 
-        // وظيفة البحث وفلترة الأقسام
+        // إعداد توكن الـ CSRF للـ Fetch API
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+            '{{ csrf_token() }}';
+
+        // ------------------ واجهة المستخدم والبحث ------------------
         function filterItems() {
             const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
             const items = document.querySelectorAll('.menu-item-card');
@@ -183,7 +225,6 @@
             document.getElementById('noResults').classList.toggle('hidden', visibleCount > 0);
         }
 
-        // اختيار القسم
         function selectCategory(categoryId) {
             currentCategoryId = categoryId;
             document.querySelectorAll('.category-tab').forEach(tab => {
@@ -198,7 +239,40 @@
             filterItems();
         }
 
-        // إضافة منتج للسلة
+        // ------------------ إدارة حالة الطلب (Order Type) ------------------
+        function setOrderType(type) {
+            currentOrderType = type;
+
+            // تصفير الأزرار
+            document.querySelectorAll('.order-type-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                btn.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+
+            // تفعيل الزر المختار
+            const activeBtn = document.getElementById(`type_${type}`);
+            activeBtn.classList.remove('text-gray-500', 'hover:text-gray-700');
+            activeBtn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+
+            // التحكم في إظهار وإخفاء الحقول الديناميكية
+            const dynamicContainer = document.getElementById('dynamicFields');
+            const dineInFields = document.getElementById('field_dine_in');
+            const deliveryFields = document.getElementById('field_delivery');
+
+            dineInFields.classList.add('hidden');
+            deliveryFields.classList.add('hidden');
+            dynamicContainer.classList.add('hidden');
+
+            if (type === 'dine_in') {
+                dynamicContainer.classList.remove('hidden');
+                dineInFields.classList.remove('hidden');
+            } else if (type === 'delivery') {
+                dynamicContainer.classList.remove('hidden');
+                deliveryFields.classList.remove('hidden');
+            }
+        }
+
+        // ------------------ إدارة السلة (Cart) ------------------
         function addItem(id, name, price) {
             if (cart[id]) {
                 cart[id].quantity += 1;
@@ -211,14 +285,11 @@
                 };
             }
             renderCart();
-            // تشغيل تأثير صوتي أو هابتيك (اختياري)
             if (navigator.vibrate) navigator.vibrate(50);
         }
 
-        // تعديل الكمية (بواسطة الأزرار + و - أو الإدخال اليدوي)
         function updateQuantity(id, changeType, manualValue = null) {
             if (!cart[id]) return;
-
             if (manualValue !== null) {
                 cart[id].quantity = parseInt(manualValue) || 1;
             } else {
@@ -232,7 +303,6 @@
             }
         }
 
-        // حذف منتج
         function removeItem(id) {
             const el = document.getElementById(`cart-item-${id}`);
             if (el) {
@@ -240,22 +310,15 @@
                 setTimeout(() => {
                     delete cart[id];
                     renderCart();
-                }, 200); // إعطاء وقت للأنيميشن
+                }, 200);
             }
         }
 
-        // تحديث وعرض السلة وملخص الحساب
         function renderCart() {
             const container = document.getElementById('invoiceItems');
             container.innerHTML = '';
-
             let subtotal = 0;
-            let index = 0;
             let totalItems = 0;
-
-            // جلب قيمة الخصم من الحقل
-            const discountInput = document.getElementById('discountInput').value;
-            const discount = parseFloat(discountInput) || 0;
 
             for (let key in cart) {
                 const item = cart[key];
@@ -263,7 +326,6 @@
                 subtotal += itemTotal;
                 totalItems += item.quantity;
 
-                // تصميم عصري ومدمج لعنصر السلة
                 container.innerHTML += `
                 <div id="cart-item-${item.id}" class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-2 transition-all duration-200">
                     <div class="flex justify-between items-start">
@@ -272,30 +334,18 @@
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    
                     <div class="flex justify-between items-center mt-1">
                         <div class="flex flex-col">
                             <span class="text-[10px] text-gray-400 font-semibold">${item.price.toFixed(2)} ج</span>
                             <span class="text-sm font-black text-blue-600">${itemTotal.toFixed(2)} ج</span>
                         </div>
-
                         <div class="flex items-center bg-gray-50 border border-gray-200 rounded-xl p-1">
-                            <button type="button" onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:shadow-sm rounded-lg transition-all">
-                                <i class="fa-solid fa-minus text-[10px]"></i>
-                            </button>
-                            
-                            <input type="number" name="items[${index}][quantity]" value="${item.quantity}" min="1" 
-                                   onchange="updateQuantity('${item.id}', null, this.value)"
-                                   class="w-8 text-center bg-transparent font-black text-gray-800 outline-none border-none p-0 text-sm appearance-none">
-                            <input type="hidden" name="items[${index}][menu_id]" value="${item.id}">
-                            
-                            <button type="button" onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:shadow-sm rounded-lg transition-all">
-                                <i class="fa-solid fa-plus text-[10px]"></i>
-                            </button>
+                            <button type="button" onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:shadow-sm rounded-lg transition-all"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                            <input type="number" value="${item.quantity}" min="1" onchange="updateQuantity('${item.id}', null, this.value)" class="w-8 text-center bg-transparent font-black text-gray-800 outline-none border-none p-0 text-sm appearance-none">
+                            <button type="button" onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:shadow-sm rounded-lg transition-all"><i class="fa-solid fa-plus text-[10px]"></i></button>
                         </div>
                     </div>
                 </div>`;
-                index++;
             }
 
             if (Object.keys(cart).length === 0) {
@@ -306,93 +356,106 @@
                 </div>`;
             }
 
-            // حساب الإجمالي النهائي والتأكد من أنه لا يكون بالسالب
-            const grandTotal = Math.max(0, subtotal - discount);
-
-            // تحديث الواجهة
             document.getElementById('itemsCountBadge').innerText = `${totalItems} عناصر`;
-            document.getElementById('subtotal').innerText = subtotal.toFixed(2) + ' ج.م';
-            document.getElementById('grandTotal').innerText = grandTotal.toFixed(2) + ' ج.م';
-
-            // تفعيل/تعطيل زر الإرسال بناءً على السلة
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = Object.keys(cart).length === 0;
+            document.getElementById('grandTotal').innerText = subtotal.toFixed(2) + ' ج.م';
+            document.getElementById('submitBtn').disabled = Object.keys(cart).length === 0;
         }
 
         renderCart();
 
-        // إظهار نافذة النجاح
+        // ------------------ إرسال الطلب للباك إند (Backend Integration) ------------------
+        function submitOrder() {
+            if (Object.keys(cart).length === 0) return;
+
+            // تجهيز البيانات بناءً على OrderRequest في الباك إند
+            const payload = {
+                type: currentOrderType,
+                items: Object.values(cart).map(item => ({
+                    menu_id: item.id,
+                    quantity: item.quantity
+                }))
+            };
+
+            // إضافة الحقول الإضافية بناءً على الحالة
+            if (currentOrderType === 'dine_in') {
+                const tableNum = document.getElementById('table_number').value;
+                if (!tableNum) {
+                    alert('يرجى إدخال رقم الترابيزة');
+                    return;
+                }
+                payload.table_number = parseInt(tableNum);
+            } else if (currentOrderType === 'delivery') {
+                payload.phone = document.getElementById('customer_phone').value;
+                payload.delivery_address = document.getElementById('delivery_address').value;
+                payload.delivery_person = document.getElementById('delivery_person').value;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> جاري حفظ الأوردر...';
+
+            fetch('{{ route('orders.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    if (!response.ok) throw response;
+                    return response.json();
+                })
+                .then(data => {
+                    // إظهار نافذة النجاح مع رقم الأوردر القادم من الباك إند
+                    document.getElementById('successOrderNumber').innerText = 'رقم الطلب: ' + (data.data
+                        ?.order_number || '');
+                    showSuccessModal();
+
+                    // تفريغ السلة والحقول
+                    cart = {};
+                    renderCart();
+                    document.getElementById('table_number').value = '';
+                    document.getElementById('customer_phone').value = '';
+                    document.getElementById('delivery_address').value = '';
+                    document.getElementById('delivery_person').value = '';
+                    document.getElementById('searchInput').value = '';
+                    selectCategory('all');
+                    setOrderType('takeaway'); // العودة للحالة الافتراضية
+                })
+                .catch(async error => {
+                    let errorMsg = 'حدث خطأ أثناء حفظ الأوردر.';
+                    if (error.json) {
+                        const errData = await error.json();
+                        errorMsg = errData.message || errorMsg;
+                    }
+                    alert(errorMsg);
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML =
+                        '<i class="fa-solid fa-cash-register group-hover:-translate-y-1 transition-transform duration-300"></i> إتمام الطلب وطباعة الفاتورة';
+                });
+        }
+
+        // إظهار وإخفاء نافذة النجاح
         function showSuccessModal() {
             const modal = document.getElementById('successModal');
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.add('opacity-100', 'scale-100'), 10);
-            setTimeout(() => closeSuccessModal(), 1500);
+            setTimeout(() => {
+                modal.classList.remove('opacity-100', 'scale-100');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }, 2000);
         }
 
-        function closeSuccessModal() {
-            const modal = document.getElementById('successModal');
-            modal.classList.remove('opacity-100', 'scale-100');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-
-        // معالجة الإرسال
-        document.getElementById('posForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (Object.keys(cart).length === 0) return;
-
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> جاري إصدار الفاتورة...';
-
-            const formData = new FormData(this);
-
-            fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showSuccessModal();
-                        cart = {};
-                        document.getElementById('discountInput').value = '0';
-                        renderCart();
-                        document.getElementById('searchInput').value = '';
-                        selectCategory('all');
-                    } else if (data.error) {
-                        alert(data.error);
-                    }
-                })
-                .catch(error => {
-                    alert('حدث خطأ غير متوقع أثناء الحفظ.');
-                })
-                .finally(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-cash-register"></i> تأكيد وطباعة الفاتورة';
-                });
-        });
+        // اختصارات الكيبورد السريعة للبحث
         document.addEventListener('keydown', function(e) {
-            // تجاهل Enter
-            if (e.key === 'Enter') return;
-
-            // تجاهل Ctrl و Alt و Meta
-            if (e.ctrlKey || e.altKey || e.metaKey) return;
-
-            // لو المستخدم بيكتب بالفعل في input أو textarea سيبه
+            if (e.key === 'Enter' || e.ctrlKey || e.altKey || e.metaKey) return;
             const active = document.activeElement;
-            if (
-                active.tagName === 'INPUT' ||
-                active.tagName === 'TEXTAREA' ||
-                active.isContentEditable
-            ) {
-                return;
-            }
+            if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') return;
 
-            // لو المفتاح حرف أو رقم أو رمز
             if (e.key.length === 1) {
                 const search = document.getElementById('searchInput');
                 search.focus();

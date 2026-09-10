@@ -26,6 +26,10 @@ class Menu extends Model
     {
         return $this->hasMany(Recipe::class, 'menu_item_id', 'id');
     }
+    public function orderItems()
+{
+    return $this->hasMany(OrderItem::class);
+}
     public function getRecipeCostAttribute()
     {
         return $this->recipes->sum(function ($recipe) {

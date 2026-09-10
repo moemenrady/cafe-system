@@ -52,4 +52,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->role === 'supervisor';
     }
+
+    public function createdOrders()
+    {
+        return $this->hasMany(Order::class, 'created_by');
+    }
 }

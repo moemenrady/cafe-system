@@ -182,7 +182,12 @@
                     class="fa-solid fa-file-invoice-dollar text-cafePrimary group-hover:scale-110 transition-transform"></i>
                 <span data-ar="فواتير المبيعات" data-en="Sales Invoices">فواتير المبيعات</span>
             </a>
-
+            <a href="{{ route('tables.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->routeIs('tables.*') ? 'active-tab' : '' }}">
+                <i
+                    class="fa-solid fa-table-cells-large text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="الترابيزات" data-en="Tables">الترابيزات</span>
+            </a>
             <a href="{{ route('expenses.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->is('expenses*') ? 'active-tab' : '' }}">
                 <i class="fa-solid fa-wallet text-cafePrimary group-hover:scale-110 transition-transform"></i>

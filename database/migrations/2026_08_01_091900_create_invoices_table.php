@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('client_id')->nullable()->constrained('customers')->nullOnDelete(); // مربوط بجدول الـ customers عندك
             $table->decimal('profit', 12, 2)->default(0);
             $table->string('payment_method')->default('cash'); // cash, InstaPay, card
+            $table->foreignId('order_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->text('note')->nullable();
             $table->timestamps();

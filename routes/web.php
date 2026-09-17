@@ -37,3 +37,4 @@ require __DIR__.'/inventory.php';
 require __DIR__.'/admin.php';
 require __DIR__.'/orders.php';
 require __DIR__.'/shifts.php';
+require __DIR__.'/printing.php';

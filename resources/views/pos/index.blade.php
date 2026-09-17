@@ -66,7 +66,7 @@
 
                                 @if ($menu->image)
                                     <div class="w-full h-20 bg-gray-100 overflow-hidden relative shrink-0">
-                                        <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }}"
+                                        <img src="{{ asset('images/products/' . $menu->image) }}" alt="{{ $menu->name }}"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                     </div>
                                     <div

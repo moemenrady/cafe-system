@@ -10,7 +10,8 @@ class Order extends Model
 
         'order_number',
         'customer_id',
-        'table_number',
+        'table_id',      // FK → tables.id (الطاولة المختارة في الـ POS)
+        'table_number',  // محفوظ للتوافق مع البيانات القديمة
         'delivery_address',
         'phone',
         'delivery_person',
@@ -47,6 +48,11 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function table()
+    {
+        return $this->belongsTo(Table::class, 'table_id');
     }
 
     public function creator()

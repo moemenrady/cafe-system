@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Table;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,30 +19,45 @@ class OrderRequest extends FormRequest
 
             'customer_id' => [
                 'nullable',
-                'exists:customers,id'
+                'exists:customers,id',
             ],
 
-            'table_number' => [
+            // table_id هو المعرّف الصحيح المرتبط بجدول الطاولات
+            'table_id' => [
                 'nullable',
                 'integer',
-                'min:1'
+                'exists:tables,id',
+                // لو نوع الطلب Dine-In → الطاولة مطلوبة ويجب أن تكون نشطة
+                Rule::when(fn() => $this->input('type') === 'dine_in', [
+                    'required',
+                    function ($attribute, $value, $fail) {
+                        $table = Table::find($value);
+                        if (!$table) {
+                            $fail('الطاولة غير موجودة.');
+                            return;
+                        }
+                        if (!$table->is_active) {
+                            $fail('الطاولة المختارة غير نشطة. الرجاء اختيار طاولة نشطة.');
+                        }
+                    },
+                ]),
             ],
 
             'delivery_address' => [
                 'nullable',
-                'string'
+                'string',
             ],
 
             'phone' => [
                 'nullable',
                 'string',
-                'max:20'
+                'max:20',
             ],
 
             'delivery_person' => [
                 'nullable',
                 'string',
-                'max:255'
+                'max:255',
             ],
 
             'type' => [
@@ -49,11 +65,27 @@ class OrderRequest extends FormRequest
                 Rule::in([
                     'dine_in',
                     'takeaway',
-                    'delivery'
-                ])
+                    'delivery',
+                ]),
             ],
 
-            // أضف هذه القواعد
+            'payment_method' => [
+                'nullable',
+                Rule::in(['cash', 'InstaPay', 'card']),
+            ],
+
+            'discount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'notes' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
+
             'items' => [
                 'required',
                 'array',
@@ -75,11 +107,21 @@ class OrderRequest extends FormRequest
                 'nullable',
                 'string',
             ],
+        ];
+    }
 
-            'notes' => [
-                'nullable',
-                'string'
-            ],
+    public function messages(): array
+    {
+        return [
+            'table_id.required'        => 'يجب اختيار طاولة لطلبات الصالة.',
+            'type.required'            => 'يجب تحديد نوع الطلب.',
+            'type.in'                  => 'نوع الطلب غير صحيح.',
+            'items.required'           => 'يجب إضافة منتج واحد على الأقل.',
+            'items.min'                => 'يجب إضافة منتج واحد على الأقل.',
+            'items.*.menu_id.required' => 'معرف المنتج مطلوب.',
+            'items.*.menu_id.exists'   => 'أحد المنتجات غير موجود في القائمة.',
+            'items.*.quantity.min'     => 'يجب أن تكون الكمية 1 على الأقل.',
+            'payment_method.in'        => 'طريقة الدفع غير صحيحة.',
         ];
     }
 }

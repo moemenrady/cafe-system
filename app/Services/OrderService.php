@@ -54,17 +54,18 @@ class OrderService
     private function createOrderRecord(array $data): Order
     {
         return Order::create([
-            'order_number' => $this->generateOrderNumber(),
-            'customer_id' => $data['customer_id'] ?? null,
-            'table_number' => $data['table_number'] ?? null,
+            'order_number'    => $this->generateOrderNumber(),
+            'customer_id'     => $data['customer_id'] ?? null,
+            'table_id'        => $data['table_id'] ?? null,
+            'table_number'    => $data['table_id'] ?? $data['table_number'] ?? null,
             'delivery_address' => $data['delivery_address'] ?? null,
-            'phone' => $data['phone'] ?? null,
+            'phone'           => $data['phone'] ?? null,
             'delivery_person' => $data['delivery_person'] ?? null,
-            'type' => $this->resolveOrderType($data['type'] ?? null),
-            'status' => $this->resolveInitialStatus($data['type'] ?? null),
-            'payment_status' => 'pending',
-            'notes' => $data['notes'] ?? null,
-            'created_by' => Auth::check() ? Auth::id() : 1,
+            'type'            => $this->resolveOrderType($data['type'] ?? null),
+            'status'          => $this->resolveInitialStatus($data['type'] ?? null),
+            'payment_status'  => 'pending',
+            'notes'           => $data['notes'] ?? null,
+            'created_by'      => Auth::check() ? Auth::id() : 1,
         ]);
     }
 

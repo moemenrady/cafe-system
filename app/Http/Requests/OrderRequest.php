@@ -107,6 +107,17 @@ class OrderRequest extends FormRequest
                 'nullable',
                 'string',
             ],
+
+            'force' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'device_uuid' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
         ];
     }
 

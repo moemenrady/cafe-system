@@ -19,6 +19,110 @@
         </div>
     </div>
 
+    {{-- ========== نافذة تنبيه تعذر اتصال الطابعة (Production Warning Modal) ========== --}}
+    <div id="printerWarningModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden"
+        onclick="hidePrinterWarningModal()">
+        <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full mx-4 shadow-2xl border border-amber-200 animate-slide-in relative text-right" onclick="event.stopPropagation()">
+            
+            {{-- الأيقونة والعنوان --}}
+            <div class="flex flex-col items-center text-center mb-4">
+                <div class="w-16 h-16 bg-amber-50 border-2 border-amber-100 rounded-2xl flex items-center justify-center text-amber-500 text-2xl shadow-inner mb-3 relative">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white">!</span>
+                </div>
+                <h4 class="text-lg font-black text-gray-900 mb-1">تنبيه: الطابعة غير متصلة</h4>
+                <p id="printerWarningMsg" class="text-xs font-semibold text-gray-600 leading-relaxed max-w-sm">تعذر إتمام الطلب: برنامج الطباعة غير متصل بالجهاز حالياً أو الطابعة غير متصلة بالشبكة.</p>
+            </div>
+
+            {{-- صندوق تفاصيل حالة الطابعات --}}
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 mb-4 space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-gray-700">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-cash-register text-gray-400"></i> طابعة الكاشير:</span>
+                    <span id="warnPrinterCashierStatus" class="px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-[11px] font-bold">غير متصلة</span>
+                </div>
+                <div class="flex items-center justify-between text-xs font-bold text-gray-700">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-mug-hot text-gray-400"></i> طابعة الباريستا / المطبخ:</span>
+                    <span id="warnPrinterBaristaStatus" class="px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-[11px] font-bold">غير متصلة</span>
+                </div>
+                <div class="pt-2 border-t border-slate-200 text-[11px] text-amber-800 flex items-start gap-1.5 font-medium leading-normal">
+                    <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 shrink-0"></i>
+                    <span>إذا اخترت <b>المتابعة</b>، سيتم تسجيل الطلب واعتماده في النظام وتحديث المخزون، ولكن <b>لن تتم طباعة الفاتورة ورقياً</b>.</span>
+                </div>
+            </div>
+
+            {{-- زرا الإجراءات --}}
+            <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" id="confirmForceSubmitBtn" onclick="confirmForceSubmitOrder()"
+                    class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-3 rounded-xl text-xs sm:text-sm shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-check"></i>
+                    متابعة وحفظ الطلب
+                </button>
+                <button type="button" onclick="hidePrinterWarningModal()"
+                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm transition-all active:scale-95">
+                    إلغاء والتراجع
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ========== نافذة تفاصيل الطابعات للتشخيص ========== --}}
+    <div id="printerDetailsModal"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center hidden"
+        onclick="togglePrinterDetailsModal()">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl border border-gray-100 relative text-right" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-gray-800">حالة نظام الطباعة</h4>
+                        <p id="diagDeviceUuid" class="text-[11px] font-mono text-gray-400">الجهاز: pos-cashier-01</p>
+                    </div>
+                </div>
+                <button type="button" onclick="togglePrinterDetailsModal()" class="text-gray-400 hover:text-gray-600 text-sm p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2.5 mb-4">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <span id="diagAgentDot" class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                        <span class="text-xs font-bold text-gray-700">برنامج الطباعة (Agent):</span>
+                    </div>
+                    <span id="diagAgentStatus" class="text-xs font-bold text-gray-600">جاري الفحص...</span>
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <span id="diagCashierDot" class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                        <span class="text-xs font-bold text-gray-700">طابعة الكاشير:</span>
+                    </div>
+                    <span id="diagCashierStatus" class="text-xs font-bold text-gray-600">-</span>
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <span id="diagBaristaDot" class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                        <span class="text-xs font-bold text-gray-700">طابعة الباريستا / المطبخ:</span>
+                    </div>
+                    <span id="diagBaristaStatus" class="text-xs font-bold text-gray-600">-</span>
+                </div>
+
+                <div class="text-[11px] text-gray-400 text-left font-mono pt-1" id="diagLastSeen">
+                    آخر نبضة: -
+                </div>
+            </div>
+
+            <button type="button" onclick="fetchPrinterStatus(true)"
+                class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate"></i> فحص الحالة الآن
+            </button>
+        </div>
+    </div>
+
     {{-- ========== Toast للأخطاء ========== --}}
     <div id="errorToast"
         class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden bg-red-600 text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 max-w-sm text-center">
@@ -32,20 +136,31 @@
         {{-- ==================== يسار: المنتجات ==================== --}}
         <div class="lg:col-span-8 space-y-3">
 
-            {{-- شريط البحث والفئات --}}
+            {{-- شريط البحث والفئات وحالة الطابعة --}}
             <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 space-y-3 sticky top-2 z-10">
 
-                {{-- البحث --}}
-                <div class="relative">
-                    <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" id="searchInput"
-                        class="w-full bg-gray-50 text-gray-800 pr-10 pl-10 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none font-medium text-sm transition-all"
-                        placeholder="ابحث بسرعة... (أو اضغط أي حرف)">
-                    <button id="clearSearch" onclick="clearSearch()"
-                        class="absolute inset-y-0 left-0 hidden px-3 text-gray-400 hover:text-gray-600">
-                        <i class="fa-solid fa-xmark"></i>
+                {{-- البحث ومؤشر الطابعة --}}
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="searchInput"
+                            class="w-full bg-gray-50 text-gray-800 pr-10 pl-10 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none font-medium text-sm transition-all"
+                            placeholder="ابحث بسرعة... (أو اضغط أي حرف)">
+                        <button id="clearSearch" onclick="clearSearch()"
+                            class="absolute inset-y-0 left-0 hidden px-3 text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    {{-- زر حالة الطابعة المباشر --}}
+                    <button type="button" id="posPrinterStatusBtn" onclick="togglePrinterDetailsModal()"
+                        class="shrink-0 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+                        title="انقر لعرض تفاصيل اتصال برنامج الطباعة">
+                        <span id="posPrinterDot" class="w-2.5 h-2.5 rounded-full bg-gray-400 animate-pulse"></span>
+                        <i class="fa-solid fa-print"></i>
+                        <span id="posPrinterText" class="hidden sm:inline">فحص الطابعة...</span>
                     </button>
                 </div>
 
@@ -603,7 +718,7 @@
     renderCart();
 
     // ========== إرسال الطلب ==========
-    function submitOrder() {
+    function submitOrder(force = false) {
         if (Object.keys(cart).length === 0) return;
 
         // تحقق من الطاولة للصالة
@@ -624,6 +739,8 @@
             type: currentOrderType,
             notes: document.getElementById('orderNotes').value.trim() || null,
             discount: discount || null,
+            force: force,
+            device_uuid: 'pos-cashier-01',
             items: Object.values(cart).map(item => ({
                 menu_id: item.id,
                 quantity: item.quantity,
@@ -652,6 +769,7 @@
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
+                'X-Device-UUID': 'pos-cashier-01',
             },
             body: JSON.stringify(payload),
         })
@@ -661,6 +779,9 @@
             return data;
         })
         .then(data => {
+            // إخفاء نافذة التحذير إن كانت مفتوحة
+            hidePrinterWarningModal();
+
             // عرض نافذة النجاح
             document.getElementById('successOrderNumber').textContent = 'رقم الطلب: ' + (data.data?.order_number || '');
             showSuccessModal();
@@ -672,6 +793,12 @@
             refreshTables();
         })
         .catch(err => {
+            // إذا كان الخطأ تحذيراً لعدم اتصال الطابعة
+            if (err?.printer_warning) {
+                showPrinterWarningModal(err);
+                return;
+            }
+
             const msg = err?.message || err?.errors
                 ? (Object.values(err.errors || {})[0]?.[0] || err.message)
                 : 'حدث خطأ أثناء حفظ الطلب.';
@@ -683,6 +810,163 @@
             updateSubmitButton();
         });
     }
+
+    // ========== إدارة نافذة تحذير الطابعة ==========
+    function showPrinterWarningModal(err) {
+        document.getElementById('printerWarningMsg').textContent = err?.message || 'تعذر الاتصال ببرنامج الطباعة أو الطابعة غير متصلة بالشبكة.';
+
+        const cashierEl = document.getElementById('warnPrinterCashierStatus');
+        const baristaEl = document.getElementById('warnPrinterBaristaStatus');
+        const printers = err?.printers;
+
+        if (printers?.cashier) {
+            const isOnline = printers.cashier.status === 'online';
+            cashierEl.textContent = isOnline ? 'متصلة (' + (printers.cashier.latency_ms ?? 0) + 'ms)' : 'غير متصلة';
+            cashierEl.className = isOnline 
+                ? 'px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-700 text-[11px] font-bold' 
+                : 'px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-[11px] font-bold';
+        } else {
+            cashierEl.textContent = 'برنامج الطباعة متوقف';
+            cashierEl.className = 'px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-[11px] font-bold';
+        }
+
+        if (printers?.barista) {
+            const isOnline = printers.barista.status === 'online';
+            baristaEl.textContent = isOnline ? 'متصلة (' + (printers.barista.latency_ms ?? 0) + 'ms)' : 'غير متصلة';
+            baristaEl.className = isOnline 
+                ? 'px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-700 text-[11px] font-bold' 
+                : 'px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-[11px] font-bold';
+        } else {
+            baristaEl.textContent = 'برنامج الطباعة متوقف';
+            baristaEl.className = 'px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-[11px] font-bold';
+        }
+
+        document.getElementById('printerWarningModal').classList.remove('hidden');
+    }
+
+    function hidePrinterWarningModal() {
+        document.getElementById('printerWarningModal').classList.add('hidden');
+    }
+
+    function confirmForceSubmitOrder() {
+        hidePrinterWarningModal();
+        submitOrder(true);
+    }
+
+    // ========== فحص وتشخيص حالة الطابعة المباشر ==========
+    let cachedPrinterHealth = null;
+
+    async function fetchPrinterStatus(isManual = false) {
+        const btn = document.getElementById('posPrinterStatusBtn');
+        const dot = document.getElementById('posPrinterDot');
+        const text = document.getElementById('posPrinterText');
+
+        if (isManual && text) {
+            text.textContent = 'جاري الفحص...';
+        }
+
+        try {
+            const res = await fetch('/api/pos/printer-status?device_uuid=pos-cashier-01', {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await res.json();
+            cachedPrinterHealth = data;
+
+            if (data.connected && data.is_ready) {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50';
+                btn.className = 'shrink-0 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all bg-emerald-50/80 border-emerald-200 text-emerald-700 hover:bg-emerald-100/70';
+                text.textContent = 'الطابعات جاهزة';
+            } else if (data.connected && !data.is_ready) {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
+                btn.className = 'shrink-0 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all bg-amber-50/80 border-amber-200 text-amber-700 hover:bg-amber-100/70';
+                text.textContent = 'تنبيه طابعة';
+            } else {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-red-500';
+                btn.className = 'shrink-0 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all bg-red-50/80 border-red-200 text-red-700 hover:bg-red-100/70';
+                text.textContent = 'الطابعة غير متصلة';
+            }
+
+            updatePrinterDetailsUI(data);
+        } catch (e) {
+            if (dot && btn && text) {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-gray-400';
+                btn.className = 'shrink-0 flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all bg-gray-50 border-gray-200 text-gray-600';
+                text.textContent = 'تعذر الاتصال';
+            }
+        }
+    }
+
+    function togglePrinterDetailsModal() {
+        const modal = document.getElementById('printerDetailsModal');
+        const isHidden = modal.classList.contains('hidden');
+        if (isHidden) {
+            modal.classList.remove('hidden');
+            fetchPrinterStatus(false);
+        } else {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function updatePrinterDetailsUI(data) {
+        if (!data) return;
+        const deviceEl = document.getElementById('diagDeviceUuid');
+        if (deviceEl) deviceEl.textContent = 'الجهاز: ' + (data.device_uuid || 'pos-cashier-01');
+        
+        const agentStatus = document.getElementById('diagAgentStatus');
+        const agentDot = document.getElementById('diagAgentDot');
+        if (agentStatus && agentDot) {
+            if (data.connected) {
+                agentStatus.textContent = 'متصل (جاهز)';
+                agentStatus.className = 'text-xs font-bold text-emerald-600';
+                agentDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+            } else {
+                agentStatus.textContent = 'غير متصل';
+                agentStatus.className = 'text-xs font-bold text-red-600';
+                agentDot.className = 'w-2.5 h-2.5 rounded-full bg-red-500';
+            }
+        }
+
+        const cashierStatus = document.getElementById('diagCashierStatus');
+        const cashierDot = document.getElementById('diagCashierDot');
+        if (cashierStatus && cashierDot) {
+            if (data.printers?.cashier) {
+                const isUp = data.printers.cashier.status === 'online';
+                cashierStatus.textContent = isUp ? `متصلة (${data.printers.cashier.latency_ms ?? 0}ms)` : 'غير متصلة';
+                cashierStatus.className = isUp ? 'text-xs font-bold text-emerald-600' : 'text-xs font-bold text-red-600';
+                cashierDot.className = isUp ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-red-500';
+            } else {
+                cashierStatus.textContent = 'غير معرفة';
+                cashierStatus.className = 'text-xs font-bold text-gray-400';
+                cashierDot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300';
+            }
+        }
+
+        const baristaStatus = document.getElementById('diagBaristaStatus');
+        const baristaDot = document.getElementById('diagBaristaDot');
+        if (baristaStatus && baristaDot) {
+            if (data.printers?.barista) {
+                const isUp = data.printers.barista.status === 'online';
+                baristaStatus.textContent = isUp ? `متصلة (${data.printers.barista.latency_ms ?? 0}ms)` : 'غير متصلة';
+                baristaStatus.className = isUp ? 'text-xs font-bold text-emerald-600' : 'text-xs font-bold text-red-600';
+                baristaDot.className = isUp ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-red-500';
+            } else {
+                baristaStatus.textContent = 'غير معرفة';
+                baristaStatus.className = 'text-xs font-bold text-gray-400';
+                baristaDot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300';
+            }
+        }
+
+        const lastSeenEl = document.getElementById('diagLastSeen');
+        if (lastSeenEl) {
+            lastSeenEl.textContent = data.last_seen 
+                ? 'آخر نبضة: ' + new Date(data.last_seen).toLocaleTimeString('ar-EG')
+                : 'آخر نبضة: لا توجد بيانات';
+        }
+    }
+
+    // بدء المراقبة الدورية لحالة الطابعة
+    fetchPrinterStatus();
+    setInterval(() => fetchPrinterStatus(), 20000);
 
     function resetPOS() {
         cart = {};
@@ -727,6 +1011,14 @@
 
         // Escape: مسح البحث أو إغلاق المودال
         if (e.key === 'Escape') {
+            if (!document.getElementById('printerWarningModal').classList.contains('hidden')) {
+                hidePrinterWarningModal();
+                return;
+            }
+            if (!document.getElementById('printerDetailsModal').classList.contains('hidden')) {
+                togglePrinterDetailsModal();
+                return;
+            }
             if (!document.getElementById('successModal').classList.contains('hidden')) {
                 hideSuccessModal();
                 return;

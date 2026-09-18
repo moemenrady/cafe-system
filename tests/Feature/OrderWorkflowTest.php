@@ -105,4 +105,98 @@ class OrderWorkflowTest extends TestCase
         $this->assertDatabaseHas('printer_jobs', ['order_id' => $order->id, 'type' => 'kitchen']);
         $this->assertDatabaseHas('printer_jobs', ['order_id' => $order->id, 'type' => 'waiter']);
     }
+
+    public function test_order_controller_warns_when_printer_is_disconnected(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        \Illuminate\Support\Facades\Cache::forget('pos_device_pos-cashier-01');
+
+        $category = Category::create(['name' => 'Juice']);
+        $menu = Menu::create([
+            'name' => 'Orange Juice',
+            'category_id' => $category->id,
+            'price' => 10,
+            'is_available' => true,
+        ]);
+
+        $response = $this->postJson(route('orders.store'), [
+            'type' => 'takeaway',
+            'items' => [
+                ['menu_id' => $menu->id, 'quantity' => 1],
+            ],
+        ]);
+
+        $response->assertStatus(422)
+                 ->assertJson([
+                     'success' => false,
+                     'printer_warning' => true,
+                 ]);
+    }
+
+    public function test_order_controller_allows_order_when_force_flag_is_true(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        \Illuminate\Support\Facades\Cache::forget('pos_device_pos-cashier-01');
+
+        $category = Category::create(['name' => 'Juice']);
+        $menu = Menu::create([
+            'name' => 'Mango Juice',
+            'category_id' => $category->id,
+            'price' => 12,
+            'is_available' => true,
+        ]);
+
+        $response = $this->postJson(route('orders.store'), [
+            'type' => 'takeaway',
+            'force' => true,
+            'items' => [
+                ['menu_id' => $menu->id, 'quantity' => 1],
+            ],
+        ]);
+
+        $response->assertStatus(201)
+                 ->assertJson([
+                     'success' => true,
+                 ]);
+    }
+
+    public function test_order_controller_succeeds_when_printer_is_ready(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        \Illuminate\Support\Facades\Cache::put('pos_device_pos-cashier-01', [
+            'status' => 'ready',
+            'active_roles' => ['cashier', 'barista'],
+            'printers' => [
+                'cashier' => ['status' => 'online'],
+                'barista' => ['status' => 'online'],
+            ],
+            'last_seen' => now()->toIso8601String(),
+        ], 60);
+
+        $category = Category::create(['name' => 'Juice']);
+        $menu = Menu::create([
+            'name' => 'Apple Juice',
+            'category_id' => $category->id,
+            'price' => 14,
+            'is_available' => true,
+        ]);
+
+        $response = $this->postJson(route('orders.store'), [
+            'type' => 'takeaway',
+            'items' => [
+                ['menu_id' => $menu->id, 'quantity' => 1],
+            ],
+        ]);
+
+        $response->assertStatus(201)
+                 ->assertJson([
+                     'success' => true,
+                 ]);
+    }
 }

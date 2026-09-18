@@ -1,0 +1,91 @@
+{
+  "device_uuid": "pos-cashier-01",
+  "laravel_backend_url": "http://127.0.0.1:8000",
+  "reverb": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "scheme": "http",
+    "app_key": "4m1fxfohhbtyb2cxn45b"
+  },
+  "printers": [
+    {
+      "id": "printer-1",
+      "name": "طابعة الكاشير الرئيسية",
+      "role": "cashier",
+      "host": "127.0.0.1",
+      "port": 9101,
+      "enabled": true
+    },
+    {
+      "id": "printer-2",
+      "name": "طابعة الباريستا والمشروبات",
+      "role": "barista",
+      "host": "127.0.0.1",
+      "port": 9102,
+      "enabled": true
+    },
+    {
+      "id": "printer-3",
+      "name": "طابعة المطبخ والمأكولات",
+      "role": "kitchen",
+      "host": "127.0.0.1",
+      "port": 9103,
+      "enabled": true
+    },
+    {
+      "id": "printer-4",
+      "name": "طابعة الصالة والتوصيل",
+      "role": "all",
+      "host": "127.0.0.1",
+      "port": 9104,
+      "enabled": true
+    }
+  ],
+  "templates": {
+    "cashier": {
+      "header": {
+        "store_name": "كافيه X",
+        "branch": "فرع X",
+        "tax_number": "TR-9821389",
+        "phone": "01000000000",
+        "align": "center",
+        "store_name_size": "double"
+      },
+      "body": {
+        "show_table": true,
+        "show_server": true,
+        "show_tax_breakdown": true,
+        "show_drawer_kick": true
+      },
+      "footer": {
+        "thank_you_message": "شكراً لزيارتكم! نتشرف بكم دائماً",
+        "wifi_pass": "royal_guest_2026",
+        "align": "center",
+        "show_cut": true
+      }
+    },
+    "barista": {
+      "header": {
+        "title": "تكت باريستا - مشروبات",
+        "align": "center",
+        "title_size": "double"
+      },
+      "body": {
+        "show_table": true,
+        "show_order_type": true,
+        "show_notes": true,
+        "item_font_size": "double"
+      },
+      "footer": {
+        "show_cut": true
+      }
+    }
+  },
+  "server": {
+    "port": 3210
+  },
+  "heartbeat_interval_ms": 30000,
+  "app_version": "1.0.0",
+  "auto_update_enabled": true,
+  "is_configured": true
+}

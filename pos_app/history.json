@@ -1,0 +1,271 @@
+[
+  {
+    "id": "job-1789750038355",
+    "order_number": "1099",
+    "type": "cashier",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-18T16:47:18.355Z",
+    "formatted_time": "٠٧:٤٧:١٨ م",
+    "formatted_date": "١٨‏/٩‏/٢٠٢٦",
+    "table": "Table 4",
+    "cashier": "كاشير",
+    "total": "171.00",
+    "items_count": 2,
+    "items_summary": "2x Spanish Latte, 1x Croissant",
+    "printers": [
+      {
+        "id": "printer-1",
+        "name": "طابعة الكاشير الرئيسية",
+        "success": true
+      },
+      {
+        "id": "printer-4",
+        "name": "طابعة الصالة والتوصيل",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": null,
+      "type": null,
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": "1099",
+        "table_number": "Table 4",
+        "server_name": "Ziad",
+        "items": [
+          {
+            "name": "Spanish Latte",
+            "quantity": 2,
+            "price": 55
+          },
+          {
+            "name": "Croissant",
+            "quantity": 1,
+            "price": 40
+          }
+        ],
+        "subtotal": 150,
+        "tax": 21,
+        "total": 171
+      },
+      "status": null
+    },
+    "error": null
+  },
+  {
+    "id": "job-1789750037702",
+    "order_number": "1099",
+    "type": "cashier",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-18T16:47:17.702Z",
+    "formatted_time": "٠٧:٤٧:١٧ م",
+    "formatted_date": "١٨‏/٩‏/٢٠٢٦",
+    "table": "Table 4",
+    "cashier": "كاشير",
+    "total": "171.00",
+    "items_count": 2,
+    "items_summary": "2x Spanish Latte, 1x Croissant",
+    "printers": [
+      {
+        "id": "printer-1",
+        "name": "طابعة الكاشير الرئيسية",
+        "success": true
+      },
+      {
+        "id": "printer-4",
+        "name": "طابعة الصالة والتوصيل",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": null,
+      "type": null,
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": "1099",
+        "table_number": "Table 4",
+        "server_name": "Ziad",
+        "items": [
+          {
+            "name": "Spanish Latte",
+            "quantity": 2,
+            "price": 55
+          },
+          {
+            "name": "Croissant",
+            "quantity": 1,
+            "price": 40
+          }
+        ],
+        "subtotal": 150,
+        "tax": 21,
+        "total": 171
+      },
+      "status": null
+    },
+    "error": null
+  },
+  {
+    "id": "job-1789749998331",
+    "order_number": "1099",
+    "type": "cashier",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-18T16:46:38.331Z",
+    "formatted_time": "٠٧:٤٦:٣٨ م",
+    "formatted_date": "١٨‏/٩‏/٢٠٢٦",
+    "table": "Table 4",
+    "cashier": "كاشير",
+    "total": "171.00",
+    "items_count": 2,
+    "items_summary": "2x Spanish Latte, 1x Croissant",
+    "printers": [
+      {
+        "id": "printer-1",
+        "name": "طابعة الكاشير الرئيسية",
+        "success": true
+      },
+      {
+        "id": "printer-4",
+        "name": "طابعة الصالة والتوصيل",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": null,
+      "type": null,
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": "1099",
+        "table_number": "Table 4",
+        "server_name": "Ziad",
+        "items": [
+          {
+            "name": "Spanish Latte",
+            "quantity": 2,
+            "price": 55
+          },
+          {
+            "name": "Croissant",
+            "quantity": 1,
+            "price": 40
+          }
+        ],
+        "subtotal": 150,
+        "tax": 21,
+        "total": 171
+      },
+      "status": null
+    },
+    "error": null
+  },
+  {
+    "id": "sample-arabic-verification",
+    "order_number": "1099",
+    "type": "cashier",
+    "source": "test_receipt",
+    "status": "printed",
+    "timestamp": "2026-09-18T16:44:54.551Z",
+    "formatted_time": "٠٧:٤٤:٥٤ م",
+    "formatted_date": "١٨‏/٩‏/٢٠٢٦",
+    "table": "طاولة 4",
+    "cashier": "أحمد",
+    "total": "171.00",
+    "items_count": 2,
+    "items_summary": "2x Spanish Latte, 1x Croissant",
+    "printers": [
+      {
+        "id": "printer-1",
+        "name": "طابعة الكاشير",
+        "host": "127.0.0.1",
+        "port": 9101,
+        "success": true,
+        "latencyMs": 2
+      }
+    ],
+    "raw_job": {
+      "uuid": "sample-arabic-verification",
+      "type": "cashier",
+      "payload": {
+        "order_number": "1099",
+        "date": "9/18/2026, 7:28:08 PM",
+        "table": "طاولة 4",
+        "cashier_name": "أحمد",
+        "type": "صالة",
+        "items": [
+          {
+            "quantity": 2,
+            "name": "Spanish Latte",
+            "price": 55
+          },
+          {
+            "quantity": 1,
+            "name": "Croissant",
+            "price": 40
+          }
+        ],
+        "subtotal": 150,
+        "tax": 21,
+        "total": 171,
+        "payment_method": "فيزا"
+      }
+    },
+    "error": null
+  },
+  {
+    "id": "job-1789749435821",
+    "order_number": "1099",
+    "type": "cashier",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-18T16:37:15.821Z",
+    "formatted_time": "٠٧:٣٧:١٥ م",
+    "formatted_date": "١٨‏/٩‏/٢٠٢٦",
+    "table": "Table 4",
+    "cashier": "كاشير",
+    "total": "171.00",
+    "items_count": 2,
+    "items_summary": "2x Spanish Latte, 1x Croissant",
+    "printers": [
+      {
+        "id": "printer-1",
+        "name": "طابعة الكاشير الرئيسية",
+        "success": true
+      },
+      {
+        "id": "printer-4",
+        "name": "طابعة الصالة والتوصيل",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": null,
+      "type": null,
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": "1099",
+        "table_number": "Table 4",
+        "server_name": "Ziad",
+        "items": [
+          {
+            "name": "Spanish Latte",
+            "quantity": 2,
+            "price": 55
+          },
+          {
+            "name": "Croissant",
+            "quantity": 1,
+            "price": 40
+          }
+        ],
+        "subtotal": 150,
+        "tax": 21,
+        "total": 171
+      },
+      "status": null
+    },
+    "error": null
+  }
+]

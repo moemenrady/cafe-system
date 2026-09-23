@@ -37,6 +37,7 @@
   "author": "Cafe System Engineering",
   "license": "UNLICENSED",
   "dependencies": {
+    "@napi-rs/canvas": "^1.0.9",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "laravel-echo": "^1.17.1",

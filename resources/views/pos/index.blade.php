@@ -66,6 +66,164 @@
         </div>
     </div>
 
+    {{-- ========== نافذة إدارة الطاولة المشغولة (Active Table Modal) ========== --}}
+    <div id="activeTableModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden"
+        onclick="closeActiveTableModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full mx-4 shadow-2xl border border-gray-100 overflow-hidden text-right flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
+            
+            {{-- Header --}}
+            <div class="bg-amber-50 p-4 border-b border-amber-100 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-lg shadow-sm">
+                        <i class="fa-solid fa-chair"></i>
+                    </span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-black text-gray-900 text-base sm:text-lg" id="atModalTableName">طاولة</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">مشغولة</span>
+                        </div>
+                        <p class="text-xs font-mono text-gray-500" id="atModalOrderNumber">#ORD-...</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeActiveTableModal()" class="text-gray-400 hover:text-gray-600 text-xl p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            {{-- Metadata Info Bar --}}
+            <div class="bg-gray-50/80 px-4 py-2 border-b border-gray-100 flex justify-between items-center text-xs text-gray-600 shrink-0">
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-regular fa-clock text-gray-400"></i>
+                    <span>وقت الفتح: <b id="atModalOpenedAt" class="font-mono text-gray-800">-</b></span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-tie text-gray-400"></i>
+                    <span>الموظف: <b id="atModalEmployee" class="text-gray-800">-</b></span>
+                </div>
+            </div>
+
+            {{-- Body Scrollable --}}
+            <div class="p-4 overflow-y-auto space-y-3.5 flex-1">
+                
+                {{-- قائمة الأصناف --}}
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <h4 class="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-utensils text-blue-500"></i>
+                            أصناف الطلب:
+                        </h4>
+                        <span id="atModalItemsCount" class="text-[11px] font-bold text-gray-400">0 أصناف</span>
+                    </div>
+                    <div class="border border-gray-100 rounded-2xl overflow-hidden shadow-xs">
+                        <table class="w-full text-xs text-right">
+                            <thead class="bg-gray-50 text-gray-500 font-bold border-b border-gray-100">
+                                <tr>
+                                    <th class="p-2">الصنف</th>
+                                    <th class="p-2 text-center">الكمية</th>
+                                    <th class="p-2">السعر</th>
+                                    <th class="p-2 text-left">الإجمالي</th>
+                                </tr>
+                            </thead>
+                            <tbody id="atModalItemsTable" class="divide-y divide-gray-50">
+                                {{-- تُملأ عبر JS --}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- تفاصيل العميل --}}
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-xs space-y-1.5">
+                    <p class="font-bold text-gray-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user text-cafePrimary"></i>
+                        بيانات العميل:
+                    </p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="relative">
+                            <input type="text" id="atModalCustomerPhone"
+                                oninput="searchCustomer(this.value, 'modal')"
+                                class="w-full bg-white px-2.5 py-1.5 rounded-xl border border-gray-200 text-xs outline-none focus:border-blue-400 font-mono"
+                                placeholder="رقم الهاتف">
+                            <div id="atModalCustomerSuggestions" class="absolute right-0 left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 hidden max-h-32 overflow-y-auto"></div>
+                        </div>
+                        <input type="text" id="atModalCustomerName"
+                            class="w-full bg-white px-2.5 py-1.5 rounded-xl border border-gray-200 text-xs outline-none focus:border-blue-400"
+                            placeholder="اسم العميل">
+                    </div>
+                </div>
+
+                {{-- الحساب المالي (Subtotal, Discount, VAT 14%, Grand Total) --}}
+                <div class="bg-gray-50 border border-gray-200 rounded-2xl p-3 space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center text-gray-600">
+                        <span>المجموع الفرعي:</span>
+                        <span class="font-bold text-gray-800" id="atModalSubtotal">0.00 ج</span>
+                    </div>
+                    
+                    {{-- تعديل الخصم --}}
+                    <div class="flex justify-between items-center text-gray-600">
+                        <span class="flex items-center gap-1">الخصم:</span>
+                        <div class="flex items-center gap-1">
+                            <input type="number" id="atModalDiscount" min="0" step="0.5" value="0"
+                                oninput="recalcModalTotals()"
+                                class="w-16 bg-white border border-gray-200 rounded-lg px-2 py-0.5 text-center font-bold text-red-500 outline-none text-xs">
+                            <span class="text-[10px] text-gray-400">ج.م</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-gray-600">
+                        <span>ضريبة القيمة المضافة (14%):</span>
+                        <span class="font-bold text-amber-600" id="atModalVat">0.00 ج</span>
+                    </div>
+
+                    <div class="flex justify-between items-center border-t border-gray-200 pt-1.5">
+                        <span class="text-sm font-black text-gray-900">الإجمالي النهائي:</span>
+                        <span class="text-xl font-black text-emerald-600" id="atModalGrandTotal">0.00 ج</span>
+                    </div>
+                </div>
+
+                {{-- طريقة الدفع للإغلاق --}}
+                <div>
+                    <p class="text-xs font-bold text-gray-600 mb-1">طريقة الدفع عند الإغلاق:</p>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" onclick="setModalPaymentMethod('cash')" id="modal_pm_cash"
+                            class="modal-pm-btn bg-emerald-50 border border-emerald-300 text-emerald-700 font-bold text-xs py-1.5 rounded-xl transition-all">
+                            💰 كاش
+                        </button>
+                        <button type="button" onclick="setModalPaymentMethod('InstaPay')" id="modal_pm_InstaPay"
+                            class="modal-pm-btn bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 font-bold text-xs py-1.5 rounded-xl transition-all">
+                            📱 إنستا
+                        </button>
+                        <button type="button" onclick="setModalPaymentMethod('card')" id="modal_pm_card"
+                            class="modal-pm-btn bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 font-bold text-xs py-1.5 rounded-xl transition-all">
+                            💳 كارد
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Actions Footer --}}
+            <div class="p-3 bg-gray-50 border-t border-gray-100 grid grid-cols-3 gap-2 shrink-0">
+                <button type="button" onclick="startAddonMode()"
+                    class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-plus"></i>
+                    إضافة أصناف
+                </button>
+
+                <button type="button" onclick="printActiveTableInvoice()" id="atModalPrintBtn"
+                    class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1 shadow-sm shadow-amber-500/20">
+                    <i class="fa-solid fa-print"></i>
+                    طباعة الفاتورة
+                </button>
+
+                <button type="button" onclick="closeActiveTable()" id="atModalCloseTableBtn"
+                    class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1 shadow-sm shadow-emerald-600/20">
+                    <i class="fa-solid fa-check-double"></i>
+                    إغلاق الطاولة
+                </button>
+            </div>
+        </div>
+    </div>
+
     {{-- ========== نافذة تفاصيل الطابعات للتشخيص ========== --}}
     <div id="printerDetailsModal"
         class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center hidden"
@@ -278,20 +436,42 @@
 
                     {{-- صالة: اختيار الطاولة --}}
                     <div id="field_dine_in" class="hidden">
-                        <p class="text-xs font-bold text-gray-600 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chair text-cafePrimary"></i>
-                            اختر الطاولة <span class="text-red-500">*</span>
-                        </p>
-                        <div id="tablesGrid" class="grid grid-cols-3 gap-1.5 max-h-36 overflow-y-auto">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-xs font-bold text-gray-600 flex items-center gap-1.5">
+                                <i class="fa-solid fa-chair text-cafePrimary"></i>
+                                اختيار الطاولة <span class="text-red-500">*</span>
+                            </p>
+                            <button type="button" onclick="refreshTables()" class="text-[11px] text-blue-600 hover:text-blue-800 flex items-center gap-1 font-bold">
+                                <i class="fa-solid fa-rotate text-[10px]"></i> تحديث
+                            </button>
+                        </div>
+                        <div id="tablesGrid" class="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto p-0.5">
                             {{-- يُملأ عبر JavaScript من البيانات المُمررة من الـ Controller --}}
                         </div>
                         <p id="tableError" class="hidden text-red-500 text-xs mt-1 flex items-center gap-1">
                             <i class="fa-solid fa-circle-exclamation"></i>
-                            يجب اختيار طاولة للصالة
+                            يجب اختيار طاولة متاحة للصالة
                         </p>
                         <p id="noTablesMsg" class="hidden text-xs text-gray-400 text-center py-2">
                             لا توجد طاولات نشطة. تواصل مع الإدارة.
                         </p>
+
+                        {{-- بيانات العميل للصالة (اختياري) --}}
+                        <div class="mt-2 pt-2 border-t border-gray-100 space-y-1">
+                            <p class="text-[11px] font-bold text-gray-500">بيانات العميل (اختياري):</p>
+                            <div class="flex gap-1.5">
+                                <div class="relative flex-1">
+                                    <input type="text" id="dine_customer_phone"
+                                        oninput="searchCustomer(this.value, 'dine')"
+                                        class="w-full bg-white px-2.5 py-1.5 rounded-xl border border-gray-200 text-xs outline-none focus:border-blue-400 font-mono"
+                                        placeholder="هاتف العميل">
+                                    <div id="dine_customer_suggestions" class="absolute right-0 left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 hidden max-h-32 overflow-y-auto"></div>
+                                </div>
+                                <input type="text" id="dine_customer_name"
+                                    class="w-1/2 bg-white px-2.5 py-1.5 rounded-xl border border-gray-200 text-xs outline-none focus:border-blue-400"
+                                    placeholder="اسم العميل">
+                            </div>
+                        </div>
                     </div>
 
                     {{-- ديليفري --}}
@@ -328,6 +508,17 @@
                     <input type="text" id="orderNotes"
                         class="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs text-gray-600 focus:border-blue-300 outline-none transition placeholder-gray-400"
                         placeholder="💬 ملاحظة على الطلب (اختياري)">
+                </div>
+
+                {{-- تنبيه وضع إضافة الأصناف لطاولة مفتوحة --}}
+                <div id="addonBanner" class="hidden mx-3 mt-1 mb-2 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-xl text-xs font-bold flex justify-between items-center shrink-0">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus-circle text-blue-600"></i>
+                        <span>إضافة أصناف إلى: <b id="addonTableName" class="text-blue-900"></b></span>
+                    </span>
+                    <button type="button" onclick="cancelAddonMode()" class="text-red-500 hover:text-red-700 bg-white px-2 py-0.5 rounded-lg border border-red-200 text-[10px]">
+                        إلغاء
+                    </button>
                 </div>
 
                 {{-- السلة --}}
@@ -378,8 +569,12 @@
                             <span>الخصم:</span>
                             <span id="discountDisplay" class="font-bold text-red-500">- 0.00 ج</span>
                         </div>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span id="vatLabel">ضريبة القيمة المضافة (0%):</span>
+                            <span id="vatDisplay" class="font-bold text-amber-600">0.00 ج</span>
+                        </div>
                         <div class="flex justify-between items-center border-t border-gray-200 pt-1.5 mt-1">
-                            <span class="text-sm font-black text-gray-800">الإجمالي:</span>
+                            <span class="text-sm font-black text-gray-800">الإجمالي النهائي:</span>
                             <span id="grandTotal" class="text-2xl font-black text-emerald-600">0.00 ج</span>
                         </div>
                     </div>
@@ -411,6 +606,13 @@
     let currentOrderType = 'takeaway';
     let selectedTableId = null;
     let currentPaymentMethod = 'cash';
+
+    // حالة إدارة الطاولات المفتوحة وإضافة الأصناف والعملاء
+    let addonOrderId = null;
+    let addonTableId = null;
+    let activeModalOrder = null;
+    let modalPaymentMethod = 'cash';
+    let customerSearchTimer = null;
 
     // ========== البحث مع Debounce ==========
     let searchDebounceTimer = null;
@@ -501,6 +703,7 @@
             pmSection.classList.remove('hidden');
         }
 
+        updateTotals();
         updateSubmitButton();
     }
 
@@ -539,24 +742,37 @@
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.dataset.tableId = table.id;
-            btn.className = [
-                'table-btn rounded-xl py-2 px-1 text-center transition-all border text-xs font-bold',
-                isSelected
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30'
-                    : isOccupied
-                        ? 'bg-orange-50 text-orange-500 border-orange-200 cursor-not-allowed'
+
+            if (isOccupied) {
+                // الطاولة المشغولة: كليك لفتح تفاصيل الطلب الحالي (PHASE 2 & 3)
+                btn.className = 'table-btn rounded-xl py-2 px-1 text-center transition-all border text-xs font-bold bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 hover:border-amber-400 cursor-pointer shadow-xs active:scale-95';
+                btn.title = `طاولة مشغولة: ${table.name} (اضغط لعرض الطلب والحساب)`;
+                btn.innerHTML = `
+                    <div class="font-black text-xs leading-tight text-amber-950">${table.name}</div>
+                    <div class="text-[9px] font-bold text-amber-700 mt-0.5 flex items-center justify-center gap-0.5">
+                        <i class="fa-solid fa-clipboard-list text-[8px]"></i>
+                        <span>مشغولة</span>
+                    </div>
+                    ${table.order?.total ? `<div class="text-[9px] font-black text-emerald-700 mt-0.5">${Number(table.order.total).toFixed(0)}ج</div>` : ''}
+                `;
+                btn.onclick = () => openActiveTableModal(table.id);
+            } else {
+                // الطاولة الفارغة المتاحة: كليك لاختيارها لفتح طلب جديد
+                btn.className = [
+                    'table-btn rounded-xl py-2 px-1 text-center transition-all border text-xs font-bold cursor-pointer active:scale-95',
+                    isSelected
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30 ring-2 ring-blue-300'
                         : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700',
-            ].join(' ');
+                ].join(' ');
+                btn.title = `طاولة متاحة: ${table.name}`;
+                btn.innerHTML = `
+                    <div class="font-black text-xs leading-tight">${table.name}</div>
+                    ${table.capacity ? `<div class="text-[9px] opacity-60 mt-0.5">${table.capacity}👤</div>` : ''}
+                    <div class="text-[9px] text-emerald-600 font-bold mt-0.5">متاحة</div>
+                `;
+                btn.onclick = () => selectTable(table.id);
+            }
 
-            btn.disabled = isOccupied;
-            btn.title = isOccupied ? 'مشغولة' : table.name;
-            btn.innerHTML = `
-                <div class="font-black text-xs leading-tight">${table.name}</div>
-                ${table.capacity ? `<div class="text-[9px] opacity-60 mt-0.5">${table.capacity}👤</div>` : ''}
-                ${isOccupied ? '<div class="text-[9px] text-orange-400 mt-0.5">مشغولة</div>' : ''}
-            `;
-
-            btn.onclick = () => selectTable(table.id);
             grid.appendChild(btn);
         });
     }
@@ -564,7 +780,6 @@
     function selectTable(id) {
         selectedTableId = id;
         document.getElementById('tableError').classList.add('hidden');
-        // نعيد رسم الـ grid عشان نحدّث الـ selected state
         renderTablesGrid();
     }
 
@@ -703,9 +918,22 @@
 
     function updateTotalsDisplay(subtotal) {
         const discount = Math.max(0, parseFloat(document.getElementById('discountInput').value) || 0);
-        const total = Math.max(0, subtotal - discount);
+        const taxable = Math.max(0, subtotal - discount);
+
+        // الصالة 14% - التيك أواي 0% - الديليفري 0%
+        const isDineIn = (currentOrderType === 'dine_in');
+        const vatRate = isDineIn ? 0.14 : 0.0;
+        const vat = Math.round(taxable * vatRate * 100) / 100;
+        const total = Math.round((taxable + vat) * 100) / 100;
+
         document.getElementById('subtotalDisplay').textContent = subtotal.toFixed(2) + ' ج';
         document.getElementById('discountDisplay').textContent = '- ' + discount.toFixed(2) + ' ج';
+        const vatLabel = document.getElementById('vatLabel');
+        if (vatLabel) {
+            vatLabel.textContent = isDineIn ? 'ضريبة القيمة المضافة (14%):' : 'ضريبة القيمة المضافة (0%):';
+        }
+        const vatEl = document.getElementById('vatDisplay');
+        if (vatEl) vatEl.textContent = vat.toFixed(2) + ' ج';
         document.getElementById('grandTotal').textContent = total.toFixed(2) + ' ج';
     }
 
@@ -720,6 +948,58 @@
     // ========== إرسال الطلب ==========
     function submitOrder(force = false) {
         if (Object.keys(cart).length === 0) return;
+
+        // في حال كنا في وضع إضافة أصناف لطاولة مفتوحة
+        if (addonOrderId) {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin ml-1"></i> جاري إضافة الأصناف...';
+
+            const payload = {
+                items: Object.values(cart).map(item => ({
+                    menu_id: item.id,
+                    quantity: item.quantity,
+                })),
+                force: force,
+                device_uuid: 'pos-cashier-01',
+            };
+
+            fetch(`/orders/${addonOrderId}/add-items`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'X-Device-UUID': 'pos-cashier-01',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw data;
+                return data;
+            })
+            .then(data => {
+                hidePrinterWarningModal();
+                const savedTableId = addonTableId;
+                cancelAddonMode();
+                refreshTables();
+                if (savedTableId) openActiveTableModal(savedTableId);
+            })
+            .catch(err => {
+                if (err?.printer_warning) {
+                    showPrinterWarningModal(err);
+                    return;
+                }
+                const msg = err?.message || 'حدث خطأ أثناء إضافة الأصناف للطاولة.';
+                showError(msg);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                updateSubmitButton();
+            });
+            return;
+        }
 
         // تحقق من الطاولة للصالة
         if (currentOrderType === 'dine_in' && !selectedTableId) {
@@ -749,6 +1029,8 @@
 
         if (currentOrderType === 'dine_in') {
             payload.table_id = selectedTableId;
+            payload.customer_phone = document.getElementById('dine_customer_phone')?.value.trim() || null;
+            payload.customer_name  = document.getElementById('dine_customer_name')?.value.trim() || null;
         } else if (currentOrderType === 'delivery') {
             payload.phone           = document.getElementById('customer_phone').value.trim() || null;
             payload.delivery_address = document.getElementById('delivery_address').value.trim() || null;
@@ -779,7 +1061,6 @@
             return data;
         })
         .then(data => {
-            // إخفاء نافذة التحذير إن كانت مفتوحة
             hidePrinterWarningModal();
 
             // عرض نافذة النجاح
@@ -793,7 +1074,6 @@
             refreshTables();
         })
         .catch(err => {
-            // إذا كان الخطأ تحذيراً لعدم اتصال الطابعة
             if (err?.printer_warning) {
                 showPrinterWarningModal(err);
                 return;
@@ -809,6 +1089,299 @@
             btn.innerHTML = '<i class="fa-solid fa-cash-register ml-1"></i> إتمام الطلب';
             updateSubmitButton();
         });
+    }
+
+    // ========== إدارة نافذة الطاولة المشغولة (Active Table Modal) ==========
+    async function openActiveTableModal(tableId) {
+        const table = tablesData.find(t => t.id === tableId);
+        if (!table) return;
+
+        let order = table.order;
+
+        if (!order || !order.items) {
+            try {
+                const res = await fetch(`/orders/table/${tableId}/active`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const json = await res.json();
+                if (json.success && json.data) {
+                    order = json.data;
+                } else {
+                    showError(json.message || 'تعذر جلب تفاصيل طلب الطاولة.');
+                    return;
+                }
+            } catch (e) {
+                showError('تعذر الاتصال بالسيرفر لجلب بيانات الطاولة.');
+                return;
+            }
+        }
+
+        activeModalOrder = order;
+        activeModalOrder.table_id = table.id;
+        activeModalOrder.table_name = table.name;
+
+        // ملء عناصر المودال
+        document.getElementById('atModalTableName').textContent = table.name;
+        document.getElementById('atModalOrderNumber').textContent = `#${order.order_number || order.id}`;
+        document.getElementById('atModalOpenedAt').textContent = order.opened_at || (order.created_at ? order.created_at.substring(0, 16) : '-');
+        document.getElementById('atModalEmployee').textContent = order.employee || order.creator?.name || 'الكاشير';
+
+        // الأصناف
+        const items = order.items || [];
+        document.getElementById('atModalItemsCount').textContent = `${items.length} أصناف`;
+        const tbody = document.getElementById('atModalItemsTable');
+        tbody.innerHTML = '';
+
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-gray-400">لا توجد أصناف في الطلب.</td></tr>';
+        } else {
+            items.forEach(it => {
+                const tr = document.createElement('tr');
+                const name = it.name || it.menu?.name || 'صنف';
+                const total = Number(it.total || (it.price * it.quantity)).toFixed(2);
+                tr.innerHTML = `
+                    <td class="p-2 font-bold text-gray-800">${name} ${it.notes ? `<span class="block text-[10px] text-gray-400">(${it.notes})</span>` : ''}</td>
+                    <td class="p-2 text-center font-bold text-blue-600">${it.quantity}</td>
+                    <td class="p-2 text-gray-600">${Number(it.price).toFixed(2)} ج</td>
+                    <td class="p-2 text-left font-bold text-gray-900">${total} ج</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // العميل
+        document.getElementById('atModalCustomerName').value = order.customer_name || order.customer?.name || '';
+        document.getElementById('atModalCustomerPhone').value = order.customer_phone || order.customer?.phone || order.phone || '';
+
+        // الخصم
+        document.getElementById('atModalDiscount').value = Number(order.discount || 0);
+
+        // الحسابات المالية
+        recalcModalTotals();
+
+        // طريقة الدفع
+        setModalPaymentMethod(order.invoice?.payment_method || 'cash');
+
+        // إظهار المودال
+        document.getElementById('activeTableModal').classList.remove('hidden');
+    }
+
+    function closeActiveTableModal() {
+        document.getElementById('activeTableModal').classList.add('hidden');
+        activeModalOrder = null;
+    }
+
+    function recalcModalTotals() {
+        if (!activeModalOrder) return;
+        const subtotal = Number(activeModalOrder.subtotal || 0);
+        const discountInput = parseFloat(document.getElementById('atModalDiscount').value) || 0;
+        const discount = Math.min(subtotal, Math.max(0, discountInput));
+        const taxable = Math.max(0, subtotal - discount);
+        const isDineIn = (!activeModalOrder.type || activeModalOrder.type === 'dine_in');
+        const vatRate = isDineIn ? 0.14 : 0.0;
+        const vat = Math.round(taxable * vatRate * 100) / 100;
+        const grandTotal = Math.round((taxable + vat) * 100) / 100;
+
+        document.getElementById('atModalSubtotal').textContent = subtotal.toFixed(2) + ' ج';
+        document.getElementById('atModalVat').textContent = vat.toFixed(2) + ' ج';
+        document.getElementById('atModalGrandTotal').textContent = grandTotal.toFixed(2) + ' ج';
+    }
+
+    function setModalPaymentMethod(method) {
+        modalPaymentMethod = method;
+        document.querySelectorAll('.modal-pm-btn').forEach(btn => {
+            btn.classList.remove('bg-emerald-50', 'border-emerald-300', 'text-emerald-700');
+            btn.classList.add('bg-gray-50', 'border-gray-200', 'text-gray-600');
+        });
+        const active = document.getElementById(`modal_pm_${method}`);
+        if (active) {
+            active.classList.remove('bg-gray-50', 'border-gray-200', 'text-gray-600');
+            active.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-700');
+        }
+    }
+
+    // 1. طباعة الفاتورة دون إغلاق الطاولة
+    async function printActiveTableInvoice() {
+        if (!activeModalOrder) return;
+        const btn = document.getElementById('atModalPrintBtn');
+        const origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> جاري الإرسال...';
+
+        try {
+            const res = await fetch(`/orders/${activeModalOrder.id}/print-invoice`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'X-Device-UUID': 'pos-cashier-01'
+                },
+                body: JSON.stringify({ force: false })
+            });
+            const data = await res.json();
+            if (!res.ok) throw data;
+
+            showError('تم إرسال أمر طباعة الفاتورة إلى الطابعة بنجاح.');
+            const toast = document.getElementById('errorToast');
+            toast.className = toast.className.replace('bg-red-600', 'bg-emerald-600');
+            setTimeout(() => {
+                toast.className = toast.className.replace('bg-emerald-600', 'bg-red-600');
+            }, 3000);
+        } catch (err) {
+            if (err?.printer_warning) {
+                showPrinterWarningModal(err);
+                return;
+            }
+            showError(err?.message || 'تعذر إرسال أمر طباعة الفاتورة.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+        }
+    }
+
+    // 2. إغلاق الطاولة وإتمام التحصيل
+    async function closeActiveTable() {
+        if (!activeModalOrder) return;
+
+        if (!confirm(`هل أنت متأكد من إغلاق طاولة (${activeModalOrder.table_name}) وتحصيل الحساب؟`)) {
+            return;
+        }
+
+        const btn = document.getElementById('atModalCloseTableBtn');
+        const origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> جاري الإغلاق...';
+
+        const payload = {
+            payment_method: modalPaymentMethod,
+            customer_name: document.getElementById('atModalCustomerName').value.trim() || null,
+            customer_phone: document.getElementById('atModalCustomerPhone').value.trim() || null,
+            discount: parseFloat(document.getElementById('atModalDiscount').value) || 0,
+            force: false,
+            device_uuid: 'pos-cashier-01'
+        };
+
+        try {
+            const res = await fetch(`/orders/${activeModalOrder.id}/close-table`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'X-Device-UUID': 'pos-cashier-01'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) throw data;
+
+            closeActiveTableModal();
+            refreshTables();
+
+            document.getElementById('successOrderNumber').textContent = 'تم إغلاق طلب: ' + (data.data?.order_number || '');
+            showSuccessModal();
+        } catch (err) {
+            if (err?.printer_warning) {
+                showPrinterWarningModal(err);
+                return;
+            }
+            showError(err?.message || 'تعذر إغلاق الطاولة.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+        }
+    }
+
+    // 3. وضع إضافة الأصناف لطاولة مفتوحة
+    function startAddonMode() {
+        if (!activeModalOrder) return;
+
+        addonOrderId = activeModalOrder.id;
+        addonTableId = activeModalOrder.table_id;
+        const tableName = activeModalOrder.table_name;
+
+        closeActiveTableModal();
+
+        // إفراغ سلة الـ POS لاستقبال الأصناف الإضافية الجديدة فقط
+        cart = {};
+        renderCart();
+
+        document.getElementById('addonTableName').textContent = tableName;
+        document.getElementById('addonBanner').classList.remove('hidden');
+
+        // ضبط نوع الطلب كصالة
+        setOrderType('dine_in');
+        selectedTableId = addonTableId;
+
+        // تحديث زر الإرسال
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fa-solid fa-plus ml-1"></i> تأكيد إضافة الأصناف للطاولة';
+    }
+
+    function cancelAddonMode() {
+        addonOrderId = null;
+        addonTableId = null;
+        document.getElementById('addonBanner').classList.add('hidden');
+        cart = {};
+        renderCart();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerHTML = '<i class="fa-solid fa-cash-register ml-1"></i> إتمام الطلب';
+        updateSubmitButton();
+    }
+
+    // 4. البحث التلقائي عن العملاء
+    function searchCustomer(query, context) {
+        clearTimeout(customerSearchTimer);
+        const container = context === 'modal' 
+            ? document.getElementById('atModalCustomerSuggestions') 
+            : document.getElementById('dine_customer_suggestions');
+
+        if (!container) return;
+        query = query.trim();
+        if (query.length < 3) {
+            container.classList.add('hidden');
+            return;
+        }
+
+        customerSearchTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(`/customers/search?phone=${encodeURIComponent(query)}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const json = await res.json();
+                const customers = json.data || [];
+
+                if (customers.length === 0) {
+                    container.classList.add('hidden');
+                    return;
+                }
+
+                container.innerHTML = '';
+                customers.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'px-3 py-1.5 hover:bg-blue-50 cursor-pointer flex justify-between items-center text-xs border-b border-gray-50 last:border-none';
+                    item.innerHTML = `
+                        <span class="font-bold text-gray-800">${c.name}</span>
+                        <span class="font-mono text-gray-400 text-[11px]">${c.phone || ''}</span>
+                    `;
+                    item.onclick = () => {
+                        if (context === 'modal') {
+                            document.getElementById('atModalCustomerName').value = c.name;
+                            document.getElementById('atModalCustomerPhone').value = c.phone || '';
+                        } else {
+                            document.getElementById('dine_customer_name').value = c.name;
+                            document.getElementById('dine_customer_phone').value = c.phone || '';
+                        }
+                        container.classList.add('hidden');
+                    };
+                    container.appendChild(item);
+                });
+                container.classList.remove('hidden');
+            } catch (e) {
+                container.classList.add('hidden');
+            }
+        }, 200);
     }
 
     // ========== إدارة نافذة تحذير الطابعة ==========
@@ -971,11 +1544,14 @@
     function resetPOS() {
         cart = {};
         selectedTableId = null;
+        if (addonOrderId) cancelAddonMode();
         renderCart();
         document.querySelectorAll('[id^="badge-"]').forEach(b => b.classList.add('hidden'));
         document.getElementById('orderNotes').value = '';
         document.getElementById('discountInput').value = '0';
         document.getElementById('customer_phone').value = '';
+        if (document.getElementById('dine_customer_phone')) document.getElementById('dine_customer_phone').value = '';
+        if (document.getElementById('dine_customer_name')) document.getElementById('dine_customer_name').value = '';
         document.getElementById('delivery_address').value = '';
         document.getElementById('delivery_person').value = '';
         document.getElementById('searchInput').value = '';

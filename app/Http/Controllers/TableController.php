@@ -62,6 +62,16 @@ class TableController extends Controller
         return view('tables.edit', compact('table'));
     }
 
+    public function show(Table $table)
+    {
+        return view('tables.show', compact('table'));
+    }
+
+    public function history()
+    {
+        $tables=Table::all();
+        return view('tables.history', compact('tables'));
+    }
     /**
      * تحديث بيانات الطاولة
      */
@@ -129,21 +139,47 @@ class TableController extends Controller
     }
 
     /**
-     * JSON endpoint للـ POS – الطاولات النشطة مع حالة الشغل
+     * JSON endpoint للـ POS – الطاولات النشطة مع بيانات الطلب المفتوح
      * GET /pos/tables
      */
     public function posIndex()
     {
         $tables = Table::active()
+            ->with(['currentOrder.items.menu', 'currentOrder.customer', 'currentOrder.creator'])
             ->orderBy('name')
             ->get()
             ->map(function ($table) {
+                $order = $table->currentOrder;
                 return [
                     'id'          => $table->id,
                     'name'        => $table->name,
                     'capacity'    => $table->capacity,
                     'area'        => $table->area,
-                    'is_occupied' => $table->isOccupied(),
+                    'is_occupied' => (bool) $order,
+                    'order'       => $order ? [
+                        'id'             => $order->id,
+                        'order_number'   => $order->order_number,
+                        'opened_at'      => $order->created_at?->format('Y-m-d H:i'),
+                        'opened_at_time' => $order->created_at?->format('H:i'),
+                        'employee'       => $order->creator?->name ?? 'الكاشير',
+                        'customer_name'  => $order->customer?->name,
+                        'customer_phone' => $order->customer?->phone ?? $order->phone,
+                        'subtotal'       => (float) $order->subtotal,
+                        'discount'       => (float) $order->discount,
+                        'vat'            => (float) $order->vat,
+                        'total'          => (float) $order->total,
+                        'items'          => $order->items->map(function ($item) {
+                            return [
+                                'id'         => $item->id,
+                                'menu_id'    => $item->menu_id,
+                                'name'       => $item->menu?->name ?? 'صنف',
+                                'quantity'   => $item->quantity,
+                                'price'      => (float) $item->price,
+                                'total'      => (float) $item->total,
+                                'notes'      => $item->notes,
+                            ];
+                        })->values(),
+                    ] : null,
                 ];
             });
 

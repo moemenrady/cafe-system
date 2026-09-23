@@ -1,61 +1,38 @@
 {
   "device_uuid": "pos-cashier-01",
-  "laravel_backend_url": "http://127.0.0.1:8000",
+  "laravel_backend_url": "http://127.0.0.1:8000/",
   "reverb": {
     "host": "127.0.0.1",
     "port": 8080,
     "scheme": "http",
-    "app_key": "4m1fxfohhbtyb2cxn45b"
+    "app_key": "zjlmatbcy55ncococ8lw"
   },
   "printers": [
     {
-      "id": "printer-1",
-      "name": "طابعة الكاشير الرئيسية",
-      "role": "cashier",
-      "host": "127.0.0.1",
-      "port": 9101,
-      "enabled": true
-    },
-    {
-      "id": "printer-2",
-      "name": "طابعة الباريستا والمشروبات",
-      "role": "barista",
-      "host": "127.0.0.1",
-      "port": 9102,
-      "enabled": true
-    },
-    {
-      "id": "printer-3",
-      "name": "طابعة المطبخ والمأكولات",
-      "role": "kitchen",
-      "host": "127.0.0.1",
-      "port": 9103,
-      "enabled": true
-    },
-    {
-      "id": "printer-4",
-      "name": "طابعة الصالة والتوصيل",
+      "id": "printer-1790096631475",
+      "name": "XP-80C",
+      "type": "windows",
+      "windows_printer_name": "XP-80C",
       "role": "all",
-      "host": "127.0.0.1",
-      "port": 9104,
-      "enabled": true
+      "enabled": true,
+      "timeout_ms": 4000
     }
   ],
   "templates": {
     "cashier": {
       "header": {
-        "store_name": "كافيه X",
-        "branch": "فرع X",
-        "tax_number": "TR-9821389",
-        "phone": "01000000000",
+        "store_name": "Sana Beatch UNO",
+        "branch": "",
+        "tax_number": "",
+        "phone": "",
         "align": "center",
         "store_name_size": "double"
       },
       "body": {
         "show_table": true,
-        "show_server": true,
+        "show_server": false,
         "show_tax_breakdown": true,
-        "show_drawer_kick": true
+        "show_drawer_kick": false
       },
       "footer": {
         "thank_you_message": "شكراً لزيارتكم! نتشرف بكم دائماً",

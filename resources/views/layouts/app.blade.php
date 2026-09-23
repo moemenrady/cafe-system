@@ -184,10 +184,16 @@
             </a>
             @if (auth()->user() && in_array(auth()->user()->role, ['admin', 'supervisor']))
             <a href="{{ route('tables.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->routeIs('tables.*') ? 'active-tab' : '' }}">
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->routeIs('tables.index', 'tables.create', 'tables.edit') ? 'active-tab' : '' }}">
                 <i
                     class="fa-solid fa-table-cells-large text-cafePrimary group-hover:scale-110 transition-transform"></i>
                 <span data-ar="الترابيزات" data-en="Tables">الترابيزات</span>
+            </a>
+            <a href="{{ route('tables.history') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:text-white hover:bg-gray-800 transition-all duration-200 group {{ request()->routeIs('tables.history') ? 'active-tab' : '' }}">
+                <i
+                    class="fa-solid fa-clock-rotate-left text-cafePrimary group-hover:scale-110 transition-transform"></i>
+                <span data-ar="سجل الطاولات" data-en="Tables History">سجل الطاولات</span>
             </a>
             @endif
             <a href="{{ route('expenses.index') }}"

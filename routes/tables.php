@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TableController;
 
@@ -19,9 +20,10 @@ Route::middleware(['auth', 'verified', 'role:admin|supervisor'])
         Route::resource('tables', TableController::class);
         Route::post('/tables/{table}/toggle', [TableController::class, 'toggle'])
             ->name('tables.toggle');
+        Route::get('/tables/history', [OrderController::class, 'tableHistory'])->name('tables.history');
     });
 
 // JSON endpoint للـ POS – متاح لكل المستخدمين المسجلين (الكاشير يحتاجها)
-Route::middleware(['auth', 'verified'])
-    ->get('/pos/tables', [TableController::class, 'posIndex'])
-    ->name('pos.tables');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/pos/tables', [TableController::class, 'posIndex'])->name('pos.tables');
+});

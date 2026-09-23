@@ -18,6 +18,7 @@ class Order extends Model
 
         'type',
         'status',
+        'closed_at',
         'payment_status',
 
         'subtotal',
@@ -38,6 +39,7 @@ class Order extends Model
         'service_charge' => 'decimal:2',
         'vat' => 'decimal:2',
         'total' => 'decimal:2',
+        'closed_at' => 'datetime',
     ];
 
     public function items()

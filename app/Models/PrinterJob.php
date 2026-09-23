@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class PrinterJob extends Model
 {
     protected $fillable = [
-
+        'uuid',
+        'device_uuid',
+        'printer_identifier',
         'type',
         'order_id',
         'payload',

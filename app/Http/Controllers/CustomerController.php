@@ -8,6 +8,24 @@ use Illuminate\Http\Request;
 class CustomerController extends Controller
 {
     /**
+     * البحث عن العملاء بالهاتف أو الاسم للـ POS
+     */
+    public function search(Request $request)
+    {
+        $term = trim($request->input('q', $request->input('phone', '')));
+        if (strlen($term) < 2) {
+            return response()->json(['data' => []]);
+        }
+
+        $customers = Customer::where('phone', 'like', "%{$term}%")
+            ->orWhere('name', 'like', "%{$term}%")
+            ->take(10)
+            ->get(['id', 'name', 'phone']);
+
+        return response()->json(['data' => $customers]);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index()

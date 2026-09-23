@@ -5,20 +5,25 @@ namespace App\Services;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Support\Collection;
 
 class OrderItemService
 {
+    public function __construct(
+        protected OrderCalculationService $calculationService
+    ) {}
+
     /**
      * @param  array<int, array<string, mixed>>  $items
-     * @return array{subtotal: float, total: float}
+     * @return Collection<int, OrderItem>
      */
-    public function createItems(Order $order, array $items): array
+    public function createItems(Order $order, array $items): Collection
     {
         if (empty($items)) {
             throw new \InvalidArgumentException('Order items are required.');
         }
 
-        $subtotal = 0;
+        $createdItems = collect();
 
         foreach ($items as $itemData) {
             $menu = Menu::findOrFail($itemData['menu_id'] ?? null);
@@ -26,26 +31,20 @@ class OrderItemService
             $price = (float) $menu->price;
             $total = $price * $quantity;
 
-            OrderItem::create([
+            $item = OrderItem::create([
                 'order_id' => $order->id,
-                'menu_id' => $menu->id,
+                'menu_id'  => $menu->id,
                 'quantity' => $quantity,
-                'price' => $price,
-                'total' => $total,
-                'notes' => $itemData['notes'] ?? null,
+                'price'    => $price,
+                'total'    => $total,
+                'notes'    => $itemData['notes'] ?? null,
             ]);
 
-            $subtotal += $total;
+            $createdItems->push($item);
         }
 
-        $order->update([
-            'subtotal' => $subtotal,
-            'total' => $subtotal,
-        ]);
+        $this->calculationService->recalculateOrder($order);
 
-        return [
-            'subtotal' => (float) $subtotal,
-            'total' => (float) $subtotal,
-        ];
+        return $createdItems;
     }
 }

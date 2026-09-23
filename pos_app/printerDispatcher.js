@@ -19,6 +19,8 @@
 const net = require('net');
 const configManager = require('./configManager');
 const { prepareArabicLine } = require('./arabicHelper');
+const windowsSpooler = require('./windowsSpooler');
+const receiptBitmapRenderer = require('./receiptBitmapRenderer');
 
 // ESC/POS Binary Byte Primitives
 const ESC = 0x1B;
@@ -56,9 +58,43 @@ class PrinterDispatcher {
   }
 
   /**
-   * Probes a single printer TCP socket.
+   * Identifies whether a printer configuration represents a Windows Spooler / USB printer.
    */
-  probePrinter(host, port, timeoutMs = 3000) {
+  isWindowsPrinter(printer) {
+    if (!printer) return false;
+    const type = (printer.type || '').toLowerCase();
+    const conn = (printer.connection_type || '').toLowerCase();
+    if (type === 'windows' || type === 'system_spooler' || conn === 'windows' || conn === 'usb' || conn === 'spooler') {
+      return true;
+    }
+    // If no host or 127.0.0.1 without dedicated network port, check if matches installed Windows printer
+    if (!printer.host && printer.name) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Probes a single printer TCP socket or Windows Spooler.
+   */
+  probePrinter(target, port, timeoutMs = 3000) {
+    // If target is a printer object
+    if (typeof target === 'object' && target !== null) {
+      if (this.isWindowsPrinter(target)) {
+        const pName = target.windows_printer_name || target.name || 'XP-80C';
+        return windowsSpooler.probePrinter(pName);
+      }
+      return this.sendRawProbeTcp(target.host, target.port, target.timeout_ms || timeoutMs);
+    }
+
+    // Direct host/port invocation
+    return this.sendRawProbeTcp(target, port, timeoutMs);
+  }
+
+  /**
+   * Raw TCP Socket Probe.
+   */
+  sendRawProbeTcp(host, port, timeoutMs = 3000) {
     return new Promise((resolve) => {
       const startTime = Date.now();
       const socket = new net.Socket();
@@ -97,10 +133,12 @@ class PrinterDispatcher {
     const activeRolesSet = new Set();
 
     const probePromises = list.map(async (printer) => {
+      const isWin = this.isWindowsPrinter(printer);
       if (!printer.enabled) {
         healthMap[printer.id] = {
           name: printer.name,
           role: printer.role,
+          type: isWin ? 'windows' : 'tcp',
           host: printer.host,
           port: printer.port,
           online: false,
@@ -110,10 +148,11 @@ class PrinterDispatcher {
         return;
       }
 
-      const res = await this.probePrinter(printer.host, printer.port, printer.timeout_ms || 2500);
+      const res = await this.probePrinter(printer);
       healthMap[printer.id] = {
         name: printer.name,
         role: printer.role,
+        type: isWin ? 'windows' : 'tcp',
         host: printer.host,
         port: printer.port,
         online: res.online,
@@ -227,6 +266,20 @@ class PrinterDispatcher {
   }
 
   /**
+   * Universal Transport Router: Routes buffer to either Windows Spooler or TCP Socket.
+   */
+  async sendBufferToPrinter(printer, buffer) {
+    if (this.isWindowsPrinter(printer)) {
+      const pName = printer.windows_printer_name || printer.name || 'XP-80C';
+      console.log(`[PrinterDispatcher] [TRANSPORT] Windows Spooler -> الطابعة: "${pName}" (${buffer.length} بايت)`);
+      return windowsSpooler.sendRawBuffer(pName, buffer);
+    } else {
+      console.log(`[PrinterDispatcher] [TRANSPORT] TCP Socket -> [${printer.host}:${printer.port}] (${buffer.length} بايت)`);
+      return this.sendRawBuffer(printer.host, printer.port, buffer, printer.timeout_ms);
+    }
+  }
+
+  /**
    * Resolves target printers based on role binding.
    */
   resolveTargetPrinters(targetIdentifier, printersList) {
@@ -287,11 +340,12 @@ class PrinterDispatcher {
           buffer = this.formatCustomerReceipt(job, config, tpl);
         }
 
-        const dispatchResult = await this.sendRawBuffer(printer.host, printer.port, buffer, printer.timeout_ms);
+        const dispatchResult = await this.sendBufferToPrinter(printer, buffer);
         return {
           printer_id: printer.id,
           printer_name: printer.name,
           role: printer.role,
+          type: this.isWindowsPrinter(printer) ? 'windows' : 'tcp',
           success: true,
           ...dispatchResult
         };
@@ -300,6 +354,7 @@ class PrinterDispatcher {
           printer_id: printer.id,
           printer_name: printer.name,
           role: printer.role,
+          type: this.isWindowsPrinter(printer) ? 'windows' : 'tcp',
           success: false,
           error: err.message
         };
@@ -346,6 +401,12 @@ class PrinterDispatcher {
    * Formats a Customer Receipt using dynamic template settings.
    */
   formatCustomerReceipt(job, config, template) {
+    try {
+      return receiptBitmapRenderer.renderCustomerReceipt(job, config, template);
+    } catch (err) {
+      console.warn('[PrinterDispatcher] Raster render failed, falling back to text mode:', err.message);
+    }
+
     const tpl = template || config.templates?.cashier || configManager.getDefaultTemplates().cashier;
     const header = tpl.header || {};
     const body = tpl.body || {};
@@ -467,6 +528,12 @@ class PrinterDispatcher {
    * Formats a Barista / Kitchen production ticket using dynamic template settings.
    */
   formatKitchenTicket(job, config, template) {
+    try {
+      return receiptBitmapRenderer.renderKitchenTicket(job, config, template);
+    } catch (err) {
+      console.warn('[PrinterDispatcher] Raster render failed, falling back to text mode:', err.message);
+    }
+
     const tpl = template || config.templates?.barista || configManager.getDefaultTemplates().barista;
     const header = tpl.header || {};
     const body = tpl.body || {};

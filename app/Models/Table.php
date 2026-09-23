@@ -52,6 +52,15 @@ class Table extends Model
             ->where('payment_status', 'pending');
     }
 
+    /** الطلب المفتوح الحالي للطاولة */
+    public function currentOrder()
+    {
+        return $this->hasOne(Order::class, 'table_id')
+            ->whereIn('status', ['open', 'waiting_delivery'])
+            ->where('payment_status', 'pending')
+            ->latestOfMany();
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Helpers

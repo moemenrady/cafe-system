@@ -26,13 +26,23 @@ class PrintAgentController extends Controller
         }
 
         $jobs = PrinterJob::query()
-            ->where('device_uuid', $deviceUuid)
             ->whereIn('status', [
                 'pending',
                 'failed',
             ])
             ->orderBy('created_at')
-            ->get();
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'id' => $job->id,
+                    'uuid' => 'job-' . $job->id,
+                    'type' => $job->type,
+                    'printer_identifier' => in_array($job->type, ['kitchen', 'barista', 'waiter']) ? 'barista' : 'cashier',
+                    'payload' => $job->payload,
+                    'status' => $job->status,
+                    'created_at' => $job->created_at,
+                ];
+            });
 
         return response()->json([
             'success' => true,
@@ -40,6 +50,14 @@ class PrintAgentController extends Controller
         ]);
     }
 
+    protected function resolveJob(string $uuid): ?PrinterJob
+    {
+        $id = str_starts_with($uuid, 'job-') ? (int) substr($uuid, 4) : (is_numeric($uuid) ? (int) $uuid : null);
+        if ($id) {
+            return PrinterJob::find($id);
+        }
+        return null;
+    }
 
     /**
      * Mark print job as processing.
@@ -48,26 +66,17 @@ class PrintAgentController extends Controller
         Request $request,
         string $uuid
     ): JsonResponse {
+        $job = $this->resolveJob($uuid);
 
-        $deviceUuid = $request->header('X-Device-UUID');
-
-        if (!$deviceUuid) {
+        if (!$job) {
             return response()->json([
                 'success' => false,
-                'message' => 'X-Device-UUID header is required.',
-            ], 422);
+                'message' => 'Job not found.',
+            ], 404);
         }
 
-        $job = PrinterJob::query()
-            ->where('uuid', $uuid)
-            ->where('device_uuid', $deviceUuid)
-            ->firstOrFail();
-
         $job->update([
-            'status' => 'processing',
-            'attempts' => $job->attempts + 1,
-            'started_at' => now(),
-            'error_message' => null,
+            'status' => 'printing',
         ]);
 
         return response()->json([
@@ -75,7 +84,6 @@ class PrintAgentController extends Controller
             'data' => $job->fresh(),
         ]);
     }
-
 
     /**
      * Mark print job as successfully printed.
@@ -84,25 +92,17 @@ class PrintAgentController extends Controller
         Request $request,
         string $uuid
     ): JsonResponse {
+        $job = $this->resolveJob($uuid);
 
-        $deviceUuid = $request->header('X-Device-UUID');
-
-        if (!$deviceUuid) {
+        if (!$job) {
             return response()->json([
                 'success' => false,
-                'message' => 'X-Device-UUID header is required.',
-            ], 422);
+                'message' => 'Job not found.',
+            ], 404);
         }
-
-        $job = PrinterJob::query()
-            ->where('uuid', $uuid)
-            ->where('device_uuid', $deviceUuid)
-            ->firstOrFail();
 
         $job->update([
             'status' => 'printed',
-            'printed_at' => now(),
-            'error_message' => null,
         ]);
 
         return response()->json([
@@ -111,7 +111,6 @@ class PrintAgentController extends Controller
         ]);
     }
 
-
     /**
      * Mark print job as failed.
      */
@@ -119,24 +118,17 @@ class PrintAgentController extends Controller
         Request $request,
         string $uuid
     ): JsonResponse {
+        $job = $this->resolveJob($uuid);
 
-        $deviceUuid = $request->header('X-Device-UUID');
-
-        if (!$deviceUuid) {
+        if (!$job) {
             return response()->json([
                 'success' => false,
-                'message' => 'X-Device-UUID header is required.',
-            ], 422);
+                'message' => 'Job not found.',
+            ], 404);
         }
-
-        $job = PrinterJob::query()
-            ->where('uuid', $uuid)
-            ->where('device_uuid', $deviceUuid)
-            ->firstOrFail();
 
         $job->update([
             'status' => 'failed',
-            'error_message' => $request->input('error_message'),
         ]);
 
         return response()->json([

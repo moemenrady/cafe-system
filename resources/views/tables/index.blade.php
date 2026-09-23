@@ -28,11 +28,18 @@
             </h2>
             <p class="text-xs text-gray-500 mt-0.5">إضافة وتعديل وتفعيل طاولات الكافيه</p>
         </div>
-        <a href="{{ route('tables.create') }}"
-           class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 shadow-md shadow-blue-500/20">
-            <i class="fa-solid fa-plus"></i>
-            إضافة طاولة
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('tables.history') }}"
+               class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                سجل الطاولات المغلقة
+            </a>
+            <a href="{{ route('tables.create') }}"
+               class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 shadow-md shadow-blue-500/20">
+                <i class="fa-solid fa-plus"></i>
+                إضافة طاولة
+            </a>
+        </div>
     </div>
 
     {{-- Stats Bar --}}

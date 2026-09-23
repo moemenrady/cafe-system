@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Order extends Model
+{
+    protected $fillable = [
+
+        'order_number',
+        'customer_id',
+        'table_id',      // FK → tables.id (الطاولة المختارة في الـ POS)
+        'table_number',  // محفوظ للتوافق مع البيانات القديمة
+        'shift_id',      // FK → shifts.id
+        'delivery_address',
+        'phone',
+        'delivery_person',
+
+        'type',
+        'status',
+        'payment_status',
+        'payment_method',
+
+        'subtotal',
+        'discount',
+        'service_charge',
+        'vat',
+        'total',
+
+        'notes',
+
+        'created_by',
+    ];
+
+    protected $casts = [
+
+        'subtotal' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'service_charge' => 'decimal:2',
+        'vat' => 'decimal:2',
+        'total' => 'decimal:2',
+    ];
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function table()
+    {
+        return $this->belongsTo(Table::class, 'table_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
+    }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+}

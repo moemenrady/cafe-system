@@ -1,0 +1,68 @@
+{
+  "device_uuid": "pos-cashier-01",
+  "laravel_backend_url": "http://127.0.0.1:8000",
+  "reverb": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "scheme": "http",
+    "app_key": "zjlmatbcy55ncococ8lw"
+  },
+  "printers": [
+    {
+      "id": "printer-1790096631475",
+      "name": "XP-80C",
+      "type": "windows",
+      "windows_printer_name": "XP-80C",
+      "role": "all",
+      "enabled": true,
+      "timeout_ms": 4000
+    }
+  ],
+  "templates": {
+    "cashier": {
+      "header": {
+        "store_name": "Sana Beatch UNO",
+        "branch": "",
+        "tax_number": "",
+        "phone": "",
+        "align": "center",
+        "store_name_size": "double"
+      },
+      "body": {
+        "show_table": true,
+        "show_server": false,
+        "show_tax_breakdown": true,
+        "show_drawer_kick": false
+      },
+      "footer": {
+        "thank_you_message": "شكراً لزيارتكم! نتشرف بكم دائماً",
+        "wifi_pass": "royal_guest_2026",
+        "align": "center",
+        "show_cut": true
+      }
+    },
+    "barista": {
+      "header": {
+        "title": "تكت باريستا - مشروبات",
+        "align": "center",
+        "title_size": "double"
+      },
+      "body": {
+        "show_table": true,
+        "show_order_type": true,
+        "show_notes": true,
+        "item_font_size": "double"
+      },
+      "footer": {
+        "show_cut": true
+      }
+    }
+  },
+  "server": {
+    "port": 3210
+  },
+  "heartbeat_interval_ms": 30000,
+  "app_version": "1.0.0",
+  "auto_update_enabled": true,
+  "is_configured": true
+}

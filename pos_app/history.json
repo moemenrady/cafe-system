@@ -1,0 +1,1000 @@
+[
+  {
+    "id": "job-6c793051-89bc-4cff-98e3-9d267a654011",
+    "order_number": "ORD-20260923-0006",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:22:02.446Z",
+    "formatted_time": "١٢:٢٢:٠٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "2x موهيتو ليمون نعناع كلاسيك, 1x زجاجة مياه معدنية",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-6c793051-89bc-4cff-98e3-9d267a654011",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 7,
+        "order_number": "ORD-20260923-0006",
+        "type": "takeaway",
+        "table": null,
+        "table_name": null,
+        "notes": null,
+        "items": [
+          {
+            "name": "موهيتو ليمون نعناع كلاسيك",
+            "quantity": 2,
+            "notes": null
+          },
+          {
+            "name": "زجاجة مياه معدنية",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-23 09:22"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-ffa5a1d5-eabf-4e6a-a47d-ffd6fa7608d7",
+    "order_number": "ORD-20260923-0006",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:22:02.278Z",
+    "formatted_time": "١٢:٢٢:٠٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "125.00",
+    "items_count": 2,
+    "items_summary": "2x موهيتو ليمون نعناع كلاسيك, 1x زجاجة مياه معدنية",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-ffa5a1d5-eabf-4e6a-a47d-ffd6fa7608d7",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 7,
+        "invoice_id": 5,
+        "order_number": "ORD-20260923-0006",
+        "invoice": "INV-20260923-00005",
+        "invoice_number": "INV-20260923-00005",
+        "table_id": null,
+        "table": null,
+        "table_name": null,
+        "customer_name": null,
+        "customer_phone": null,
+        "type": "takeaway",
+        "print_type": "receipt",
+        "items": [
+          {
+            "name": "موهيتو ليمون نعناع كلاسيك",
+            "quantity": 2,
+            "price": 55,
+            "total": 110,
+            "notes": null
+          },
+          {
+            "name": "زجاجة مياه معدنية",
+            "quantity": 1,
+            "price": 15,
+            "total": 15,
+            "notes": null
+          }
+        ],
+        "subtotal": 125,
+        "discount": 0,
+        "tax_rate": 0,
+        "tax": 0,
+        "tax_amount": 0,
+        "total": 125,
+        "payment_method": "InstaPay",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-23 09:22"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-e8de82ce-1550-4a18-a210-fee82a5bb9ee",
+    "order_number": "ORD-20260923-0005",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:19:30.444Z",
+    "formatted_time": "١٢:١٩:٣٠ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-e8de82ce-1550-4a18-a210-fee82a5bb9ee",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 6,
+        "order_number": "ORD-20260923-0005",
+        "type": "takeaway",
+        "table": null,
+        "table_name": null,
+        "notes": null,
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-23 09:19"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-c46743ab-9dbd-4292-94f1-01fabb8c94db",
+    "order_number": "ORD-20260923-0005",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:19:30.286Z",
+    "formatted_time": "١٢:١٩:٣٠ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "60.00",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-c46743ab-9dbd-4292-94f1-01fabb8c94db",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 6,
+        "invoice_id": 4,
+        "order_number": "ORD-20260923-0005",
+        "invoice": "INV-20260923-00004",
+        "invoice_number": "INV-20260923-00004",
+        "table_id": null,
+        "table": null,
+        "table_name": null,
+        "customer_name": null,
+        "customer_phone": null,
+        "type": "takeaway",
+        "print_type": "receipt",
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "price": 25,
+            "total": 25,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "price": 35,
+            "total": 35,
+            "notes": null
+          }
+        ],
+        "subtotal": 60,
+        "discount": 0,
+        "tax_rate": 0,
+        "tax": 0,
+        "tax_amount": 0,
+        "total": 60,
+        "payment_method": "cash",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-23 09:19"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "reprint-1790154652307",
+    "order_number": "ORD-20260923-0003",
+    "type": "customer",
+    "source": "reprint",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:10:52.823Z",
+    "formatted_time": "١٢:١٠:٥٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "60.00",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "reprint-1790154652307",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 4,
+        "invoice_id": 3,
+        "order_number": "ORD-20260923-0003",
+        "invoice": "INV-20260923-00003",
+        "invoice_number": "INV-20260923-00003",
+        "table_id": null,
+        "table": null,
+        "table_name": null,
+        "customer_name": "عميل التيك أواي",
+        "customer_phone": "01222222222",
+        "type": "takeaway",
+        "print_type": "receipt",
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "price": 25,
+            "total": 25,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "price": 35,
+            "total": 35,
+            "notes": null
+          }
+        ],
+        "subtotal": 60,
+        "discount": 0,
+        "tax_rate": 0,
+        "tax": 0,
+        "tax_amount": 0,
+        "total": 60,
+        "payment_method": "cash",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-95806f95-ad1a-425c-8448-14dd49fffea3",
+    "order_number": "ORD-20260923-0003",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:12.174Z",
+    "formatted_time": "١٢:٠٨:١٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "60.00",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-95806f95-ad1a-425c-8448-14dd49fffea3",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 4,
+        "invoice_id": 3,
+        "order_number": "ORD-20260923-0003",
+        "invoice": "INV-20260923-00003",
+        "invoice_number": "INV-20260923-00003",
+        "table_id": null,
+        "table": null,
+        "table_name": null,
+        "customer_name": "عميل التيك أواي",
+        "customer_phone": "01222222222",
+        "type": "takeaway",
+        "print_type": "receipt",
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "price": 25,
+            "total": 25,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "price": 35,
+            "total": 35,
+            "notes": null
+          }
+        ],
+        "subtotal": 60,
+        "discount": 0,
+        "tax_rate": 0,
+        "tax": 0,
+        "tax_amount": 0,
+        "total": 60,
+        "payment_method": "cash",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-24bba84e-5f6e-429f-902d-0237cade9757",
+    "order_number": "ORD-20260923-0004",
+    "type": "delivery",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:12.126Z",
+    "formatted_time": "١٢:٠٨:١٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "صالة",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 0,
+    "items_summary": "طلب بدون تفاصيل أصناف",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-24bba84e-5f6e-429f-902d-0237cade9757",
+      "type": "delivery",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 5,
+        "order_number": "ORD-20260923-0004",
+        "phone": "01099999999",
+        "address": "شارع التحرير، الدقي، الجيزة",
+        "driver": "كابتن أحمد",
+        "notes": null
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-68fc1d4c-9bd6-4d0e-904d-235197c41346",
+    "order_number": "ORD-20260923-0002",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:12.122Z",
+    "formatted_time": "١٢:٠٨:١٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "طاولة 1",
+    "cashier": "المدير العام",
+    "total": "96.90",
+    "items_count": 2,
+    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-68fc1d4c-9bd6-4d0e-904d-235197c41346",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 3,
+        "invoice_id": null,
+        "order_number": "ORD-20260923-0002",
+        "invoice": null,
+        "invoice_number": null,
+        "table_id": 2,
+        "table": "طاولة 1",
+        "table_name": "طاولة 1",
+        "customer_name": "عميل الصالة",
+        "customer_phone": "01111111111",
+        "type": "dine_in",
+        "print_type": "receipt",
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 2,
+            "price": 25,
+            "total": 50,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "price": 35,
+            "total": 35,
+            "notes": null
+          }
+        ],
+        "subtotal": 85,
+        "discount": 0,
+        "tax_rate": 14,
+        "tax": 11.9,
+        "tax_amount": 11.9,
+        "total": 96.9,
+        "payment_method": "cash",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-d1dbee79-d33d-4fa9-8daa-c5852787708c",
+    "order_number": "ORD-20260923-0002",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:12.041Z",
+    "formatted_time": "١٢:٠٨:١٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "طاولة 1",
+    "cashier": "المدير العام",
+    "total": "96.90",
+    "items_count": 2,
+    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-d1dbee79-d33d-4fa9-8daa-c5852787708c",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 3,
+        "invoice_id": null,
+        "order_number": "ORD-20260923-0002",
+        "invoice": null,
+        "invoice_number": null,
+        "table_id": 2,
+        "table": "طاولة 1",
+        "table_name": "طاولة 1",
+        "customer_name": "عميل الصالة",
+        "customer_phone": "01111111111",
+        "type": "dine_in",
+        "print_type": "invoice",
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 2,
+            "price": 25,
+            "total": 50,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "price": 35,
+            "total": 35,
+            "notes": null
+          }
+        ],
+        "subtotal": 85,
+        "discount": 0,
+        "tax_rate": 14,
+        "tax": 11.9,
+        "tax_amount": 11.9,
+        "total": 96.9,
+        "payment_method": "cash",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-4273060f-72aa-49db-a80d-3a86f22d648b",
+    "order_number": "ORD-20260923-0002",
+    "type": "waiter",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:12.039Z",
+    "formatted_time": "١٢:٠٨:١٢ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "طاولة 1",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 0,
+    "items_summary": "طلب بدون تفاصيل أصناف",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-4273060f-72aa-49db-a80d-3a86f22d648b",
+      "type": "waiter",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 3,
+        "order_number": "ORD-20260923-0002",
+        "table": "طاولة 1",
+        "table_name": "طاولة 1",
+        "type": "dine_in"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-55239ee6-f436-4b34-b413-10f2cff7a029",
+    "order_number": "ORD-20260923-0003",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:11.975Z",
+    "formatted_time": "١٢:٠٨:١١ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-55239ee6-f436-4b34-b413-10f2cff7a029",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 4,
+        "order_number": "ORD-20260923-0003",
+        "type": "takeaway",
+        "table": null,
+        "table_name": null,
+        "notes": null,
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-5e0f35a0-595b-48f0-bf9b-30dc75b2cb35",
+    "order_number": "ORD-20260923-0004",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:11.972Z",
+    "formatted_time": "١٢:٠٨:١١ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "delivery",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "1x قهوة تركي سينجل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-5e0f35a0-595b-48f0-bf9b-30dc75b2cb35",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 5,
+        "order_number": "ORD-20260923-0004",
+        "type": "delivery",
+        "table": null,
+        "table_name": null,
+        "notes": null,
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-9ffdf9ab-55d9-4862-a672-42ed2cde870f",
+    "order_number": "ORD-20260923-0002",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:11.284Z",
+    "formatted_time": "١٢:٠٨:١١ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "طاولة 1",
+    "cashier": "المدير العام",
+    "total": "96.90",
+    "items_count": 2,
+    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-9ffdf9ab-55d9-4862-a672-42ed2cde870f",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 3,
+        "invoice_id": null,
+        "order_number": "ORD-20260923-0002",
+        "invoice": null,
+        "invoice_number": null,
+        "table_id": 2,
+        "table": "طاولة 1",
+        "table_name": "طاولة 1",
+        "customer_name": "عميل الصالة",
+        "customer_phone": "01111111111",
+        "type": "dine_in",
+        "print_type": "invoice",
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 2,
+            "price": 25,
+            "total": 50,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "price": 35,
+            "total": 35,
+            "notes": null
+          }
+        ],
+        "subtotal": 85,
+        "discount": 0,
+        "tax_rate": 14,
+        "tax": 11.9,
+        "tax_amount": 11.9,
+        "total": 96.9,
+        "payment_method": "cash",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-263d9776-ebb5-438c-94d1-0fe89932736e",
+    "order_number": "ORD-20260923-0002",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:08:10.936Z",
+    "formatted_time": "١٢:٠٨:١٠ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "طاولة 1",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-263d9776-ebb5-438c-94d1-0fe89932736e",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 3,
+        "order_number": "ORD-20260923-0002",
+        "type": "dine_in",
+        "table": "طاولة 1",
+        "table_name": "طاولة 1",
+        "notes": null,
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 2,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-23 09:08"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-8e6734d7-47a9-48f3-b16b-5c2e03d87328",
+    "order_number": "ORD-20260923-0001",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:06:19.102Z",
+    "formatted_time": "١٢:٠٦:١٩ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "vipp",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-8e6734d7-47a9-48f3-b16b-5c2e03d87328",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 2,
+        "order_number": "ORD-20260923-0001",
+        "type": "dine_in",
+        "table": "vipp",
+        "table_name": "vipp",
+        "notes": null,
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "notes": null
+          },
+          {
+            "name": "قهوة تركي دبل",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-23 09:06"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-fde24ba7-c3e2-4d29-9e19-e6b8478f6994",
+    "order_number": "ORD-20260923-0001",
+    "type": "waiter",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-23T09:06:19.098Z",
+    "formatted_time": "١٢:٠٦:١٩ م",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "vipp",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 0,
+    "items_summary": "طلب بدون تفاصيل أصناف",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-fde24ba7-c3e2-4d29-9e19-e6b8478f6994",
+      "type": "waiter",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 2,
+        "order_number": "ORD-20260923-0001",
+        "table": "vipp",
+        "table_name": "vipp",
+        "type": "dine_in"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-2",
+    "order_number": "ORD-20260922-0001",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-22T22:40:28.524Z",
+    "formatted_time": "٠١:٤٠:٢٨ ص",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x فرابوتشينو كراميل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-2",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 1,
+        "order_number": "ORD-20260922-0001",
+        "type": "takeaway",
+        "table": null,
+        "table_name": null,
+        "notes": null,
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "notes": null
+          },
+          {
+            "name": "فرابوتشينو كراميل",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-22 22:40"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "job-1",
+    "order_number": "ORD-20260922-0001",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-22T22:40:28.263Z",
+    "formatted_time": "٠١:٤٠:٢٨ ص",
+    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "119.70",
+    "items_count": 2,
+    "items_summary": "1x قهوة تركي سينجل, 1x فرابوتشينو كراميل",
+    "printers": [
+      {
+        "id": "printer-1790096631475",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "job-1",
+      "type": "customer",
+      "printer_identifier": "cashier",
+      "payload": {
+        "order_id": 1,
+        "invoice_id": 1,
+        "order_number": "ORD-20260922-0001",
+        "invoice": "INV-20260922-00001",
+        "invoice_number": "INV-20260922-00001",
+        "table_id": null,
+        "table": null,
+        "table_name": null,
+        "customer_name": null,
+        "customer_phone": null,
+        "type": "takeaway",
+        "print_type": "receipt",
+        "items": [
+          {
+            "name": "قهوة تركي سينجل",
+            "quantity": 1,
+            "price": 25,
+            "total": 25,
+            "notes": null
+          },
+          {
+            "name": "فرابوتشينو كراميل",
+            "quantity": 1,
+            "price": 80,
+            "total": 80,
+            "notes": null
+          }
+        ],
+        "subtotal": 105,
+        "discount": 0,
+        "tax_rate": 14,
+        "tax": 14.7,
+        "tax_amount": 14.7,
+        "total": 119.7,
+        "payment_method": "cash",
+        "cashier_name": "المدير العام",
+        "created_at": "2026-09-22 22:40"
+      },
+      "status": "pending"
+    },
+    "error": null
+  }
+]

@@ -1,0 +1,50 @@
+{
+  "name": "pos-print-agent",
+  "version": "1.0.0",
+  "description": "Production-grade offline-first Desktop POS Print Agent for Cafe Management System",
+  "main": "server.js",
+  "bin": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "virtual-printer": "node virtualPrinter.js",
+    "build:win": "pkg . --targets node18-win-x64 --output dist/pos-agent.exe",
+    "build:mac": "pkg . --targets node18-macos-x64 --output dist/pos-agent-mac",
+    "build:linux": "pkg . --targets node18-linux-x64 --output dist/pos-agent-linux"
+  },
+  "pkg": {
+    "scripts": [
+      "arabicHelper.js",
+      "configManager.js",
+      "printerDiscovery.js",
+      "printerDispatcher.js",
+      "printHistory.js",
+      "reverbClient.js",
+      "server.js",
+      "updater.js"
+    ],
+    "assets": [
+      "public/**/*"
+    ]
+  },
+  "keywords": [
+    "pos",
+    "thermal-printer",
+    "esc-pos",
+    "laravel-reverb",
+    "websockets"
+  ],
+  "author": "Cafe System Engineering",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.9",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "laravel-echo": "^1.17.1",
+    "pusher-js": "^8.4.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^5.14.1"
+  }
+}

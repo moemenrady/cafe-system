@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\Order;
 use App\Models\Menu;
 use App\Models\InventoryItem;
 use App\Models\InventoryMovement; // 🌟 استدعاء موديل الحركات الجديد
@@ -201,12 +202,12 @@ class InvoiceController extends Controller
                 'message' => 'تم تعديل الفاتورة بنجاح وتحديث حركة المخزن.',
                 'data' => $invoice
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage() . ' | الملف: ' . $e->getFile() . ' | السطر: ' . $e->getLine()
+                'error'   => 'حدث خطأ أثناء تعديل الفاتورة: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -228,6 +229,13 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::with('items')->findOrFail($id);
         $user = auth()->user();
+        if (!$user || !in_array($user->role, ['admin', 'supervisor'], true)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'غير مصرح لك بإلغاء الفواتير. يتطلب صلاحية مشرف أو مدير.'
+            ], 403);
+        }
+
         $oldDataSnapshot = $invoice->toArray();
 
         DB::beginTransaction();
@@ -253,19 +261,27 @@ class InvoiceController extends Controller
                 }
             }
 
-            // 2. تسجيل حركة الحذف في شاشة الرقابة (Audit Log) للمشرفين
-            if ($user && $user->role === 'supervisor') {
+            // 2. تحديث الطلب المرتبط ليصبح ملغي وتحرير الطاولة
+            if ($invoice->order_id) {
+                Order::where('id', $invoice->order_id)->update([
+                    'status' => 'cancelled',
+                    'payment_status' => 'pending',
+                ]);
+            }
+
+            // 3. تسجيل حركة الحذف في شاشة الرقابة (Audit Log) للمشرفين
+            if ($user && in_array($user->role, ['supervisor', 'admin'], true)) {
                 InvoiceTransaction::create([
                     'invoice_id' => $invoice->id,
                     'action' => 'delete',
                     'old_data' => $oldDataSnapshot,
                     'new_data' => null,
-                    'description' => "قام المشرف [{$user->name}] بحذف وإلغاء الفاتورة رقم {$invoice->invoice_number} بالكامل وإعادة موادها للمخزن.",
+                    'description' => "قام [{$user->name}] بحذف وإلغاء الفاتورة رقم {$invoice->invoice_number} وإلغاء طلبها وإعادة موادها للمخزن.",
                     'created_by' => $user->id,
                 ]);
             }
 
-            // 3. مسح أصناف الفاتورة ثم الفاتورة نفسها
+            // 4. مسح أصناف الفاتورة ثم الفاتورة نفسها
             $invoice->items()->delete();
             $invoice->delete();
 
@@ -275,7 +291,7 @@ class InvoiceController extends Controller
                 'success' => true,
                 'message' => 'تم حذف وإلغاء الفاتورة بنجاح، وإعادة المواد الخام للمخزن.'
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
@@ -369,7 +385,7 @@ class InvoiceController extends Controller
 
             DB::commit();
             return response()->json(['success' => true, 'message' => 'تم الحفظ بنجاح وتسجيل حركة المخزون.', 'data' => $invoice], 201);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }

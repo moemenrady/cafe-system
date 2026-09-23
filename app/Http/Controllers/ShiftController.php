@@ -3,63 +3,124 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shift;
+use App\Services\ShiftService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ShiftController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        protected ShiftService $shiftService
+    ) {}
+
+    public function index(Request $request): JsonResponse
     {
-        //
+        $shifts = Shift::with('user:id,name,role')
+            ->latest('start_time')
+            ->paginate(15);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $shifts,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function current(Request $request): JsonResponse
     {
-        //
+        $shift = $this->shiftService->getActiveShift($request->user());
+
+        return response()->json([
+            'success' => true,
+            'data'    => $shift,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        $request->validate([
+            'opening_float' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $shift = $this->shiftService->openShift(
+                $request->user(),
+                (float) $request->input('opening_float')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم فتح الشِفت بنجاح.',
+                'data'    => $shift,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Shift $shift)
+    public function show(Shift $shift): JsonResponse
     {
-        //
+        $shift->load(['user:id,name', 'invoices', 'orders']);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $shift,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Shift $shift)
+    public function drop(Request $request, Shift $shift): JsonResponse
     {
-        //
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $updated = $this->shiftService->recordCashDrop(
+                $shift,
+                (float) $request->input('amount'),
+                $request->input('reason')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تسجيل المسحوب النقدي بنجاح.',
+                'data'    => $updated,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Shift $shift)
+    public function close(Request $request, Shift $shift): JsonResponse
     {
-        //
-    }
+        $request->validate([
+            'actual_cash' => 'required|numeric|min:0',
+            'notes'       => 'nullable|string|max:1000',
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Shift $shift)
-    {
-        //
+        try {
+            $closed = $this->shiftService->closeShift(
+                $shift,
+                (float) $request->input('actual_cash'),
+                $request->input('notes')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إغلاق الشِفت وحساب الفروقات بنجاح.',
+                'data'    => $closed,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 }

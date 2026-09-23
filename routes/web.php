@@ -10,7 +10,6 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 |--------------------------------------------------------------------------
 */
 Route::get('/welcome', function () { return view('welcome'); });
-Route::get('/demo', [UserController::class, "index"]);
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');

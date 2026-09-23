@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Order;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -22,7 +21,14 @@ class OrderService
         return DB::transaction(function () use ($data) {
             $order = $this->createOrderRecord($data);
 
-            $this->orderItemService->createItems($order, $data['items'] ?? []);
+            $this->orderItemService->createItems(
+                $order,
+                $data['items'] ?? [],
+                (float) ($data['discount'] ?? 0),
+                (float) ($data['service_charge'] ?? 0),
+                (float) ($data['vat_rate'] ?? 0)
+            );
+
             $this->inventoryService->updateInventory($order);
 
             $this->handlePostOrderWorkflow($order);
@@ -31,39 +37,50 @@ class OrderService
         });
     }
 
-    public function checkout(Order $order): void
+    public function checkout(Order $order, array $paymentData = []): void
     {
-        DB::transaction(function () use ($order) {
-            if ($order->payment_status === 'paid') {
+        DB::transaction(function () use ($order, $paymentData) {
+            /** @var Order $lockedOrder */
+            $lockedOrder = Order::where('id', $order->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($lockedOrder->payment_status === 'paid') {
                 throw new InvalidArgumentException('Order already paid.');
             }
 
-            if (in_array($order->type, ['dine_in', 'delivery'], true)) {
-                $this->invoiceService->createInvoice($order);
+            if ($lockedOrder->status === 'cancelled') {
+                throw new InvalidArgumentException('Cannot checkout a cancelled order.');
             }
 
-            $order->update([
+            if (in_array($lockedOrder->type, ['dine_in', 'delivery'], true)) {
+                $this->invoiceService->createInvoice($lockedOrder, $paymentData);
+            }
+
+            $lockedOrder->update([
                 'payment_status' => 'paid',
-                'status' => 'completed',
+                'status'         => 'completed',
             ]);
 
-            $this->printingService->createCustomerReceipt($order);
+            $this->printingService->createCustomerReceipt($lockedOrder);
         });
     }
 
     private function createOrderRecord(array $data): Order
     {
         return Order::create([
-            'order_number'    => $this->generateOrderNumber(),
+            'order_number'    => DocumentSequenceService::getNextOrderNumber(),
             'customer_id'     => $data['customer_id'] ?? null,
             'table_id'        => $data['table_id'] ?? null,
             'table_number'    => $data['table_id'] ?? $data['table_number'] ?? null,
+            'shift_id'        => $data['shift_id'] ?? null,
             'delivery_address' => $data['delivery_address'] ?? null,
             'phone'           => $data['phone'] ?? null,
             'delivery_person' => $data['delivery_person'] ?? null,
             'type'            => $this->resolveOrderType($data['type'] ?? null),
             'status'          => $this->resolveInitialStatus($data['type'] ?? null),
             'payment_status'  => 'pending',
+            'discount'        => (float) ($data['discount'] ?? 0),
             'notes'           => $data['notes'] ?? null,
             'created_by'      => Auth::check() ? Auth::id() : 1,
         ]);
@@ -117,19 +134,5 @@ class OrderService
             'delivery' => 'waiting_delivery',
             default => 'open',
         };
-    }
-
-    private function generateOrderNumber(): string
-    {
-        $today = Carbon::today();
-        $lastOrder = Order::whereDate('created_at', $today)->latest('id')->first();
-        $nextNumber = 1;
-
-        if ($lastOrder) {
-            $lastSequence = (int) substr($lastOrder->order_number, -4);
-            $nextNumber = $lastSequence + 1;
-        }
-
-        return sprintf('ORD-%s-%04d', $today->format('Ymd'), $nextNumber);
     }
 }

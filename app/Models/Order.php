@@ -12,6 +12,7 @@ class Order extends Model
         'customer_id',
         'table_id',      // FK → tables.id (الطاولة المختارة في الـ POS)
         'table_number',  // محفوظ للتوافق مع البيانات القديمة
+        'shift_id',      // FK → shifts.id
         'delivery_address',
         'phone',
         'delivery_person',
@@ -58,6 +59,11 @@ class Order extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
     }
 
     public function invoice()

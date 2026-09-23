@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CheckoutRequest;
 use App\Http\Requests\OrderRequest;
 use App\Models\Order;
 use App\Services\OrderService;
@@ -42,7 +43,7 @@ class OrderController extends Controller
     /**
      * POST /orders/{order}/checkout – إتمام الدفع لطلب Dine-In
      */
-    public function checkout(Order $order, Request $request): JsonResponse
+    public function checkout(Order $order, CheckoutRequest $request): JsonResponse
     {
         $force = filter_var($request->input('force', false), FILTER_VALIDATE_BOOLEAN);
         $deviceUuid = $request->header('X-Device-UUID') ?? $request->input('device_uuid', 'pos-cashier-01');
@@ -52,7 +53,7 @@ class OrderController extends Controller
         }
 
         try {
-            $this->orderService->checkout($order);
+            $this->orderService->checkout($order, $request->validated());
 
             return response()->json([
                 'success' => true,

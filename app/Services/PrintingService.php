@@ -93,11 +93,15 @@ class PrintingService
 
     private function createJob(Order $order, string $type, array $payload): void
     {
+        $deviceUuid = request()->header('X-Device-UUID')
+            ?? (request()->has('device_uuid') ? request()->input('device_uuid') : 'pos-cashier-01');
+
         $job = PrinterJob::create([
-            'order_id' => $order->id,
-            'type' => $type,
-            'payload' => $payload,
-            'status' => 'pending',
+            'order_id'    => $order->id,
+            'device_uuid' => $deviceUuid,
+            'type'        => $type,
+            'payload'     => $payload,
+            'status'      => 'pending',
         ]);
 
         try {

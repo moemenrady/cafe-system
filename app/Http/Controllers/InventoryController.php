@@ -26,7 +26,7 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255|unique:inventory_items,name',
             'quantity' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
@@ -36,7 +36,7 @@ class InventoryController extends Controller
 
         DB::beginTransaction();
         try {
-            $item = InventoryItem::create($request->all());
+            $item = InventoryItem::create($validated);
 
             // 🌟 تسجيل أول حركة للمادة الخام (رصيد افتتاحي / توريد أول مرة)
             if ($item->quantity > 0) {

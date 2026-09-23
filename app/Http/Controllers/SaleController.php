@@ -29,16 +29,11 @@ class SaleController extends Controller
             $q->where('is_available', true);
         })->orderBy('name')->get();
 
-        // الطاولات النشطة فقط لعرضها في الـ POS (تُحمَّل مبدئياً ثم تُحدَّث عبر AJAX)
-        $activeTables = Table::active()->orderBy('name')->get()->map(function ($table) {
-            return [
-                'id'          => $table->id,
-                'name'        => $table->name,
-                'capacity'    => $table->capacity,
-                'area'        => $table->area,
-                'is_occupied' => $table->isOccupied(),
-            ];
-        });
+        // الطاولات النشطة فقط لعرضها في الـ POS مع حالة الشغل باستعلام واحد
+        $activeTables = Table::active()
+            ->withExists(['activeOrders as is_occupied'])
+            ->orderBy('name')
+            ->get(['id', 'name', 'capacity', 'area']);
 
         return view('pos.index', compact('menus', 'categories', 'activeTables'));
     }

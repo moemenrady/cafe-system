@@ -27,7 +27,7 @@ class OrderRequest extends FormRequest
                 'nullable',
                 'integer',
                 'exists:tables,id',
-                // لو نوع الطلب Dine-In → الطاولة مطلوبة ويجب أن تكون نشطة
+                // لو نوع الطلب Dine-In → الطاولة مطلوبة ويجب أن تكون نشطة وغير مشغولة
                 Rule::when(fn() => $this->input('type') === 'dine_in', [
                     'required',
                     function ($attribute, $value, $fail) {
@@ -38,9 +38,19 @@ class OrderRequest extends FormRequest
                         }
                         if (!$table->is_active) {
                             $fail('الطاولة المختارة غير نشطة. الرجاء اختيار طاولة نشطة.');
+                            return;
+                        }
+                        if ($table->isOccupied()) {
+                            $fail('الطاولة المختارة مشغولة بطلب مفتوح حالياً.');
                         }
                     },
                 ]),
+            ],
+
+            'shift_id' => [
+                'nullable',
+                'integer',
+                'exists:shifts,id',
             ],
 
             'delivery_address' => [
@@ -78,6 +88,19 @@ class OrderRequest extends FormRequest
                 'nullable',
                 'numeric',
                 'min:0',
+            ],
+
+            'service_charge' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'vat_rate' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:100',
             ],
 
             'notes' => [

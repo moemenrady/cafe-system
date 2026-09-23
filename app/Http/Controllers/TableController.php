@@ -12,11 +12,10 @@ class TableController extends Controller
      */
     public function index()
     {
-        // نجيب الطاولات مع معلومة الشغل أو لأ
-        $tables = Table::latest()->get()->map(function ($table) {
-            $table->is_occupied = $table->isOccupied();
-            return $table;
-        });
+        // نجيب الطاولات مع معلومة الشغل باستعلام واحد
+        $tables = Table::withExists(['activeOrders as is_occupied'])
+            ->latest()
+            ->get();
 
         return view('tables.index', compact('tables'));
     }
@@ -135,17 +134,9 @@ class TableController extends Controller
     public function posIndex()
     {
         $tables = Table::active()
+            ->withExists(['activeOrders as is_occupied'])
             ->orderBy('name')
-            ->get()
-            ->map(function ($table) {
-                return [
-                    'id'          => $table->id,
-                    'name'        => $table->name,
-                    'capacity'    => $table->capacity,
-                    'area'        => $table->area,
-                    'is_occupied' => $table->isOccupied(),
-                ];
-            });
+            ->get(['id', 'name', 'capacity', 'area']);
 
         return response()->json(['data' => $tables]);
     }

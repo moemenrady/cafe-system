@@ -114,7 +114,7 @@ Route::get('/pos/check-update', function (Request $request) {
 | Print Agent Jobs Management
 |--------------------------------------------------------------------------
 */
-Route::prefix('print-agent')->group(function () {
+Route::prefix('print-agent')->middleware('print_agent_token')->group(function () {
     Route::get('/jobs', [PrintAgentController::class, 'jobs']);
     Route::post('/jobs/{uuid}/processing', [PrintAgentController::class, 'processing']);
     Route::post('/jobs/{uuid}/complete', [PrintAgentController::class, 'complete']);

@@ -41,14 +41,16 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|confirmed|min:8',
-            'role' => 'nullable|in:user,admin',
+            'role' => 'nullable|in:admin,supervisor,cashier,barista,client',
         ]);
 
-        // أمان: فقط إذا المستخدم الحالي مُسجل ودوره admin يمكنه تعيين admin
-        $requestedRole = $request->input('role', 'user');
-        $role = 'user';
-        if (auth()->check() && auth()->user()->role === 'admin' && $requestedRole === 'admin') {
-            $role = 'admin';
+        // أمان: فقط إذا المستخدم الحالي مُسجل ودوره admin يمكنه تعيين الصلاحيات
+        $requestedRole = $request->input('role', 'client');
+        $role = 'client';
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            $role = in_array($requestedRole, ['admin', 'supervisor', 'cashier', 'barista', 'client'], true)
+                ? $requestedRole
+                : 'client';
         }
 
         // انشئ المستخدم (مؤقتًا غير مفعل)

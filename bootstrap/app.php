@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // تسجيل الـ Middleware الخاص بالصلاحيات
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'print_agent_token' => \App\Http\Middleware\VerifyPrintAgentToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

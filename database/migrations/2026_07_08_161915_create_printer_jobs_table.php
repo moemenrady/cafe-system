@@ -28,6 +28,7 @@ return new class extends Migration
             $table->enum('status', [
                 'pending',
                 'printing',
+                'processing',
                 'printed',
                 'failed',
             ])->default('pending');

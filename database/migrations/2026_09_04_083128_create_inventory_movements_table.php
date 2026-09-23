@@ -13,8 +13,8 @@ return new class extends Migration
             // ربط الحركة بالصنف الخام (بن وميلك وسكر..)
             $table->foreignId('inventory_item_id')->constrained('inventory_items')->onDelete('cascade');
             
-            // نوع الحركة: بيع، تعديل بيع، توريد جديد، هالك
-            $table->enum('type', ['sale', 'sale_update', 'restock', 'waste']);
+            // نوع الحركة: بيع، تعديل بيع، إلغاء بيع، توريد جديد، هالك
+            $table->enum('type', ['sale', 'sale_update', 'sale_cancel', 'restock', 'waste']);
             
             // الكمية (موجبة في التوريد والإرجاع، سالبة في البيع والهالك)
             $table->decimal('quantity', 10, 2);

@@ -49,12 +49,29 @@ Route::post('/pos/device-heartbeat', function (Request $request) {
 */
 Route::get('/pos/printer-status', function (Request $request) {
     $deviceUuid = $request->header('X-Device-UUID') ?? $request->query('device_uuid', 'pos-cashier-01');
+
+    if ($deviceUuid === 'none' || empty($deviceUuid)) {
+        return response()->json([
+            'success' => true,
+            'connected' => false,
+            'is_cashier' => false,
+            'status' => 'non_printing_device',
+            'is_ready' => false,
+            'message' => 'هذا الجهاز غير مخصص للطباعة المباشرة.',
+            'device_uuid' => null,
+            'printers' => null,
+            'active_roles' => [],
+            'last_seen' => null,
+        ]);
+    }
+
     $deviceStatus = Cache::get("pos_device_{$deviceUuid}");
 
     if (!$deviceStatus) {
         return response()->json([
             'success' => true,
             'connected' => false,
+            'is_cashier' => true,
             'status' => 'offline',
             'message' => 'برنامج الطباعة غير متصل بالجهاز حالياً.',
             'device_uuid' => $deviceUuid,

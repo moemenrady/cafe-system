@@ -515,11 +515,25 @@
                     </div>
                     <div>
                         <h4 class="text-sm font-black text-gray-800">حالة نظام الطباعة</h4>
-                        <p id="diagDeviceUuid" class="text-[11px] font-mono text-gray-400">الجهاز: pos-cashier-01</p>
+                        <p id="diagDeviceUuid" class="text-[11px] font-mono text-gray-400">الجهاز: جاري التعرف...</p>
                     </div>
                 </div>
                 <button type="button" onclick="togglePrinterDetailsModal()" class="text-gray-400 hover:text-gray-600 text-sm p-1">
                     <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            {{-- صندوق تعريف وتحديد دور هذا الجهاز --}}
+            <div id="diagDeviceRoleBanner" class="p-3 rounded-2xl bg-gray-50 border border-gray-100 mb-3 text-right">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-gray-700">نوع هذا الجهاز:</span>
+                    <span id="diagDeviceRoleBadge" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-200 text-slate-700">جهاز فرعي</span>
+                </div>
+                <p id="diagDeviceRoleDesc" class="text-[11px] text-gray-500 mb-2">جهاز للطلبات فقط بدون طباعة إيصالات تلقائية لحماية طابعات الكاشير.</p>
+                <button type="button" id="diagDeviceRoleToggleBtn" onclick="toggleCashierRoleManual()"
+                    class="w-full py-1.5 px-2 rounded-xl text-[11px] font-bold border border-gray-200 bg-white hover:bg-gray-100 text-gray-700 transition-colors flex items-center justify-center gap-1.5 shadow-2xs">
+                    <i id="diagDeviceRoleIcon" class="fa-solid fa-desktop"></i>
+                    <span id="diagDeviceRoleBtnText">تعيين هذا الجهاز كجهاز كاشير رئيسي للطباعة</span>
                 </button>
             </div>
 
@@ -1057,12 +1071,17 @@
             return;
         }
 
+        const isCashier = currentTerminalInfo.isCashier && currentTerminalInfo.deviceUuid !== 'none';
+        const targetDeviceUuid = isCashier ? currentTerminalInfo.deviceUuid : 'none';
+        const shouldPrint = isCashier;
+
         const payload = {
             type: currentOrderType,
             notes: document.getElementById('orderNotes').value.trim() || null,
             discount: discount || null,
             force: force,
-            device_uuid: 'pos-cashier-01',
+            device_uuid: targetDeviceUuid,
+            should_print: shouldPrint,
             items: Object.values(cart).map(item => ({
                 menu_id: item.id,
                 quantity: item.quantity,
@@ -1090,7 +1109,7 @@
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'X-Device-UUID': 'pos-cashier-01',
+                'X-Device-UUID': targetDeviceUuid,
             },
             body: JSON.stringify(payload),
         })
@@ -1175,7 +1194,85 @@
         submitOrder(true);
     }
 
-    // ========== 13. فحص وتشخيص حالة الطابعة المباشر ==========
+    // ========== 13. إدارة هوية المحطة وتشخيص الطابعات المباشر ==========
+    let currentTerminalInfo = {
+        isCashier: false,
+        deviceUuid: 'none',
+        hasLocalAgent: false,
+        localAgentData: null
+    };
+
+    /**
+     * فحص هوية الجهاز الحالي والتأكد إن كان جهاز كاشير رئيسي للطباعة أم جهاز فرعي (نادل / جوال)
+     */
+    async function resolveTerminalIdentity() {
+        // 1. محاولة استكشاف برنامج الطباعة المكتبي على 127.0.0.1:3210
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 1200);
+            const res = await fetch('http://127.0.0.1:3210/api/status', {
+                signal: timer.signal
+            });
+            clearTimeout(timer);
+
+            if (res.ok) {
+                const json = await res.json();
+                if (json.success && json.agent?.device_uuid) {
+                    currentTerminalInfo = {
+                        isCashier: true,
+                        deviceUuid: json.agent.device_uuid,
+                        hasLocalAgent: true,
+                        localAgentData: json
+                    };
+                    localStorage.setItem('pos_is_cashier_device', 'true');
+                    localStorage.setItem('pos_device_uuid', json.agent.device_uuid);
+                    return currentTerminalInfo;
+                }
+            }
+        } catch (_) {
+            // لا يوجد برنامج مكتبي قيد التشغيل محلياً على هذا الجهاز
+        }
+
+        // 2. إذا لم يستجب البرنامج المحلي، نتحقق من التعيين اليدوي المسبق لهذا المتصفح
+        const isSavedCashier = localStorage.getItem('pos_is_cashier_device') === 'true';
+        const savedUuid = localStorage.getItem('pos_device_uuid') || 'pos-cashier-01';
+
+        if (isSavedCashier) {
+            currentTerminalInfo = {
+                isCashier: true,
+                deviceUuid: savedUuid,
+                hasLocalAgent: false,
+                localAgentData: null
+            };
+        } else {
+            currentTerminalInfo = {
+                isCashier: false,
+                deviceUuid: 'none',
+                hasLocalAgent: false,
+                localAgentData: null
+            };
+        }
+
+        return currentTerminalInfo;
+    }
+
+    /**
+     * تبديل نوع الجهاز يدوياً (كاشير رئيسي للطباعة / جهاز فرعي للطلبات)
+     */
+    function toggleCashierRoleManual() {
+        const willBeCashier = !currentTerminalInfo.isCashier;
+        if (willBeCashier) {
+            localStorage.setItem('pos_is_cashier_device', 'true');
+            localStorage.setItem('pos_device_uuid', 'pos-cashier-01');
+            showInfo('تم تعيين هذا الجهاز كجهاز كاشير رئيسي للطباعة.');
+        } else {
+            localStorage.setItem('pos_is_cashier_device', 'false');
+            localStorage.setItem('pos_device_uuid', 'none');
+            showInfo('تم تحويل هذا الجهاز إلى جهاز طلبات فرعي (بدون طباعة مباشرة).');
+        }
+        fetchPrinterStatus(true);
+    }
+
     async function fetchPrinterStatus(isManual = false) {
         const btn = document.getElementById('posPrinterStatusBtn');
         const dot = document.getElementById('posPrinterDot');
@@ -1183,16 +1280,54 @@
 
         if (isManual && text) text.textContent = 'جاري الفحص...';
 
+        const terminal = await resolveTerminalIdentity();
+
+        // حالة 1: جهاز فرعي (نادل / جوال / بدون برنامج طباعة مكتبي)
+        if (!terminal.isCashier) {
+            if (dot && btn && text) {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-400';
+                btn.className = 'flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-bold transition-all bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 active:scale-95';
+                text.textContent = 'جهاز فرعي (بدون طابعة)';
+            }
+            updatePrinterDetailsUI({
+                connected: false,
+                is_cashier: false,
+                status: 'non_printing_device',
+                device_uuid: 'none'
+            });
+            return;
+        }
+
+        // حالة 2: تم تعيينه ككاشير ولكن برنامج الطباعة متوقف محلياً
+        if (terminal.isCashier && !terminal.hasLocalAgent) {
+            if (dot && btn && text) {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-red-500';
+                btn.className = 'flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-bold transition-all bg-red-50 border-red-200 text-red-700 hover:bg-red-100 active:scale-95';
+                text.textContent = 'برنامج الطباعة متوقف';
+            }
+            updatePrinterDetailsUI({
+                connected: false,
+                is_cashier: true,
+                status: 'offline',
+                device_uuid: terminal.deviceUuid
+            });
+            return;
+        }
+
+        // حالة 3: جهاز الكاشير وبرنامج الديسكتوب شغال بنجاح
         try {
-            const res = await fetch('/api/pos/printer-status?device_uuid=pos-cashier-01', {
-                headers: { 'Accept': 'application/json' }
+            const res = await fetch(`/api/pos/printer-status?device_uuid=${encodeURIComponent(terminal.deviceUuid)}`, {
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-Device-UUID': terminal.deviceUuid
+                }
             });
             const data = await res.json();
 
             if (data.connected && data.is_ready) {
                 dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50';
                 btn.className = 'flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-bold transition-all bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 active:scale-95';
-                text.textContent = 'الطابعات جاهزة';
+                text.textContent = 'طابعات الكاشير جاهزة';
             } else if (data.connected && !data.is_ready) {
                 dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
                 btn.className = 'flex items-center gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-bold transition-all bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 active:scale-95';
@@ -1227,17 +1362,49 @@
     function updatePrinterDetailsUI(data) {
         if (!data) return;
         const deviceEl = document.getElementById('diagDeviceUuid');
-        if (deviceEl) deviceEl.textContent = 'الجهاز: ' + (data.device_uuid || 'pos-cashier-01');
+        if (deviceEl) {
+            deviceEl.textContent = currentTerminalInfo.isCashier 
+                ? 'الجهاز: ' + (currentTerminalInfo.deviceUuid || 'pos-cashier-01')
+                : 'الجهاز: جهاز فرعي (بدون طابعة)';
+        }
+
+        // تحديث صندوق نوع الجهاز
+        const roleBadge = document.getElementById('diagDeviceRoleBadge');
+        const roleDesc = document.getElementById('diagDeviceRoleDesc');
+        const roleBtnText = document.getElementById('diagDeviceRoleBtnText');
+        const roleIcon = document.getElementById('diagDeviceRoleIcon');
+
+        if (roleBadge && roleDesc && roleBtnText) {
+            if (currentTerminalInfo.isCashier) {
+                roleBadge.textContent = 'جهاز كاشير رئيسي';
+                roleBadge.className = 'px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-100 text-emerald-800';
+                roleDesc.textContent = currentTerminalInfo.hasLocalAgent 
+                    ? 'هذا الجهاز متصل بالبرنامج المكتبي (127.0.0.1:3210) ومصرح له بالطباعة المباشرة.'
+                    : 'تم تعيين هذا الجهاز ككاشير، ولكن برنامج الطباعة المكتبي غير متصل محلياً.';
+                roleBtnText.textContent = 'تحويل هذا الجهاز إلى جهاز طلبات فرعي (بدون طباعة)';
+                if (roleIcon) roleIcon.className = 'fa-solid fa-mobile-screen';
+            } else {
+                roleBadge.textContent = 'جهاز فرعي (نادل / جوال)';
+                roleBadge.className = 'px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-200 text-slate-700';
+                roleDesc.textContent = 'جهاز للطلبات فقط بدون طباعة إيصالات تلقائية لحماية طابعات الكاشير.';
+                roleBtnText.textContent = 'تعيين هذا الجهاز كجهاز كاشير رئيسي للطباعة';
+                if (roleIcon) roleIcon.className = 'fa-solid fa-desktop';
+            }
+        }
         
         const agentStatus = document.getElementById('diagAgentStatus');
         const agentDot = document.getElementById('diagAgentDot');
         if (agentStatus && agentDot) {
-            if (data.connected) {
-                agentStatus.textContent = 'متصل (جاهز)';
+            if (!currentTerminalInfo.isCashier) {
+                agentStatus.textContent = 'غير مفعل على هذا الجهاز';
+                agentStatus.className = 'text-xs font-bold text-gray-400';
+                agentDot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300';
+            } else if (currentTerminalInfo.hasLocalAgent) {
+                agentStatus.textContent = 'شغال ومتصل محلياً (127.0.0.1:3210)';
                 agentStatus.className = 'text-xs font-bold text-emerald-600';
                 agentDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
             } else {
-                agentStatus.textContent = 'غير متصل';
+                agentStatus.textContent = 'متوقف (127.0.0.1:3210)';
                 agentStatus.className = 'text-xs font-bold text-red-600';
                 agentDot.className = 'w-2.5 h-2.5 rounded-full bg-red-500';
             }
@@ -1246,30 +1413,38 @@
         const cashierStatus = document.getElementById('diagCashierStatus');
         const cashierDot = document.getElementById('diagCashierDot');
         if (cashierStatus && cashierDot) {
-            if (data.printers?.cashier) {
+            if (!currentTerminalInfo.isCashier) {
+                cashierStatus.textContent = 'غير متصلة بهذا الجهاز';
+                cashierStatus.className = 'text-xs font-bold text-gray-400';
+                cashierDot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300';
+            } else if (data.printers?.cashier) {
                 const isUp = data.printers.cashier.status === 'online';
                 cashierStatus.textContent = isUp ? `متصلة (${data.printers.cashier.latency_ms ?? 0}ms)` : 'غير متصلة';
                 cashierStatus.className = isUp ? 'text-xs font-bold text-emerald-600' : 'text-xs font-bold text-red-600';
                 cashierDot.className = isUp ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-red-500';
             } else {
-                cashierStatus.textContent = 'غير معرفة';
-                cashierStatus.className = 'text-xs font-bold text-gray-400';
-                cashierDot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300';
+                cashierStatus.textContent = currentTerminalInfo.hasLocalAgent ? 'متصلة' : 'غير متصلة';
+                cashierStatus.className = currentTerminalInfo.hasLocalAgent ? 'text-xs font-bold text-emerald-600' : 'text-xs font-bold text-gray-400';
+                cashierDot.className = currentTerminalInfo.hasLocalAgent ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-gray-300';
             }
         }
 
         const baristaStatus = document.getElementById('diagBaristaStatus');
         const baristaDot = document.getElementById('diagBaristaDot');
         if (baristaStatus && baristaDot) {
-            if (data.printers?.barista) {
+            if (!currentTerminalInfo.isCashier) {
+                baristaStatus.textContent = 'غير متصلة بهذا الجهاز';
+                baristaStatus.className = 'text-xs font-bold text-gray-400';
+                baristaDot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300';
+            } else if (data.printers?.barista) {
                 const isUp = data.printers.barista.status === 'online';
                 baristaStatus.textContent = isUp ? `متصلة (${data.printers.barista.latency_ms ?? 0}ms)` : 'غير متصلة';
                 baristaStatus.className = isUp ? 'text-xs font-bold text-emerald-600' : 'text-xs font-bold text-red-600';
                 baristaDot.className = isUp ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-red-500';
             } else {
-                baristaStatus.textContent = 'غير معرفة';
-                baristaStatus.className = 'text-xs font-bold text-gray-400';
-                baristaDot.className = 'w-2.5 h-2.5 rounded-full bg-gray-300';
+                baristaStatus.textContent = currentTerminalInfo.hasLocalAgent ? 'متصلة' : 'غير متصلة';
+                baristaStatus.className = currentTerminalInfo.hasLocalAgent ? 'text-xs font-bold text-emerald-600' : 'text-xs font-bold text-gray-400';
+                baristaDot.className = currentTerminalInfo.hasLocalAgent ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-gray-300';
             }
         }
 
@@ -1277,7 +1452,7 @@
         if (lastSeenEl) {
             lastSeenEl.textContent = data.last_seen 
                 ? 'آخر نبضة: ' + new Date(data.last_seen).toLocaleTimeString('ar-EG')
-                : 'آخر نبضة: لا توجد بيانات';
+                : (currentTerminalInfo.hasLocalAgent ? 'متزامن محلياً' : 'غير متزامن');
         }
     }
 

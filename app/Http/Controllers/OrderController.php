@@ -23,9 +23,15 @@ class OrderController extends Controller
     {
         $force = filter_var($request->input('force', false), FILTER_VALIDATE_BOOLEAN);
         $deviceUuid = $request->header('X-Device-UUID') ?? $request->input('device_uuid', 'pos-cashier-01');
+        $shouldPrint = filter_var($request->input('should_print', true), FILTER_VALIDATE_BOOLEAN);
 
-        // فحص جاهزية الطابعة قبل تأكيد الأوردر (يمكن تجاوزه إذا اختار الكاشير المتابعة)
-        if ($printerError = $this->verifyPrinterReady($deviceUuid, $force)) {
+        // إذا كان الجهاز جهازاً غير مخصص للطباعة (نادل / هاتف / بدون برنامج طباعة مكتبي)
+        if ($deviceUuid === 'none' || empty($deviceUuid) || !$shouldPrint) {
+            $deviceUuid = null;
+        }
+
+        // فحص جاهزية الطابعة فقط إذا كان هذا الجهاز جهاز كاشير رئيسي للطباعة
+        if ($deviceUuid && ($printerError = $this->verifyPrinterReady($deviceUuid, $force))) {
             return $printerError;
         }
 
@@ -47,8 +53,13 @@ class OrderController extends Controller
     {
         $force = filter_var($request->input('force', false), FILTER_VALIDATE_BOOLEAN);
         $deviceUuid = $request->header('X-Device-UUID') ?? $request->input('device_uuid', 'pos-cashier-01');
+        $shouldPrint = filter_var($request->input('should_print', true), FILTER_VALIDATE_BOOLEAN);
 
-        if ($printerError = $this->verifyPrinterReady($deviceUuid, $force)) {
+        if ($deviceUuid === 'none' || empty($deviceUuid) || !$shouldPrint) {
+            $deviceUuid = null;
+        }
+
+        if ($deviceUuid && ($printerError = $this->verifyPrinterReady($deviceUuid, $force))) {
             return $printerError;
         }
 

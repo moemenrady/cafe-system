@@ -95,6 +95,12 @@ class PrintingService
     {
         $deviceUuid = request()->header('X-Device-UUID')
             ?? (request()->has('device_uuid') ? request()->input('device_uuid') : 'pos-cashier-01');
+        $shouldPrint = filter_var(request()->input('should_print', true), FILTER_VALIDATE_BOOLEAN);
+
+        // إذا كان الجهاز جهازاً غير مخصص للطباعة (نادل / هاتف / بدون برنامج طباعة مكتبي)
+        if ($deviceUuid === 'none' || empty($deviceUuid) || !$shouldPrint) {
+            return;
+        }
 
         $job = PrinterJob::create([
             'order_id'    => $order->id,

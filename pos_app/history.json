@@ -1,878 +1,2130 @@
 [
   {
-    "id": "job-6c793051-89bc-4cff-98e3-9d267a654011",
-    "order_number": "ORD-20260923-0006",
+    "id": "3e01470d-a015-4199-980c-f446c51a82f9",
+    "order_number": "ORD-20260924-00016",
     "type": "kitchen",
     "source": "reverb",
     "status": "printed",
-    "timestamp": "2026-09-23T09:22:02.446Z",
-    "formatted_time": "١٢:٢٢:٠٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "timestamp": "2026-09-24T09:49:54.635Z",
+    "formatted_time": "١٢:٤٩:٥٤ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
     "table": "takeaway",
-    "cashier": "كاشير",
-    "total": "0.00",
-    "items_count": 2,
-    "items_summary": "2x موهيتو ليمون نعناع كلاسيك, 1x زجاجة مياه معدنية",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-6c793051-89bc-4cff-98e3-9d267a654011",
-      "type": "kitchen",
-      "printer_identifier": "barista",
-      "payload": {
-        "order_id": 7,
-        "order_number": "ORD-20260923-0006",
-        "type": "takeaway",
-        "table": null,
-        "table_name": null,
-        "notes": null,
-        "items": [
-          {
-            "name": "موهيتو ليمون نعناع كلاسيك",
-            "quantity": 2,
-            "notes": null
-          },
-          {
-            "name": "زجاجة مياه معدنية",
-            "quantity": 1,
-            "notes": null
-          }
-        ],
-        "created_at": "2026-09-23 09:22"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-ffa5a1d5-eabf-4e6a-a47d-ffd6fa7608d7",
-    "order_number": "ORD-20260923-0006",
-    "type": "customer",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:22:02.278Z",
-    "formatted_time": "١٢:٢٢:٠٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "takeaway",
-    "cashier": "المدير العام",
-    "total": "125.00",
-    "items_count": 2,
-    "items_summary": "2x موهيتو ليمون نعناع كلاسيك, 1x زجاجة مياه معدنية",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-ffa5a1d5-eabf-4e6a-a47d-ffd6fa7608d7",
-      "type": "customer",
-      "printer_identifier": "cashier",
-      "payload": {
-        "order_id": 7,
-        "invoice_id": 5,
-        "order_number": "ORD-20260923-0006",
-        "invoice": "INV-20260923-00005",
-        "invoice_number": "INV-20260923-00005",
-        "table_id": null,
-        "table": null,
-        "table_name": null,
-        "customer_name": null,
-        "customer_phone": null,
-        "type": "takeaway",
-        "print_type": "receipt",
-        "items": [
-          {
-            "name": "موهيتو ليمون نعناع كلاسيك",
-            "quantity": 2,
-            "price": 55,
-            "total": 110,
-            "notes": null
-          },
-          {
-            "name": "زجاجة مياه معدنية",
-            "quantity": 1,
-            "price": 15,
-            "total": 15,
-            "notes": null
-          }
-        ],
-        "subtotal": 125,
-        "discount": 0,
-        "tax_rate": 0,
-        "tax": 0,
-        "tax_amount": 0,
-        "total": 125,
-        "payment_method": "InstaPay",
-        "cashier_name": "المدير العام",
-        "created_at": "2026-09-23 09:22"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-e8de82ce-1550-4a18-a210-fee82a5bb9ee",
-    "order_number": "ORD-20260923-0005",
-    "type": "kitchen",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:19:30.444Z",
-    "formatted_time": "١٢:١٩:٣٠ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "takeaway",
-    "cashier": "كاشير",
-    "total": "0.00",
-    "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-e8de82ce-1550-4a18-a210-fee82a5bb9ee",
-      "type": "kitchen",
-      "printer_identifier": "barista",
-      "payload": {
-        "order_id": 6,
-        "order_number": "ORD-20260923-0005",
-        "type": "takeaway",
-        "table": null,
-        "table_name": null,
-        "notes": null,
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 1,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "notes": null
-          }
-        ],
-        "created_at": "2026-09-23 09:19"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-c46743ab-9dbd-4292-94f1-01fabb8c94db",
-    "order_number": "ORD-20260923-0005",
-    "type": "customer",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:19:30.286Z",
-    "formatted_time": "١٢:١٩:٣٠ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "takeaway",
-    "cashier": "المدير العام",
-    "total": "60.00",
-    "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-c46743ab-9dbd-4292-94f1-01fabb8c94db",
-      "type": "customer",
-      "printer_identifier": "cashier",
-      "payload": {
-        "order_id": 6,
-        "invoice_id": 4,
-        "order_number": "ORD-20260923-0005",
-        "invoice": "INV-20260923-00004",
-        "invoice_number": "INV-20260923-00004",
-        "table_id": null,
-        "table": null,
-        "table_name": null,
-        "customer_name": null,
-        "customer_phone": null,
-        "type": "takeaway",
-        "print_type": "receipt",
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 1,
-            "price": 25,
-            "total": 25,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "price": 35,
-            "total": 35,
-            "notes": null
-          }
-        ],
-        "subtotal": 60,
-        "discount": 0,
-        "tax_rate": 0,
-        "tax": 0,
-        "tax_amount": 0,
-        "total": 60,
-        "payment_method": "cash",
-        "cashier_name": "المدير العام",
-        "created_at": "2026-09-23 09:19"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "reprint-1790154652307",
-    "order_number": "ORD-20260923-0003",
-    "type": "customer",
-    "source": "reprint",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:10:52.823Z",
-    "formatted_time": "١٢:١٠:٥٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "takeaway",
-    "cashier": "المدير العام",
-    "total": "60.00",
-    "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "reprint-1790154652307",
-      "type": "customer",
-      "printer_identifier": "cashier",
-      "payload": {
-        "order_id": 4,
-        "invoice_id": 3,
-        "order_number": "ORD-20260923-0003",
-        "invoice": "INV-20260923-00003",
-        "invoice_number": "INV-20260923-00003",
-        "table_id": null,
-        "table": null,
-        "table_name": null,
-        "customer_name": "عميل التيك أواي",
-        "customer_phone": "01222222222",
-        "type": "takeaway",
-        "print_type": "receipt",
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 1,
-            "price": 25,
-            "total": 25,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "price": 35,
-            "total": 35,
-            "notes": null
-          }
-        ],
-        "subtotal": 60,
-        "discount": 0,
-        "tax_rate": 0,
-        "tax": 0,
-        "tax_amount": 0,
-        "total": 60,
-        "payment_method": "cash",
-        "cashier_name": "المدير العام",
-        "created_at": "2026-09-23 09:08"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-95806f95-ad1a-425c-8448-14dd49fffea3",
-    "order_number": "ORD-20260923-0003",
-    "type": "customer",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:12.174Z",
-    "formatted_time": "١٢:٠٨:١٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "takeaway",
-    "cashier": "المدير العام",
-    "total": "60.00",
-    "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-95806f95-ad1a-425c-8448-14dd49fffea3",
-      "type": "customer",
-      "printer_identifier": "cashier",
-      "payload": {
-        "order_id": 4,
-        "invoice_id": 3,
-        "order_number": "ORD-20260923-0003",
-        "invoice": "INV-20260923-00003",
-        "invoice_number": "INV-20260923-00003",
-        "table_id": null,
-        "table": null,
-        "table_name": null,
-        "customer_name": "عميل التيك أواي",
-        "customer_phone": "01222222222",
-        "type": "takeaway",
-        "print_type": "receipt",
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 1,
-            "price": 25,
-            "total": 25,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "price": 35,
-            "total": 35,
-            "notes": null
-          }
-        ],
-        "subtotal": 60,
-        "discount": 0,
-        "tax_rate": 0,
-        "tax": 0,
-        "tax_amount": 0,
-        "total": 60,
-        "payment_method": "cash",
-        "cashier_name": "المدير العام",
-        "created_at": "2026-09-23 09:08"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-24bba84e-5f6e-429f-902d-0237cade9757",
-    "order_number": "ORD-20260923-0004",
-    "type": "delivery",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:12.126Z",
-    "formatted_time": "١٢:٠٨:١٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "صالة",
-    "cashier": "كاشير",
-    "total": "0.00",
-    "items_count": 0,
-    "items_summary": "طلب بدون تفاصيل أصناف",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-24bba84e-5f6e-429f-902d-0237cade9757",
-      "type": "delivery",
-      "printer_identifier": "cashier",
-      "payload": {
-        "order_id": 5,
-        "order_number": "ORD-20260923-0004",
-        "phone": "01099999999",
-        "address": "شارع التحرير، الدقي، الجيزة",
-        "driver": "كابتن أحمد",
-        "notes": null
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-68fc1d4c-9bd6-4d0e-904d-235197c41346",
-    "order_number": "ORD-20260923-0002",
-    "type": "customer",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:12.122Z",
-    "formatted_time": "١٢:٠٨:١٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "طاولة 1",
-    "cashier": "المدير العام",
-    "total": "96.90",
-    "items_count": 2,
-    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-68fc1d4c-9bd6-4d0e-904d-235197c41346",
-      "type": "customer",
-      "printer_identifier": "cashier",
-      "payload": {
-        "order_id": 3,
-        "invoice_id": null,
-        "order_number": "ORD-20260923-0002",
-        "invoice": null,
-        "invoice_number": null,
-        "table_id": 2,
-        "table": "طاولة 1",
-        "table_name": "طاولة 1",
-        "customer_name": "عميل الصالة",
-        "customer_phone": "01111111111",
-        "type": "dine_in",
-        "print_type": "receipt",
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 2,
-            "price": 25,
-            "total": 50,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "price": 35,
-            "total": 35,
-            "notes": null
-          }
-        ],
-        "subtotal": 85,
-        "discount": 0,
-        "tax_rate": 14,
-        "tax": 11.9,
-        "tax_amount": 11.9,
-        "total": 96.9,
-        "payment_method": "cash",
-        "cashier_name": "المدير العام",
-        "created_at": "2026-09-23 09:08"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-d1dbee79-d33d-4fa9-8daa-c5852787708c",
-    "order_number": "ORD-20260923-0002",
-    "type": "customer",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:12.041Z",
-    "formatted_time": "١٢:٠٨:١٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "طاولة 1",
-    "cashier": "المدير العام",
-    "total": "96.90",
-    "items_count": 2,
-    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-d1dbee79-d33d-4fa9-8daa-c5852787708c",
-      "type": "customer",
-      "printer_identifier": "cashier",
-      "payload": {
-        "order_id": 3,
-        "invoice_id": null,
-        "order_number": "ORD-20260923-0002",
-        "invoice": null,
-        "invoice_number": null,
-        "table_id": 2,
-        "table": "طاولة 1",
-        "table_name": "طاولة 1",
-        "customer_name": "عميل الصالة",
-        "customer_phone": "01111111111",
-        "type": "dine_in",
-        "print_type": "invoice",
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 2,
-            "price": 25,
-            "total": 50,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "price": 35,
-            "total": 35,
-            "notes": null
-          }
-        ],
-        "subtotal": 85,
-        "discount": 0,
-        "tax_rate": 14,
-        "tax": 11.9,
-        "tax_amount": 11.9,
-        "total": 96.9,
-        "payment_method": "cash",
-        "cashier_name": "المدير العام",
-        "created_at": "2026-09-23 09:08"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-4273060f-72aa-49db-a80d-3a86f22d648b",
-    "order_number": "ORD-20260923-0002",
-    "type": "waiter",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:12.039Z",
-    "formatted_time": "١٢:٠٨:١٢ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "طاولة 1",
-    "cashier": "كاشير",
-    "total": "0.00",
-    "items_count": 0,
-    "items_summary": "طلب بدون تفاصيل أصناف",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-4273060f-72aa-49db-a80d-3a86f22d648b",
-      "type": "waiter",
-      "printer_identifier": "barista",
-      "payload": {
-        "order_id": 3,
-        "order_number": "ORD-20260923-0002",
-        "table": "طاولة 1",
-        "table_name": "طاولة 1",
-        "type": "dine_in"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-55239ee6-f436-4b34-b413-10f2cff7a029",
-    "order_number": "ORD-20260923-0003",
-    "type": "kitchen",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:11.975Z",
-    "formatted_time": "١٢:٠٨:١١ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "takeaway",
-    "cashier": "كاشير",
-    "total": "0.00",
-    "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-55239ee6-f436-4b34-b413-10f2cff7a029",
-      "type": "kitchen",
-      "printer_identifier": "barista",
-      "payload": {
-        "order_id": 4,
-        "order_number": "ORD-20260923-0003",
-        "type": "takeaway",
-        "table": null,
-        "table_name": null,
-        "notes": null,
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 1,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "notes": null
-          }
-        ],
-        "created_at": "2026-09-23 09:08"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-5e0f35a0-595b-48f0-bf9b-30dc75b2cb35",
-    "order_number": "ORD-20260923-0004",
-    "type": "kitchen",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:11.972Z",
-    "formatted_time": "١٢:٠٨:١١ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "delivery",
     "cashier": "كاشير",
     "total": "0.00",
     "items_count": 1,
-    "items_summary": "1x قهوة تركي سينجل",
+    "items_summary": "2x Classic Latte",
     "printers": [
       {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
         "success": true
       }
     ],
     "raw_job": {
-      "uuid": "job-5e0f35a0-595b-48f0-bf9b-30dc75b2cb35",
+      "id": 32,
+      "uuid": "3e01470d-a015-4199-980c-f446c51a82f9",
+      "device_uuid": "pos-cashier-01",
       "type": "kitchen",
-      "printer_identifier": "barista",
+      "order_id": 16,
       "payload": {
-        "order_id": 5,
-        "order_number": "ORD-20260923-0004",
-        "type": "delivery",
-        "table": null,
-        "table_name": null,
-        "notes": null,
+        "type": "takeaway",
         "items": [
           {
-            "name": "قهوة تركي سينجل",
-            "quantity": 1,
-            "notes": null
+            "name": "Classic Latte",
+            "notes": null,
+            "quantity": 2
           }
         ],
-        "created_at": "2026-09-23 09:08"
+        "notes": null,
+        "table": null,
+        "order_id": 16,
+        "created_at": "2026-09-24 09:49",
+        "order_number": "ORD-20260924-00016"
       },
-      "status": "pending"
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:49:50.000000Z",
+      "updated_at": "2026-09-24T09:49:50.000000Z"
     },
     "error": null
   },
   {
-    "id": "job-9ffdf9ab-55d9-4862-a672-42ed2cde870f",
-    "order_number": "ORD-20260923-0002",
+    "id": "fa60f0e8-ef47-4b4f-bdd5-8af3b21b9826",
+    "order_number": "ORD-20260924-00016",
     "type": "customer",
     "source": "reverb",
     "status": "printed",
-    "timestamp": "2026-09-23T09:08:11.284Z",
-    "formatted_time": "١٢:٠٨:١١ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "طاولة 1",
+    "timestamp": "2026-09-24T09:49:53.437Z",
+    "formatted_time": "١٢:٤٩:٥٣ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
     "cashier": "المدير العام",
-    "total": "96.90",
-    "items_count": 2,
-    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
+    "total": "240.00",
+    "items_count": 1,
+    "items_summary": "2x Classic Latte",
     "printers": [
       {
-        "id": "printer-1790096631475",
+        "id": "printer-cashier",
         "name": "XP-80C",
         "success": true
       }
     ],
     "raw_job": {
-      "uuid": "job-9ffdf9ab-55d9-4862-a672-42ed2cde870f",
+      "id": 31,
+      "uuid": "fa60f0e8-ef47-4b4f-bdd5-8af3b21b9826",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 16,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "price": 120,
+            "total": 240,
+            "quantity": 2
+          }
+        ],
+        "table": null,
+        "total": 240,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 16,
+        "subtotal": 240,
+        "created_at": "2026-09-24 09:49",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00016"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:49:50.000000Z",
+      "updated_at": "2026-09-24T09:49:50.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "9ceb0652-5b2b-4e89-89f1-185cdc79a279",
+    "order_number": "ORD-20260924-00015",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:49:34.834Z",
+    "formatted_time": "١٢:٤٩:٣٤ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "2x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 30,
+      "uuid": "9ceb0652-5b2b-4e89-89f1-185cdc79a279",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 15,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "quantity": 2
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 15,
+        "created_at": "2026-09-24 09:49",
+        "order_number": "ORD-20260924-00015"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:49:31.000000Z",
+      "updated_at": "2026-09-24T09:49:31.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "2535e3b1-0f20-4e92-b32c-c8aba1aaf229",
+    "order_number": "ORD-20260924-00015",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:49:33.466Z",
+    "formatted_time": "١٢:٤٩:٣٣ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "240.00",
+    "items_count": 1,
+    "items_summary": "2x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 29,
+      "uuid": "2535e3b1-0f20-4e92-b32c-c8aba1aaf229",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 15,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "price": 120,
+            "total": 240,
+            "quantity": 2
+          }
+        ],
+        "table": null,
+        "total": 240,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 15,
+        "subtotal": 240,
+        "created_at": "2026-09-24 09:49",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00015"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:49:31.000000Z",
+      "updated_at": "2026-09-24T09:49:31.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "68e0065a-4100-4489-b78a-33b4b0c1a885",
+    "order_number": "ORD-20260924-00014",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:48:07.330Z",
+    "formatted_time": "١٢:٤٨:٠٧ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 4,
+    "items_summary": "1x Focaccia, 1x Baguette, 1x Mixed Cheese, 1x Roasted Almond Pudding",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 28,
+      "uuid": "68e0065a-4100-4489-b78a-33b4b0c1a885",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 14,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Focaccia",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Baguette",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Roasted Almond Pudding",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 14,
+        "created_at": "2026-09-24 09:48",
+        "order_number": "ORD-20260924-00014"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:48:02.000000Z",
+      "updated_at": "2026-09-24T09:48:02.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "5eb71be3-549e-4064-8d98-d5da14eb6f69",
+    "order_number": "ORD-20260924-00014",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:48:05.874Z",
+    "formatted_time": "١٢:٤٨:٠٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "400.00",
+    "items_count": 4,
+    "items_summary": "1x Focaccia, 1x Baguette, 1x Mixed Cheese, 1x Roasted Almond Pudding",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 27,
+      "uuid": "5eb71be3-549e-4064-8d98-d5da14eb6f69",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 14,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Focaccia",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Baguette",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "price": 140,
+            "total": 140,
+            "quantity": 1
+          },
+          {
+            "name": "Roasted Almond Pudding",
+            "notes": null,
+            "price": 140,
+            "total": 140,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 400,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 14,
+        "subtotal": 400,
+        "created_at": "2026-09-24 09:48",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00014"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:48:02.000000Z",
+      "updated_at": "2026-09-24T09:48:02.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "57abac2f-fb39-4bd9-ae8f-2a52173277c4",
+    "order_number": "ORD-20260924-00013",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:47:47.194Z",
+    "formatted_time": "١٢:٤٧:٤٧ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "6x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 26,
+      "uuid": "57abac2f-fb39-4bd9-ae8f-2a52173277c4",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 13,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "quantity": 6
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 13,
+        "created_at": "2026-09-24 09:47",
+        "order_number": "ORD-20260924-00013"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:47:41.000000Z",
+      "updated_at": "2026-09-24T09:47:41.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "4dedd7e2-9498-4c19-91eb-910d6c5d0bce",
+    "order_number": "ORD-20260924-00013",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:47:45.888Z",
+    "formatted_time": "١٢:٤٧:٤٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "720.00",
+    "items_count": 1,
+    "items_summary": "6x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 25,
+      "uuid": "4dedd7e2-9498-4c19-91eb-910d6c5d0bce",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 13,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "price": 120,
+            "total": 720,
+            "quantity": 6
+          }
+        ],
+        "table": null,
+        "total": 720,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 13,
+        "subtotal": 720,
+        "created_at": "2026-09-24 09:47",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00013"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:47:41.000000Z",
+      "updated_at": "2026-09-24T09:47:41.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "fc513b96-2766-4094-a13a-5dcc502054bf",
+    "order_number": "ORD-20260924-00012",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:47:22.439Z",
+    "formatted_time": "١٢:٤٧:٢٢ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "4x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 24,
+      "uuid": "fc513b96-2766-4094-a13a-5dcc502054bf",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 12,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "quantity": 4
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 12,
+        "created_at": "2026-09-24 09:47",
+        "order_number": "ORD-20260924-00012"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:47:18.000000Z",
+      "updated_at": "2026-09-24T09:47:18.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "3f668284-9aaf-4895-b42b-1fcdf3e9569f",
+    "order_number": "ORD-20260924-00012",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:47:21.087Z",
+    "formatted_time": "١٢:٤٧:٢١ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "480.00",
+    "items_count": 1,
+    "items_summary": "4x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 23,
+      "uuid": "3f668284-9aaf-4895-b42b-1fcdf3e9569f",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 12,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "price": 120,
+            "total": 480,
+            "quantity": 4
+          }
+        ],
+        "table": null,
+        "total": 480,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 12,
+        "subtotal": 480,
+        "created_at": "2026-09-24 09:47",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00012"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:47:18.000000Z",
+      "updated_at": "2026-09-24T09:47:18.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "5898b70d-19d2-4d9a-8a8b-18dcb6e0aed0",
+    "order_number": "ORD-20260924-00011",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:47:17.182Z",
+    "formatted_time": "١٢:٤٧:١٧ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "2x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 22,
+      "uuid": "5898b70d-19d2-4d9a-8a8b-18dcb6e0aed0",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 11,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "quantity": 2
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 11,
+        "created_at": "2026-09-24 09:47",
+        "order_number": "ORD-20260924-00011"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:47:12.000000Z",
+      "updated_at": "2026-09-24T09:47:12.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "8c518bce-39bf-481c-adab-335e2ec91650",
+    "order_number": "ORD-20260924-00011",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:47:15.921Z",
+    "formatted_time": "١٢:٤٧:١٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "240.00",
+    "items_count": 1,
+    "items_summary": "2x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 21,
+      "uuid": "8c518bce-39bf-481c-adab-335e2ec91650",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 11,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "price": 120,
+            "total": 240,
+            "quantity": 2
+          }
+        ],
+        "table": null,
+        "total": 240,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 11,
+        "subtotal": 240,
+        "created_at": "2026-09-24 09:47",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00011"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:47:12.000000Z",
+      "updated_at": "2026-09-24T09:47:12.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "ac6244af-f2ce-4a0f-8899-e438088fa166",
+    "order_number": "ORD-20260924-00010",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:46:57.243Z",
+    "formatted_time": "١٢:٤٦:٥٧ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "3x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 20,
+      "uuid": "ac6244af-f2ce-4a0f-8899-e438088fa166",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 10,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "quantity": 3
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 10,
+        "created_at": "2026-09-24 09:46",
+        "order_number": "ORD-20260924-00010"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:46:53.000000Z",
+      "updated_at": "2026-09-24T09:46:53.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "ec2c33bc-aaa4-4525-9e8a-a40b663e7471",
+    "order_number": "ORD-20260924-00010",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:46:55.898Z",
+    "formatted_time": "١٢:٤٦:٥٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "360.00",
+    "items_count": 1,
+    "items_summary": "3x Classic Latte",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 19,
+      "uuid": "ec2c33bc-aaa4-4525-9e8a-a40b663e7471",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 10,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Classic Latte",
+            "notes": null,
+            "price": 120,
+            "total": 360,
+            "quantity": 3
+          }
+        ],
+        "table": null,
+        "total": 360,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 10,
+        "subtotal": 360,
+        "created_at": "2026-09-24 09:46",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00010"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:46:53.000000Z",
+      "updated_at": "2026-09-24T09:46:53.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "f5fadf59-a06d-44b2-873f-19808fccaac1",
+    "order_number": "ORD-20260924-00009",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:46:34.660Z",
+    "formatted_time": "١٢:٤٦:٣٤ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 9,
+    "items_summary": "1x Vanilla Latte, 1x Spanish Latte, 1x Spanish Cookiee, 1x Salted Vanilla, 1x Cappuccino, 1x Flat white, 1x Espresso, 1x Americano, 1x Hot Chocolate",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 18,
+      "uuid": "f5fadf59-a06d-44b2-873f-19808fccaac1",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 9,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Vanilla Latte",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Spanish Latte",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Spanish Cookiee",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Salted Vanilla",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Cappuccino",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Flat white",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Espresso",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Americano",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Hot Chocolate",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 9,
+        "created_at": "2026-09-24 09:46",
+        "order_number": "ORD-20260924-00009"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:46:29.000000Z",
+      "updated_at": "2026-09-24T09:46:29.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "3982f725-bc8f-4301-9823-019fce15e17a",
+    "order_number": "ORD-20260924-00009",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:46:33.415Z",
+    "formatted_time": "١٢:٤٦:٣٣ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "1020.00",
+    "items_count": 9,
+    "items_summary": "1x Vanilla Latte, 1x Spanish Latte, 1x Spanish Cookiee, 1x Salted Vanilla, 1x Cappuccino, 1x Flat white, 1x Espresso, 1x Americano, 1x Hot Chocolate",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 17,
+      "uuid": "3982f725-bc8f-4301-9823-019fce15e17a",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 9,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Vanilla Latte",
+            "notes": null,
+            "price": 130,
+            "total": 130,
+            "quantity": 1
+          },
+          {
+            "name": "Spanish Latte",
+            "notes": null,
+            "price": 130,
+            "total": 130,
+            "quantity": 1
+          },
+          {
+            "name": "Spanish Cookiee",
+            "notes": null,
+            "price": 140,
+            "total": 140,
+            "quantity": 1
+          },
+          {
+            "name": "Salted Vanilla",
+            "notes": null,
+            "price": 130,
+            "total": 130,
+            "quantity": 1
+          },
+          {
+            "name": "Cappuccino",
+            "notes": null,
+            "price": 120,
+            "total": 120,
+            "quantity": 1
+          },
+          {
+            "name": "Flat white",
+            "notes": null,
+            "price": 100,
+            "total": 100,
+            "quantity": 1
+          },
+          {
+            "name": "Espresso",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Americano",
+            "notes": null,
+            "price": 90,
+            "total": 90,
+            "quantity": 1
+          },
+          {
+            "name": "Hot Chocolate",
+            "notes": null,
+            "price": 120,
+            "total": 120,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 1020,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 9,
+        "subtotal": 1020,
+        "created_at": "2026-09-24 09:46",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00009"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:46:29.000000Z",
+      "updated_at": "2026-09-24T09:46:29.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "37e847c7-0d60-4dd2-89fd-0c7b27372046",
+    "order_number": "ORD-20260924-00008",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:44:34.448Z",
+    "formatted_time": "١٢:٤٤:٣٤ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "2x Bagel",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 16,
+      "uuid": "37e847c7-0d60-4dd2-89fd-0c7b27372046",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 8,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Bagel",
+            "notes": null,
+            "quantity": 2
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 8,
+        "created_at": "2026-09-24 09:44",
+        "order_number": "ORD-20260924-00008"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:44:29.000000Z",
+      "updated_at": "2026-09-24T09:44:29.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "0250cec4-c049-44ba-b702-670b01336a8f",
+    "order_number": "ORD-20260924-00008",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:44:33.256Z",
+    "formatted_time": "١٢:٤٤:٣٣ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "120.00",
+    "items_count": 1,
+    "items_summary": "2x Bagel",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 15,
+      "uuid": "0250cec4-c049-44ba-b702-670b01336a8f",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 8,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Bagel",
+            "notes": null,
+            "price": 60,
+            "total": 120,
+            "quantity": 2
+          }
+        ],
+        "table": null,
+        "total": 120,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 8,
+        "subtotal": 120,
+        "created_at": "2026-09-24 09:44",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00008"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:44:29.000000Z",
+      "updated_at": "2026-09-24T09:44:29.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "ca8aecae-1b60-4339-a7b5-97251001ea76",
+    "order_number": "ORD-20260924-00007",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:44:14.564Z",
+    "formatted_time": "١٢:٤٤:١٤ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "2x Bagel",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 14,
+      "uuid": "ca8aecae-1b60-4339-a7b5-97251001ea76",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 7,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Bagel",
+            "notes": null,
+            "quantity": 2
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 7,
+        "created_at": "2026-09-24 09:44",
+        "order_number": "ORD-20260924-00007"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:44:11.000000Z",
+      "updated_at": "2026-09-24T09:44:11.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "6eeeb7f9-0964-4977-b4c7-ad9bde5ae426",
+    "order_number": "ORD-20260924-00007",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:44:13.316Z",
+    "formatted_time": "١٢:٤٤:١٣ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "120.00",
+    "items_count": 1,
+    "items_summary": "2x Bagel",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 13,
+      "uuid": "6eeeb7f9-0964-4977-b4c7-ad9bde5ae426",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 7,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Bagel",
+            "notes": null,
+            "price": 60,
+            "total": 120,
+            "quantity": 2
+          }
+        ],
+        "table": null,
+        "total": 120,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 7,
+        "subtotal": 120,
+        "created_at": "2026-09-24 09:44",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00007"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:44:11.000000Z",
+      "updated_at": "2026-09-24T09:44:11.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "1d2fe28f-ff30-4991-852a-cf19d0d556fd",
+    "order_number": "ORD-20260924-00006",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:41:09.424Z",
+    "formatted_time": "١٢:٤١:٠٩ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 5,
+    "items_summary": "1x Bagel, 1x Focaccia, 1x Baguette, 1x Mixed Cheese, 1x Caramel Machiato",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 12,
+      "uuid": "1d2fe28f-ff30-4991-852a-cf19d0d556fd",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 6,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Bagel",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Focaccia",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Baguette",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Caramel Machiato",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 6,
+        "created_at": "2026-09-24 09:41",
+        "order_number": "ORD-20260924-00006"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:41:04.000000Z",
+      "updated_at": "2026-09-24T09:41:04.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "6b3af6c6-2201-4f63-b35a-57d550d3ee4c",
+    "order_number": "ORD-20260924-00006",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:41:08.176Z",
+    "formatted_time": "١٢:٤١:٠٨ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "450.00",
+    "items_count": 5,
+    "items_summary": "1x Bagel, 1x Focaccia, 1x Baguette, 1x Mixed Cheese, 1x Caramel Machiato",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 11,
+      "uuid": "6b3af6c6-2201-4f63-b35a-57d550d3ee4c",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 6,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Bagel",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Focaccia",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Baguette",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "price": 140,
+            "total": 140,
+            "quantity": 1
+          },
+          {
+            "name": "Caramel Machiato",
+            "notes": null,
+            "price": 130,
+            "total": 130,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 450,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 6,
+        "subtotal": 450,
+        "created_at": "2026-09-24 09:41",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00006"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:41:04.000000Z",
+      "updated_at": "2026-09-24T09:41:04.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "1bf36a6f-a7af-4ed0-874c-97ed327088ba",
+    "order_number": "ORD-20260924-00005",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:38:50.448Z",
+    "formatted_time": "١٢:٣٨:٥٠ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 3,
+    "items_summary": "1x Focaccia, 1x Baguette, 1x Mixed Cheese",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 10,
+      "uuid": "1bf36a6f-a7af-4ed0-874c-97ed327088ba",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 5,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Focaccia",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Baguette",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 5,
+        "created_at": "2026-09-24 09:38",
+        "order_number": "ORD-20260924-00005"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:38:45.000000Z",
+      "updated_at": "2026-09-24T09:38:45.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "3a6e96c4-db5f-439b-b079-27cd81a71d90",
+    "order_number": "ORD-20260924-00005",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:38:49.137Z",
+    "formatted_time": "١٢:٣٨:٤٩ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "260.00",
+    "items_count": 3,
+    "items_summary": "1x Focaccia, 1x Baguette, 1x Mixed Cheese",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 9,
+      "uuid": "3a6e96c4-db5f-439b-b079-27cd81a71d90",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 5,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Focaccia",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Baguette",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          },
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "price": 140,
+            "total": 140,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 260,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 5,
+        "subtotal": 260,
+        "created_at": "2026-09-24 09:38",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00005"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:38:45.000000Z",
+      "updated_at": "2026-09-24T09:38:45.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "1601311c-392d-4024-855a-571c990e8712",
+    "order_number": "ORD-20260924-00004",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:37:14.433Z",
+    "formatted_time": "١٢:٣٧:١٤ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "1x Baguette",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 8,
+      "uuid": "1601311c-392d-4024-855a-571c990e8712",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 4,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Baguette",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 4,
+        "created_at": "2026-09-24 09:37",
+        "order_number": "ORD-20260924-00004"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:37:08.000000Z",
+      "updated_at": "2026-09-24T09:37:08.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "2991fd5c-dd53-4f72-b9e9-98c71eef6022",
+    "order_number": "ORD-20260924-00004",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:37:12.490Z",
+    "formatted_time": "١٢:٣٧:١٢ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "60.00",
+    "items_count": 1,
+    "items_summary": "1x Baguette",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 7,
+      "uuid": "2991fd5c-dd53-4f72-b9e9-98c71eef6022",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 4,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Baguette",
+            "notes": null,
+            "price": 60,
+            "total": 60,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 60,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 4,
+        "subtotal": 60,
+        "created_at": "2026-09-24 09:37",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00004"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:37:08.000000Z",
+      "updated_at": "2026-09-24T09:37:08.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "90f6e916-468f-4e92-8a09-0763e22d7926",
+    "order_number": "ORD-20260924-00003",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:32:25.905Z",
+    "formatted_time": "١٢:٣٢:٢٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "1x Mixed Cheese, 1x Tuna",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 6,
+      "uuid": "90f6e916-468f-4e92-8a09-0763e22d7926",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 3,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Tuna",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 3,
+        "created_at": "2026-09-24 09:32",
+        "order_number": "ORD-20260924-00003"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:32:20.000000Z",
+      "updated_at": "2026-09-24T09:32:20.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "617121ce-28dc-40e5-be59-913718628661",
+    "order_number": "ORD-20260924-00003",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:32:24.468Z",
+    "formatted_time": "١٢:٣٢:٢٤ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "310.00",
+    "items_count": 2,
+    "items_summary": "1x Mixed Cheese, 1x Tuna",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 5,
+      "uuid": "617121ce-28dc-40e5-be59-913718628661",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 3,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "price": 140,
+            "total": 140,
+            "quantity": 1
+          },
+          {
+            "name": "Tuna",
+            "notes": null,
+            "price": 170,
+            "total": 170,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 310,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 3,
+        "subtotal": 310,
+        "created_at": "2026-09-24 09:32",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00003"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T09:32:20.000000Z",
+      "updated_at": "2026-09-24T09:32:20.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "4c95102f-be1b-44ec-b27c-151191d00e57",
+    "order_number": "ORD-20260924-00002",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:31:52.561Z",
+    "formatted_time": "١٢:٣١:٥٢ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "1x Tuna",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 4,
+      "uuid": "4c95102f-be1b-44ec-b27c-151191d00e57",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 2,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Tuna",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 2,
+        "created_at": "2026-09-24 08:37",
+        "order_number": "ORD-20260924-00002"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T08:37:49.000000Z",
+      "updated_at": "2026-09-24T08:37:49.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "48358744-ae4c-4320-b617-4d9512aafbee",
+    "order_number": "ORD-20260924-00002",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:31:52.305Z",
+    "formatted_time": "١٢:٣١:٥٢ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "170.00",
+    "items_count": 1,
+    "items_summary": "1x Tuna",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 3,
+      "uuid": "48358744-ae4c-4320-b617-4d9512aafbee",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 2,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Tuna",
+            "notes": null,
+            "price": 170,
+            "total": 170,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 170,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 2,
+        "subtotal": 170,
+        "created_at": "2026-09-24 08:37",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00002"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T08:37:49.000000Z",
+      "updated_at": "2026-09-24T08:37:49.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "0d51944d-f7c2-41e2-a602-83fff1cb59e9",
+    "order_number": "ORD-20260924-00001",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:31:51.376Z",
+    "formatted_time": "١٢:٣١:٥١ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "1x Tuna",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 2,
+      "uuid": "0d51944d-f7c2-41e2-a602-83fff1cb59e9",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 1,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Tuna",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 1,
+        "created_at": "2026-09-24 08:37",
+        "order_number": "ORD-20260924-00001"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T08:37:18.000000Z",
+      "updated_at": "2026-09-24T08:37:18.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "fd07eaa1-08be-431d-85c1-8713ca02baee",
+    "order_number": "ORD-20260924-00001",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:31:50.409Z",
+    "formatted_time": "١٢:٣١:٥٠ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "170.00",
+    "items_count": 1,
+    "items_summary": "1x Tuna",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 1,
+      "uuid": "fd07eaa1-08be-431d-85c1-8713ca02baee",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 1,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Tuna",
+            "notes": null,
+            "price": 170,
+            "total": 170,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 170,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 1,
+        "subtotal": 170,
+        "created_at": "2026-09-24 08:37",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00001"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T08:37:18.000000Z",
+      "updated_at": "2026-09-24T08:37:18.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "ed5af5be-8839-4d5d-98f4-29de1ffff052",
+    "order_number": "ORD-20260924-00004",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:19:06.843Z",
+    "formatted_time": "١٢:١٩:٠٦ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": 1,
+    "cashier": "المدير العام",
+    "total": "190.00",
+    "items_count": 2,
+    "items_summary": "1x Focaccia, 1x Caramel Machiato",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "ed5af5be-8839-4d5d-98f4-29de1ffff052",
       "type": "customer",
       "printer_identifier": "cashier",
       "payload": {
-        "order_id": 3,
-        "invoice_id": null,
-        "order_number": "ORD-20260923-0002",
-        "invoice": null,
-        "invoice_number": null,
-        "table_id": 2,
-        "table": "طاولة 1",
-        "table_name": "طاولة 1",
-        "customer_name": "عميل الصالة",
-        "customer_phone": "01111111111",
+        "order_id": 31,
+        "order_number": "ORD-20260924-00004",
+        "invoice": "INV-20260924-00004",
+        "table": 1,
         "type": "dine_in",
-        "print_type": "invoice",
         "items": [
           {
-            "name": "قهوة تركي سينجل",
-            "quantity": 2,
-            "price": 25,
-            "total": 50,
+            "name": "Focaccia",
+            "quantity": 1,
+            "price": 60,
+            "total": 60,
             "notes": null
           },
           {
-            "name": "قهوة تركي دبل",
+            "name": "Caramel Machiato",
             "quantity": 1,
-            "price": 35,
-            "total": 35,
+            "price": 130,
+            "total": 130,
             "notes": null
           }
         ],
-        "subtotal": 85,
+        "subtotal": 190,
         "discount": 0,
-        "tax_rate": 14,
-        "tax": 11.9,
-        "tax_amount": 11.9,
-        "total": 96.9,
-        "payment_method": "cash",
+        "total": 190,
         "cashier_name": "المدير العام",
-        "created_at": "2026-09-23 09:08"
+        "created_at": "2026-09-24 09:17"
       },
       "status": "pending"
     },
     "error": null
   },
   {
-    "id": "job-263d9776-ebb5-438c-94d1-0fe89932736e",
-    "order_number": "ORD-20260923-0002",
-    "type": "kitchen",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:08:10.936Z",
-    "formatted_time": "١٢:٠٨:١٠ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "طاولة 1",
-    "cashier": "كاشير",
-    "total": "0.00",
-    "items_count": 2,
-    "items_summary": "2x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-263d9776-ebb5-438c-94d1-0fe89932736e",
-      "type": "kitchen",
-      "printer_identifier": "barista",
-      "payload": {
-        "order_id": 3,
-        "order_number": "ORD-20260923-0002",
-        "type": "dine_in",
-        "table": "طاولة 1",
-        "table_name": "طاولة 1",
-        "notes": null,
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 2,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "notes": null
-          }
-        ],
-        "created_at": "2026-09-23 09:08"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-8e6734d7-47a9-48f3-b16b-5c2e03d87328",
-    "order_number": "ORD-20260923-0001",
-    "type": "kitchen",
-    "source": "reverb",
-    "status": "printed",
-    "timestamp": "2026-09-23T09:06:19.102Z",
-    "formatted_time": "١٢:٠٦:١٩ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "vipp",
-    "cashier": "كاشير",
-    "total": "0.00",
-    "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x قهوة تركي دبل",
-    "printers": [
-      {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
-        "success": true
-      }
-    ],
-    "raw_job": {
-      "uuid": "job-8e6734d7-47a9-48f3-b16b-5c2e03d87328",
-      "type": "kitchen",
-      "printer_identifier": "barista",
-      "payload": {
-        "order_id": 2,
-        "order_number": "ORD-20260923-0001",
-        "type": "dine_in",
-        "table": "vipp",
-        "table_name": "vipp",
-        "notes": null,
-        "items": [
-          {
-            "name": "قهوة تركي سينجل",
-            "quantity": 1,
-            "notes": null
-          },
-          {
-            "name": "قهوة تركي دبل",
-            "quantity": 1,
-            "notes": null
-          }
-        ],
-        "created_at": "2026-09-23 09:06"
-      },
-      "status": "pending"
-    },
-    "error": null
-  },
-  {
-    "id": "job-fde24ba7-c3e2-4d29-9e19-e6b8478f6994",
-    "order_number": "ORD-20260923-0001",
+    "id": "1a6cbb8a-ed85-454e-a266-e760a8452d1a",
+    "order_number": "ORD-20260924-00004",
     "type": "waiter",
     "source": "reverb",
     "status": "printed",
-    "timestamp": "2026-09-23T09:06:19.098Z",
-    "formatted_time": "١٢:٠٦:١٩ م",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "vipp",
+    "timestamp": "2026-09-24T09:17:45.823Z",
+    "formatted_time": "١٢:١٧:٤٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": 1,
     "cashier": "كاشير",
     "total": "0.00",
     "items_count": 0,
     "items_summary": "طلب بدون تفاصيل أصناف",
     "printers": [
       {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
         "success": true
       }
     ],
     "raw_job": {
-      "uuid": "job-fde24ba7-c3e2-4d29-9e19-e6b8478f6994",
+      "uuid": "1a6cbb8a-ed85-454e-a266-e760a8452d1a",
       "type": "waiter",
       "printer_identifier": "barista",
       "payload": {
-        "order_id": 2,
-        "order_number": "ORD-20260923-0001",
-        "table": "vipp",
-        "table_name": "vipp",
+        "order_id": 31,
+        "order_number": "ORD-20260924-00004",
+        "table": 1,
         "type": "dine_in"
       },
       "status": "pending"
@@ -880,118 +2132,143 @@
     "error": null
   },
   {
-    "id": "job-2",
-    "order_number": "ORD-20260922-0001",
+    "id": "46ebedad-4893-4b76-b3cd-74355a734a14",
+    "order_number": "ORD-20260924-00004",
     "type": "kitchen",
     "source": "reverb",
     "status": "printed",
-    "timestamp": "2026-09-22T22:40:28.524Z",
-    "formatted_time": "٠١:٤٠:٢٨ ص",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
-    "table": "takeaway",
+    "timestamp": "2026-09-24T09:17:45.618Z",
+    "formatted_time": "١٢:١٧:٤٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": 1,
     "cashier": "كاشير",
     "total": "0.00",
     "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x فرابوتشينو كراميل",
+    "items_summary": "1x Focaccia, 1x Caramel Machiato",
     "printers": [
       {
-        "id": "printer-1790096631475",
-        "name": "XP-80C",
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
         "success": true
       }
     ],
     "raw_job": {
-      "uuid": "job-2",
+      "uuid": "46ebedad-4893-4b76-b3cd-74355a734a14",
       "type": "kitchen",
       "printer_identifier": "barista",
       "payload": {
-        "order_id": 1,
-        "order_number": "ORD-20260922-0001",
-        "type": "takeaway",
-        "table": null,
-        "table_name": null,
+        "order_id": 31,
+        "order_number": "ORD-20260924-00004",
+        "type": "dine_in",
+        "table": 1,
         "notes": null,
         "items": [
           {
-            "name": "قهوة تركي سينجل",
+            "name": "Focaccia",
             "quantity": 1,
             "notes": null
           },
           {
-            "name": "فرابوتشينو كراميل",
+            "name": "Caramel Machiato",
             "quantity": 1,
             "notes": null
           }
         ],
-        "created_at": "2026-09-22 22:40"
+        "created_at": "2026-09-24 09:17"
       },
       "status": "pending"
     },
     "error": null
   },
   {
-    "id": "job-1",
-    "order_number": "ORD-20260922-0001",
+    "id": "e02acbf0-b4fd-4c37-83bd-cecced8cbdc5",
+    "order_number": "ORD-20260924-00003",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T09:16:55.900Z",
+    "formatted_time": "١٢:١٦:٥٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 1,
+    "items_summary": "1x Caramel Machiato",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "uuid": "e02acbf0-b4fd-4c37-83bd-cecced8cbdc5",
+      "type": "kitchen",
+      "printer_identifier": "barista",
+      "payload": {
+        "order_id": 30,
+        "order_number": "ORD-20260924-00003",
+        "type": "takeaway",
+        "table": null,
+        "notes": null,
+        "items": [
+          {
+            "name": "Caramel Machiato",
+            "quantity": 1,
+            "notes": null
+          }
+        ],
+        "created_at": "2026-09-24 09:16"
+      },
+      "status": "pending"
+    },
+    "error": null
+  },
+  {
+    "id": "57c7666b-756e-431d-a633-75da12cc4ac1",
+    "order_number": "ORD-20260924-00003",
     "type": "customer",
     "source": "reverb",
     "status": "printed",
-    "timestamp": "2026-09-22T22:40:28.263Z",
-    "formatted_time": "٠١:٤٠:٢٨ ص",
-    "formatted_date": "٢٣‏/٩‏/٢٠٢٦",
+    "timestamp": "2026-09-24T09:16:55.796Z",
+    "formatted_time": "١٢:١٦:٥٥ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
     "table": "takeaway",
     "cashier": "المدير العام",
-    "total": "119.70",
-    "items_count": 2,
-    "items_summary": "1x قهوة تركي سينجل, 1x فرابوتشينو كراميل",
+    "total": "130.00",
+    "items_count": 1,
+    "items_summary": "1x Caramel Machiato",
     "printers": [
       {
-        "id": "printer-1790096631475",
+        "id": "printer-cashier",
         "name": "XP-80C",
         "success": true
       }
     ],
     "raw_job": {
-      "uuid": "job-1",
+      "uuid": "57c7666b-756e-431d-a633-75da12cc4ac1",
       "type": "customer",
       "printer_identifier": "cashier",
       "payload": {
-        "order_id": 1,
-        "invoice_id": 1,
-        "order_number": "ORD-20260922-0001",
-        "invoice": "INV-20260922-00001",
-        "invoice_number": "INV-20260922-00001",
-        "table_id": null,
+        "order_id": 30,
+        "order_number": "ORD-20260924-00003",
+        "invoice": null,
         "table": null,
-        "table_name": null,
-        "customer_name": null,
-        "customer_phone": null,
         "type": "takeaway",
-        "print_type": "receipt",
         "items": [
           {
-            "name": "قهوة تركي سينجل",
+            "name": "Caramel Machiato",
             "quantity": 1,
-            "price": 25,
-            "total": 25,
-            "notes": null
-          },
-          {
-            "name": "فرابوتشينو كراميل",
-            "quantity": 1,
-            "price": 80,
-            "total": 80,
+            "price": 130,
+            "total": 130,
             "notes": null
           }
         ],
-        "subtotal": 105,
+        "subtotal": 130,
         "discount": 0,
-        "tax_rate": 14,
-        "tax": 14.7,
-        "tax_amount": 14.7,
-        "total": 119.7,
-        "payment_method": "cash",
+        "total": 130,
         "cashier_name": "المدير العام",
-        "created_at": "2026-09-22 22:40"
+        "created_at": "2026-09-24 09:16"
       },
       "status": "pending"
     },

@@ -42,6 +42,8 @@ class ReverbClient {
     this.lastHeartbeatReceivedAt = null;
     this.recentJobs = []; // In-memory ring buffer for UI dashboard activity feed
     this.maxRecentJobs = 50;
+    this.processingJobUuids = new Set();
+    this.pollingTimer = null;
   }
 
   /**
@@ -87,10 +89,12 @@ class ReverbClient {
 
       this.bindPusherEvents(deviceUuid);
       this.startWatchdog();
+      this.startPollingWatchdog(2500);
     } catch (err) {
       this.status = 'error';
       this.lastError = err.message;
       console.error(`[ReverbClient] Failed to instantiate Pusher instance: ${err.message}`);
+      this.startPollingWatchdog(2500);
       this.scheduleReconnect();
     }
   }
@@ -174,6 +178,18 @@ class ReverbClient {
     }
 
     const jobUuid = job.uuid || `local-${Date.now()}`;
+
+    // Deduplication guard against concurrent WebSocket and poller delivery
+    if (this.processingJobUuids.has(jobUuid)) {
+      console.log(`[ReverbClient] Job [${jobUuid}] already processed or in progress. Skipping duplicate.`);
+      return;
+    }
+    this.processingJobUuids.add(jobUuid);
+    if (this.processingJobUuids.size > 2000) {
+      const [oldest] = this.processingJobUuids;
+      this.processingJobUuids.delete(oldest);
+    }
+
     const printerIdentifier = (job.printer_identifier || job.type || 'cashier').toLowerCase();
 
     const jobRecord = {
@@ -267,30 +283,46 @@ class ReverbClient {
     const deviceUuid = this.currentConfig.device_uuid;
 
     try {
-      console.log(`[ReverbClient] Querying pending jobs from ${endpoint}...`);
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'X-Device-UUID': deviceUuid
         },
-        signal: AbortSignal.timeout(6000)
+        signal: AbortSignal.timeout(5000)
       });
 
       if (response.ok) {
         const json = await response.json();
         const pendingJobs = json.data || [];
-        if (pendingJobs.length > 0) {
-          console.log(`[ReverbClient] Found ${pendingJobs.length} pending offline jobs in queue. Processing sequentially...`);
-          for (const job of pendingJobs) {
+        for (const job of pendingJobs) {
+          if (job.uuid && !this.processingJobUuids.has(job.uuid)) {
+            console.log(`[ReverbClient Watchdog] Found new pending job [${job.uuid}] (${job.type}) for order #${job.payload?.order_number || job.order_id || 'N/A'}`);
             await this.handlePrintJobEvent({ job });
           }
-        } else {
-          console.log('[ReverbClient] No pending offline print jobs.');
         }
       }
     } catch (err) {
-      console.warn(`[ReverbClient] Could not fetch offline pending jobs: ${err.message}`);
+      // Quietly ignore transient network failures during polling
+    }
+  }
+
+  /**
+   * Continuous high-frequency watchdog poller (dual-mode backup to WebSockets).
+   */
+  startPollingWatchdog(intervalMs = 2500) {
+    this.stopPollingWatchdog();
+    console.log(`[ReverbClient] Starting real-time pending jobs watchdog poller (every ${intervalMs}ms)...`);
+    this.syncPendingJobs().catch(() => {});
+    this.pollingTimer = setInterval(() => {
+      this.syncPendingJobs().catch(() => {});
+    }, intervalMs);
+  }
+
+  stopPollingWatchdog() {
+    if (this.pollingTimer) {
+      clearInterval(this.pollingTimer);
+      this.pollingTimer = null;
     }
   }
 
@@ -326,12 +358,12 @@ class ReverbClient {
     this.watchdogTimer = setInterval(() => {
       if (this.pusher && this.pusher.connection) {
         const state = this.pusher.connection.state;
-        if (state === 'disconnected' || state === 'failed' || state === 'unavailable') {
-          console.warn(`[ReverbClient Watchdog] Detected unhealthy state "${state}". Forcing reconnection.`);
+        if (!this.reconnectTimer && (state === 'disconnected' || state === 'failed')) {
+          console.warn(`[ReverbClient Watchdog] Detected state "${state}". Triggering reconnection.`);
           this.scheduleReconnect();
         }
       }
-    }, 15000);
+    }, 20000);
   }
 
   stopWatchdog() {
@@ -346,6 +378,7 @@ class ReverbClient {
    */
   disconnect() {
     this.stopWatchdog();
+    this.stopPollingWatchdog();
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
@@ -379,6 +412,7 @@ class ReverbClient {
     return {
       status: this.status,
       connected: this.status === 'connected',
+      polling_active: !!this.pollingTimer,
       last_connected_at: this.lastConnectedAt,
       last_error: this.lastError,
       reconnect_attempts: this.reconnectAttempts,

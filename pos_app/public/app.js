@@ -113,6 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const tplCashierPhone = document.getElementById('tplCashierPhone');
   const tplCashierAlign = document.getElementById('tplCashierAlign');
   const tplCashierStoreSize = document.getElementById('tplCashierStoreSize');
+  const tplCashierStoreWeight = document.getElementById('tplCashierStoreWeight');
+  const tplCashierItemSize = document.getElementById('tplCashierItemSize');
+  const tplCashierItemWeight = document.getElementById('tplCashierItemWeight');
+  const tplCashierGeneralWeight = document.getElementById('tplCashierGeneralWeight');
   const tplCashierShowTable = document.getElementById('tplCashierShowTable');
   const tplCashierShowServer = document.getElementById('tplCashierShowServer');
   const tplCashierShowTax = document.getElementById('tplCashierShowTax');
@@ -124,10 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Template Form Inputs: Barista
   const tplBaristaTitle = document.getElementById('tplBaristaTitle');
   const tplBaristaTitleSize = document.getElementById('tplBaristaTitleSize');
+  const tplBaristaTitleWeight = document.getElementById('tplBaristaTitleWeight');
   const tplBaristaShowTable = document.getElementById('tplBaristaShowTable');
   const tplBaristaShowOrderType = document.getElementById('tplBaristaShowOrderType');
   const tplBaristaShowNotes = document.getElementById('tplBaristaShowNotes');
   const tplBaristaItemSize = document.getElementById('tplBaristaItemSize');
+  const tplBaristaItemWeight = document.getElementById('tplBaristaItemWeight');
+  const tplBaristaNotesWeight = document.getElementById('tplBaristaNotesWeight');
   const tplBaristaShowCut = document.getElementById('tplBaristaShowCut');
 
   // Template Buttons
@@ -647,6 +654,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // Visual Receipt Template Editor & Live Preview
   // ==========================================
+
+  // Sizing and Weight class mapping for the 80mm live paper preview
+  const PREVIEW_SIZE_MAP = {
+    store_name: {
+      normal: 'text-sm',
+      medium: 'text-base',
+      large: 'text-lg',
+      double: 'text-lg',
+      xlarge: 'text-xl'
+    },
+    title: {
+      normal: 'text-sm',
+      medium: 'text-base',
+      large: 'text-lg',
+      double: 'text-lg',
+      xlarge: 'text-xl'
+    },
+    items: {
+      normal: 'text-[11px]',
+      medium: 'text-xs',
+      large: 'text-sm',
+      double: 'text-sm',
+      xlarge: 'text-base'
+    }
+  };
+
+  const PREVIEW_WEIGHT_MAP = {
+    normal: 'font-normal',
+    medium: 'font-semibold',
+    bold: 'font-bold',
+    double: 'font-bold',
+    extrabold: 'font-black'
+  };
+
   function renderTemplateForm() {
     if (!activeTemplates) return;
 
@@ -661,7 +702,12 @@ document.addEventListener('DOMContentLoaded', () => {
       tplCashierTaxNo.value = h.tax_number || '';
       tplCashierPhone.value = h.phone || '';
       tplCashierAlign.value = h.align || 'center';
-      tplCashierStoreSize.value = h.store_name_size || 'double';
+
+      tplCashierStoreSize.value = h.store_name_size || 'large';
+      tplCashierStoreWeight.value = h.store_name_weight || 'extrabold';
+      tplCashierItemSize.value = b.item_font_size || 'large';
+      tplCashierItemWeight.value = b.item_font_weight || 'bold';
+      tplCashierGeneralWeight.value = b.general_font_weight || 'medium';
 
       tplCashierShowTable.checked = b.show_table !== false;
       tplCashierShowServer.checked = b.show_server !== false;
@@ -678,11 +724,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const f = t.footer || {};
 
       tplBaristaTitle.value = h.title || '';
-      tplBaristaTitleSize.value = h.title_size || 'double';
+      tplBaristaTitleSize.value = h.title_size || 'large';
+      tplBaristaTitleWeight.value = h.title_weight || 'extrabold';
       tplBaristaShowTable.checked = b.show_table !== false;
       tplBaristaShowOrderType.checked = b.show_order_type !== false;
       tplBaristaShowNotes.checked = b.show_notes !== false;
-      tplBaristaItemSize.value = b.item_font_size || 'double';
+      tplBaristaItemSize.value = b.item_font_size || 'large';
+      tplBaristaItemWeight.value = b.item_font_weight || 'extrabold';
+      tplBaristaNotesWeight.value = b.notes_font_weight || 'bold';
       tplBaristaShowCut.checked = f.show_cut !== false;
     }
 
@@ -692,7 +741,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Reactive Event Listeners for Live Thermal Paper Updates
   const cashierInputs = [
     tplCashierStoreName, tplCashierBranch, tplCashierTaxNo, tplCashierPhone,
-    tplCashierAlign, tplCashierStoreSize, tplCashierShowTable, tplCashierShowServer,
+    tplCashierAlign, tplCashierStoreSize, tplCashierStoreWeight, tplCashierItemSize,
+    tplCashierItemWeight, tplCashierGeneralWeight, tplCashierShowTable, tplCashierShowServer,
     tplCashierShowTax, tplCashierDrawerKick, tplCashierThankYou, tplCashierWifi, tplCashierShowCut
   ];
   cashierInputs.forEach(input => {
@@ -701,8 +751,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const baristaInputs = [
-    tplBaristaTitle, tplBaristaTitleSize, tplBaristaShowTable, tplBaristaShowOrderType,
-    tplBaristaShowNotes, tplBaristaItemSize, tplBaristaShowCut
+    tplBaristaTitle, tplBaristaTitleSize, tplBaristaTitleWeight, tplBaristaShowTable,
+    tplBaristaShowOrderType, tplBaristaShowNotes, tplBaristaItemSize, tplBaristaItemWeight,
+    tplBaristaNotesWeight, tplBaristaShowCut
   ];
   baristaInputs.forEach(input => {
     input?.addEventListener('input', updateLivePaperPreview);
@@ -725,9 +776,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const prevDrawerBadge = document.getElementById('prevCashierDrawerBadge');
       const prevCutBadge = document.getElementById('prevCashierCutBadge');
 
+      const prevItemHeader = document.getElementById('prevCashierItemHeader');
+      const prevItem1 = document.getElementById('prevCashierItem1');
+      const prevItem2 = document.getElementById('prevCashierItem2');
+      const prevItemNote = document.getElementById('prevCashierItemNote');
+
       prevHeader.style.textAlign = tplCashierAlign.value;
       prevStoreName.textContent = tplCashierStoreName.value || 'كافيه رويال';
-      prevStoreName.className = tplCashierStoreSize.value === 'double' ? 'font-extrabold text-base tracking-tight' : 'font-bold text-sm';
+
+      // 4-Level Store Name Size & Weight
+      const sSizeClass = (PREVIEW_SIZE_MAP.store_name[tplCashierStoreSize.value] || 'text-lg');
+      const sWeightClass = (PREVIEW_WEIGHT_MAP[tplCashierStoreWeight.value] || 'font-black');
+      prevStoreName.className = `${sSizeClass} ${sWeightClass} tracking-tight`;
+
       prevBranch.textContent = tplCashierBranch.value;
       prevBranch.style.display = tplCashierBranch.value ? 'block' : 'none';
 
@@ -737,8 +798,25 @@ document.addEventListener('DOMContentLoaded', () => {
       prevPhone.textContent = tplCashierPhone.value;
       prevPhone.style.display = tplCashierPhone.value ? 'block' : 'none';
 
-      prevTable.style.display = tplCashierShowTable.checked ? 'block' : 'none';
-      prevServer.style.display = tplCashierShowServer.checked ? 'block' : 'none';
+      // 4-Level Items Size & Weight
+      const iSizeClass = (PREVIEW_SIZE_MAP.items[tplCashierItemSize.value] || 'text-sm');
+      const iWeightClass = (PREVIEW_WEIGHT_MAP[tplCashierItemWeight.value] || 'font-bold');
+
+      if (prevItem1) prevItem1.className = `flex justify-between ${iSizeClass} ${iWeightClass}`;
+      if (prevItem2) prevItem2.className = `flex justify-between ${iSizeClass} ${iWeightClass}`;
+      if (prevItemHeader) prevItemHeader.className = `flex justify-between font-bold border-b border-stone-300 pb-1 ${iSizeClass}`;
+
+      // General Weight for metadata
+      const genWeightClass = (PREVIEW_WEIGHT_MAP[tplCashierGeneralWeight.value] || 'font-semibold');
+      if (prevTable) {
+        prevTable.style.display = tplCashierShowTable.checked ? 'block' : 'none';
+        prevTable.className = `text-stone-700 ${genWeightClass}`;
+      }
+      if (prevServer) {
+        prevServer.style.display = tplCashierShowServer.checked ? 'block' : 'none';
+        prevServer.className = `text-stone-700 ${genWeightClass}`;
+      }
+
       prevTaxBreakdown.style.display = tplCashierShowTax.checked ? 'block' : 'none';
 
       prevThankYou.textContent = tplCashierThankYou.value;
@@ -760,15 +838,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const prevBaristaCutBadge = document.getElementById('prevBaristaCutBadge');
 
       prevBaristaTitle.textContent = tplBaristaTitle.value || '*** تكت باريستا ***';
-      prevBaristaTitle.className = tplBaristaTitleSize.value === 'double' ? 'font-extrabold text-base' : 'font-bold text-sm';
+
+      // 4-Level Title Size & Weight
+      const bTitleSizeClass = (PREVIEW_SIZE_MAP.title[tplBaristaTitleSize.value] || 'text-lg');
+      const bTitleWeightClass = (PREVIEW_WEIGHT_MAP[tplBaristaTitleWeight.value] || 'font-black');
+      prevBaristaTitle.className = `${bTitleSizeClass} ${bTitleWeightClass}`;
 
       prevBaristaTable.style.display = tplBaristaShowTable.checked ? 'block' : 'none';
       prevBaristaOrderType.style.display = tplBaristaShowOrderType.checked ? 'block' : 'none';
-      prevBaristaNotes.style.display = tplBaristaShowNotes.checked ? 'block' : 'none';
 
-      const isLargeItem = tplBaristaItemSize.value === 'double';
-      prevBaristaItem1.className = isLargeItem ? 'font-extrabold text-sm flex justify-between' : 'font-semibold text-xs flex justify-between';
-      prevBaristaItem2.className = isLargeItem ? 'font-extrabold text-sm flex justify-between' : 'font-semibold text-xs flex justify-between';
+      // 4-Level Barista Items Size & Weight
+      const bItemSizeClass = (PREVIEW_SIZE_MAP.items[tplBaristaItemSize.value] || 'text-base');
+      const bItemWeightClass = (PREVIEW_WEIGHT_MAP[tplBaristaItemWeight.value] || 'font-black');
+      prevBaristaItem1.className = `${bItemSizeClass} ${bItemWeightClass} flex justify-between`;
+      prevBaristaItem2.className = `${bItemSizeClass} ${bItemWeightClass} flex justify-between`;
+
+      // 4-Level Barista Notes Weight
+      const bNotesWeightClass = (PREVIEW_WEIGHT_MAP[tplBaristaNotesWeight.value] || 'font-bold');
+      prevBaristaNotes.style.display = tplBaristaShowNotes.checked ? 'block' : 'none';
+      prevBaristaNotes.className = `text-[11px] ${bNotesWeightClass} text-stone-700 pr-2`;
 
       prevBaristaCutBadge.style.opacity = tplBaristaShowCut.checked ? '1' : '0.2';
     }
@@ -783,13 +871,17 @@ document.addEventListener('DOMContentLoaded', () => {
           tax_number: tplCashierTaxNo.value.trim(),
           phone: tplCashierPhone.value.trim(),
           align: tplCashierAlign.value,
-          store_name_size: tplCashierStoreSize.value
+          store_name_size: tplCashierStoreSize.value,
+          store_name_weight: tplCashierStoreWeight.value
         },
         body: {
           show_table: tplCashierShowTable.checked,
           show_server: tplCashierShowServer.checked,
           show_tax_breakdown: tplCashierShowTax.checked,
-          show_drawer_kick: tplCashierDrawerKick.checked
+          show_drawer_kick: tplCashierDrawerKick.checked,
+          item_font_size: tplCashierItemSize.value,
+          item_font_weight: tplCashierItemWeight.value,
+          general_font_weight: tplCashierGeneralWeight.value
         },
         footer: {
           thank_you_message: tplCashierThankYou.value.trim(),
@@ -803,13 +895,16 @@ document.addEventListener('DOMContentLoaded', () => {
         header: {
           title: tplBaristaTitle.value.trim(),
           align: 'center',
-          title_size: tplBaristaTitleSize.value
+          title_size: tplBaristaTitleSize.value,
+          title_weight: tplBaristaTitleWeight.value
         },
         body: {
           show_table: tplBaristaShowTable.checked,
           show_order_type: tplBaristaShowOrderType.checked,
           show_notes: tplBaristaShowNotes.checked,
-          item_font_size: tplBaristaItemSize.value
+          item_font_size: tplBaristaItemSize.value,
+          item_font_weight: tplBaristaItemWeight.value,
+          notes_font_weight: tplBaristaNotesWeight.value
         },
         footer: {
           show_cut: tplBaristaShowCut.checked
@@ -1182,8 +1277,10 @@ document.addEventListener('DOMContentLoaded', () => {
       statDeviceUuid.textContent = agent.device_uuid || 'N/A';
       statChannelName.textContent = `print-agent.${agent.device_uuid || 'N/A'}`;
 
-      // Reverb State Pill
+      // Reverb & Real-time State Pill
       const wsState = websocket.status || 'disconnected';
+      const isPolling = websocket.polling_active || false;
+
       if (wsState === 'connected') {
         wsStatusText.textContent = 'السيستم شغال والنت تمام';
         wsStatusText.className = 'text-xs font-bold text-emerald-400';
@@ -1191,8 +1288,15 @@ document.addEventListener('DOMContentLoaded', () => {
         wsPingRing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
         statWsState.textContent = 'متصل بـ Reverb (أونلاين)';
         statWsState.className = 'text-base font-bold text-emerald-400';
+      } else if (isPolling) {
+        wsStatusText.textContent = 'الطباعة المباشرة نشطة (Watchdog)';
+        wsStatusText.className = 'text-xs font-bold text-emerald-400';
+        wsStatusDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400';
+        wsPingRing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
+        statWsState.textContent = wsState === 'reconnecting' ? 'مزامنة نشطة (Reverb جاري الربط)' : 'مزامنة فورية نشطة (Watchdog)';
+        statWsState.className = 'text-base font-bold text-emerald-400';
       } else if (wsState === 'connecting' || wsState === 'reconnecting') {
-        wsStatusText.textContent = 'جاري إعادة الاتصال...';
+        wsStatusText.textContent = 'جاري الاتصال...';
         wsStatusText.className = 'text-xs font-bold text-amber-400';
         wsStatusDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400';
         wsPingRing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75';

@@ -22,8 +22,12 @@
             <p class="text-xs text-gray-300 mt-1">جميع الأرقام والإحصائيات أدناه مقتصرة وحصرية على مبيعات وعمليات اليوم الحالي فقط.</p>
         </div>
 
-        <div class="flex items-center gap-2 self-end sm:self-auto">
-            <a href="{{ route('shifts.index') }}" class="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 transition backdrop-blur-sm border border-white/10">
+        <div class="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+            <a href="{{ route('purchase-invoices.index') }}" class="px-3.5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 transition backdrop-blur-sm border border-white/10">
+                <i class="fa-solid fa-boxes-packing text-sky-400"></i>
+                <span>فواتير الشراء</span>
+            </a>
+            <a href="{{ route('shifts.index') }}" class="px-3.5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 transition backdrop-blur-sm border border-white/10">
                 <i class="fa-solid fa-clock text-amber-400"></i>
                 <span>مراقبة الشيفتات</span>
             </a>
@@ -35,7 +39,7 @@
     </div>
 
     {{-- ==================== 2. كروت الـ KPI الرئيسية اليومية ==================== --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         
         {{-- إجمالي مبيعات اليوم --}}
         <div class="bg-white p-5 rounded-3xl border border-emerald-100 bg-emerald-50/20 shadow-xs flex flex-col justify-between">
@@ -46,7 +50,7 @@
                 </div>
             </div>
             <div>
-                <p class="text-2xl sm:text-3xl font-black text-emerald-600 font-mono leading-tight">
+                <p class="text-2xl font-black text-emerald-600 font-mono leading-tight">
                     {{ number_format($todaySales, 2) }} <span class="text-xs text-emerald-500 font-sans">ج.م</span>
                 </p>
                 <div class="text-[10px] text-gray-500 font-mono mt-2 pt-2 border-t border-emerald-100/60 flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -59,21 +63,23 @@
             </div>
         </div>
 
-        {{-- صافي دخل اليوم --}}
-        <div class="bg-white p-5 rounded-3xl border border-blue-100 bg-blue-50/20 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between text-blue-800 text-xs font-bold mb-2">
-                <span>صافي ربح اليوم</span>
-                <div class="w-9 h-9 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                    <i class="fa-solid fa-chart-line text-base"></i>
+        {{-- مشتريات وتوريدات اليوم --}}
+        <div class="bg-white p-5 rounded-3xl border border-sky-100 bg-sky-50/20 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between text-sky-800 text-xs font-bold mb-2">
+                <span>مشتريات اليوم</span>
+                <div class="w-9 h-9 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                    <i class="fa-solid fa-cart-flatbed text-base"></i>
                 </div>
             </div>
             <div>
-                <p class="text-2xl sm:text-3xl font-black text-blue-600 font-mono leading-tight">
-                    {{ number_format($todayNetProfit, 2) }} <span class="text-xs text-blue-500 font-sans">ج.م</span>
+                <p class="text-2xl font-black text-sky-700 font-mono leading-tight">
+                    {{ number_format($todayPurchasesTotal, 2) }} <span class="text-xs text-sky-500 font-sans">ج.م</span>
                 </p>
-                <p class="text-[10px] text-gray-400 mt-2 pt-2 border-t border-blue-100/60">
-                    المبيعات اليومية ({{ number_format($todaySales, 0) }}) - المصروفات ({{ number_format($todayExpenses, 0) }})
-                </p>
+                <div class="text-[10px] text-gray-500 font-mono mt-2 pt-2 border-t border-sky-100/60 flex items-center justify-between">
+                    <span>مسدد: <b>{{ number_format($todayPurchasesPaid, 0) }}</b></span>
+                    <span class="text-rose-600 font-bold">آجل: <b>{{ number_format($todayPurchasesUnpaid, 0) }}</b></span>
+                    <span class="text-gray-400">({{ $todayPurchasesCount }} فواتير)</span>
+                </div>
             </div>
         </div>
 
@@ -86,25 +92,43 @@
                 </div>
             </div>
             <div>
-                <p class="text-2xl sm:text-3xl font-black text-rose-600 font-mono leading-tight">
+                <p class="text-2xl font-black text-rose-600 font-mono leading-tight">
                     {{ number_format($todayExpenses, 2) }} <span class="text-xs text-rose-500 font-sans">ج.م</span>
                 </p>
                 <p class="text-[10px] text-gray-400 mt-2 pt-2 border-t border-rose-100/60">
-                    عدد سندات المصروفات المسجلة اليوم: <b>{{ $todayExpensesCount }}</b>
+                    عدد سندات المصروفات: <b>{{ $todayExpensesCount }}</b>
                 </p>
             </div>
         </div>
 
-        {{-- عدد فواتير اليوم --}}
+        {{-- صافي دخل وسيولة اليوم --}}
+        <div class="bg-white p-5 rounded-3xl border border-blue-100 bg-blue-50/20 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between text-blue-800 text-xs font-bold mb-2">
+                <span>صافي سيولة اليوم</span>
+                <div class="w-9 h-9 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <i class="fa-solid fa-chart-line text-base"></i>
+                </div>
+            </div>
+            <div>
+                <p class="text-2xl font-black text-blue-600 font-mono leading-tight">
+                    {{ number_format($todayNetProfit, 2) }} <span class="text-xs text-blue-500 font-sans">ج.م</span>
+                </p>
+                <p class="text-[10px] text-gray-400 mt-2 pt-2 border-t border-blue-100/60">
+                    المبيعات - (المصروفات + المشتريات المسددة)
+                </p>
+            </div>
+        </div>
+
+        {{-- عدد فواتير مبيعات اليوم --}}
         <div class="bg-white p-5 rounded-3xl border border-indigo-100 bg-indigo-50/20 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between text-indigo-800 text-xs font-bold mb-2">
-                <span>فواتير اليوم</span>
+                <span>فواتير المبيعات</span>
                 <div class="w-9 h-9 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
                     <i class="fa-solid fa-file-invoice-dollar text-base"></i>
                 </div>
             </div>
             <div>
-                <p class="text-2xl sm:text-3xl font-black text-indigo-700 font-mono leading-tight">
+                <p class="text-2xl font-black text-indigo-700 font-mono leading-tight">
                     {{ $todayInvoicesCount }} <span class="text-xs text-indigo-400 font-sans">فاتورة</span>
                 </p>
                 <p class="text-[10px] text-gray-400 mt-2 pt-2 border-t border-indigo-100/60">
@@ -388,6 +412,104 @@
                                 <td class="py-3.5 px-4 text-center">
                                     <a href="{{ route('sales-invoices.show', $inv->id) }}" target="_blank"
                                         class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-sky-500 hover:text-white text-gray-700 font-bold text-[11px] inline-flex items-center gap-1 transition">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                        <span>عرض</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+
+    {{-- ==================== 6. فواتير وتوريدات مشتريات اليوم ==================== --}}
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-xs overflow-hidden">
+        <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
+                    <i class="fa-solid fa-cart-flatbed text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-black text-gray-800">فواتير مشتريات وتوريد اليوم</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">البضائع والمواد الخام التي تم شراؤها وتوريدها للمخزن اليوم</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('purchase-invoices.create') }}" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>فاتورة شراء جديدة</span>
+                </a>
+                <a href="{{ route('purchase-invoices.index') }}" class="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs transition">
+                    عرض كافة فواتير الشراء &larr;
+                </a>
+            </div>
+        </div>
+
+        @if($latestPurchaseInvoices->isEmpty())
+            <div class="p-10 text-center text-gray-400 space-y-2">
+                <i class="fa-solid fa-cart-flatbed text-3xl text-gray-300"></i>
+                <p class="font-bold text-gray-600 text-xs">لم تُسجل أي فواتير شراء أو توريدات اليوم حتى الآن</p>
+                <div class="pt-1">
+                    <a href="{{ route('purchase-invoices.create') }}" class="inline-flex items-center gap-1.5 text-xs text-blue-600 font-bold hover:underline">
+                        <span>تسجيل أول فاتورة شراء لليوم</span>
+                        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+        @else
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs">
+                    <thead class="bg-gray-50/70 text-gray-400 text-[11px] font-black border-b border-gray-100">
+                        <tr>
+                            <th class="py-3 px-4">رقم الفاتورة</th>
+                            <th class="py-3 px-4">المورد / الشركة</th>
+                            <th class="py-3 px-4 text-center">عدد الأصناف</th>
+                            <th class="py-3 px-4">طريقة الدفع</th>
+                            <th class="py-3 px-4">حالة السداد</th>
+                            <th class="py-3 px-4">إجمالي الصافي</th>
+                            <th class="py-3 px-4">المدفوع / المتبقي</th>
+                            <th class="py-3 px-4 text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach($latestPurchaseInvoices as $pInv)
+                            <tr class="hover:bg-gray-50/80 transition">
+                                <td class="py-3.5 px-4 font-mono font-black text-gray-800">
+                                    {{ $pInv->invoice_number }}
+                                </td>
+                                <td class="py-3.5 px-4 font-bold text-gray-800">
+                                    {{ $pInv->supplier_name }}
+                                </td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="px-2 py-0.5 rounded-lg bg-gray-100 text-gray-700 font-mono text-[11px] font-bold">
+                                        {{ $pInv->items->count() }} صنف
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="text-xs text-gray-600 font-medium">
+                                        {{ $pInv->payment_method_label }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black {{ $pInv->payment_status_badge_class }}">
+                                        {{ $pInv->payment_status_label }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4 font-mono font-black text-sky-700 text-sm">
+                                    {{ number_format($pInv->net_amount, 2) }} ج.م
+                                </td>
+                                <td class="py-3.5 px-4 font-mono text-[11px]">
+                                    <span class="text-emerald-600 font-bold">{{ number_format($pInv->paid_amount, 2) }}</span>
+                                    @if($pInv->remaining_amount > 0)
+                                        <span class="text-gray-300 mx-1">/</span>
+                                        <span class="text-rose-600 font-bold" title="متبقي">{{ number_format($pInv->remaining_amount, 2) }}</span>
+                                    @endif
+                                </td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <a href="{{ route('purchase-invoices.show', $pInv->id) }}"
+                                        class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 font-bold text-[11px] inline-flex items-center gap-1 transition">
                                         <i class="fa-solid fa-eye text-xs"></i>
                                         <span>عرض</span>
                                     </a>

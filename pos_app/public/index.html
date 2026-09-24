@@ -494,7 +494,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs text-slate-300 font-bold mb-1">محاذاة الترويسة</label>
                 <select id="tplCashierAlign" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
@@ -504,16 +504,58 @@
                 </select>
               </div>
               <div>
-                <label class="block text-xs text-slate-300 font-bold mb-1">حجم خط اسم المحل</label>
+                <label class="block text-xs text-slate-300 font-bold mb-1">حجم اسم المحل (4 مستويات)</label>
                 <select id="tplCashierStoreSize" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
-                  <option value="double">خط عريض ومضاعف (Double)</option>
-                  <option value="normal">خط عادي (Normal)</option>
+                  <option value="normal">1: عادي (26px)</option>
+                  <option value="medium">2: متوسط واضح (30px)</option>
+                  <option value="large">3: كبير بارز (36px)</option>
+                  <option value="xlarge">4: ضخم فائق الحجم (44px)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 font-bold mb-1">طُخن وسُمك اسم المحل (4 مستويات)</label>
+                <select id="tplCashierStoreWeight" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
+                  <option value="normal">1: عادي (Regular 400)</option>
+                  <option value="medium">2: نصف عريض (Semi-Bold 600)</option>
+                  <option value="bold">3: عريض بولد (Bold 700)</option>
+                  <option value="extrabold">4: فائق السُمك (Heavy Black 900)</option>
                 </select>
               </div>
             </div>
 
             <div class="border-b border-slate-800 pb-3 pt-2">
-              <h3 class="text-sm font-extrabold text-white">تفاصيل الإيصال ومعدات الهاردوير (Body)</h3>
+              <h3 class="text-sm font-extrabold text-white">تفاصيل الإيصال والأصناف والهاردوير (Body)</h3>
+            </div>
+
+            <!-- 4 Levels Controls for Cashier Items & Body -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs text-slate-300 font-bold mb-1">حجم خط الأصناف والأسعار</label>
+                <select id="tplCashierItemSize" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
+                  <option value="normal">1: عادي (20px)</option>
+                  <option value="medium">2: متوسط واضح (24px)</option>
+                  <option value="large">3: كبير بارز (28px)</option>
+                  <option value="xlarge">4: ضخم عريض (34px)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 font-bold mb-1">طُخن وسُمك خط الأصناف</label>
+                <select id="tplCashierItemWeight" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
+                  <option value="normal">1: عادي (400)</option>
+                  <option value="medium">2: سُمك متوسط (600)</option>
+                  <option value="bold">3: عريض بولد (700)</option>
+                  <option value="extrabold">4: فائق السُمك (900 Heavy)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 font-bold mb-1">طُخن وسُمك باقي الفاتورة</label>
+                <select id="tplCashierGeneralWeight" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
+                  <option value="normal">1: عادي (400)</option>
+                  <option value="medium">2: سُمك متوسط (600)</option>
+                  <option value="bold">3: عريض بولد (700)</option>
+                  <option value="extrabold">4: فائق السُمك (900 Heavy)</option>
+                </select>
+              </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -566,16 +608,27 @@
               <p class="text-xs text-slate-400 mt-0.5">تكت تجهيز الطلبات بوضوح وسرعة قراءة فائقة.</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs text-slate-300 font-bold mb-1">عنوان التكت الرئيسي</label>
                 <input type="text" id="tplBaristaTitle" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none" placeholder="تكت باريستا - مشروبات">
               </div>
               <div>
-                <label class="block text-xs text-slate-300 font-bold mb-1">حجم خط العنوان</label>
+                <label class="block text-xs text-slate-300 font-bold mb-1">حجم خط العنوان (4 مستويات)</label>
                 <select id="tplBaristaTitleSize" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none">
-                  <option value="double">خط عريض ومضاعف (Double)</option>
-                  <option value="normal">خط عادي (Normal)</option>
+                  <option value="normal">1: عادي (24px)</option>
+                  <option value="medium">2: متوسط واضح (28px)</option>
+                  <option value="large">3: كبير بارز (34px)</option>
+                  <option value="xlarge">4: ضخم فائق الحجم (42px)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 font-bold mb-1">طُخن وسُمك العنوان (4 مستويات)</label>
+                <select id="tplBaristaTitleWeight" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none">
+                  <option value="normal">1: عادي (400)</option>
+                  <option value="medium">2: سُمك متوسط (600)</option>
+                  <option value="bold">3: عريض بولد (700)</option>
+                  <option value="extrabold">4: فائق السُمك (900 Heavy)</option>
                 </select>
               </div>
             </div>
@@ -595,14 +648,37 @@
               </label>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs text-slate-300 font-bold mb-1">حجم خط الأصناف والكميات</label>
                 <select id="tplBaristaItemSize" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none">
-                  <option value="double">خط كبير جداً للقراءة السريعة</option>
-                  <option value="normal">خط عادي</option>
+                  <option value="normal">1: عادي (20px)</option>
+                  <option value="medium">2: متوسط واضح (24px)</option>
+                  <option value="large">3: كبير بارز (28px)</option>
+                  <option value="xlarge">4: ضخم جداً للسرعة (34px)</option>
                 </select>
               </div>
+              <div>
+                <label class="block text-xs text-slate-300 font-bold mb-1">طُخن وسُمك خط الأصناف</label>
+                <select id="tplBaristaItemWeight" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none">
+                  <option value="normal">1: عادي (400)</option>
+                  <option value="medium">2: سُمك متوسط (600)</option>
+                  <option value="bold">3: عريض بولد (700)</option>
+                  <option value="extrabold">4: فائق السُمك (900 Heavy)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-300 font-bold mb-1">طُخن وسُمك الملاحظات</label>
+                <select id="tplBaristaNotesWeight" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none">
+                  <option value="normal">1: عادي (400)</option>
+                  <option value="medium">2: سُمك متوسط (600)</option>
+                  <option value="bold">3: عريض بولد (700)</option>
+                  <option value="extrabold">4: فائق السُمك (900 Heavy)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs text-slate-300 font-bold mb-1">قطع الورق</label>
                 <label class="flex items-center gap-2 h-10 px-3 bg-surface-950 border border-slate-700 rounded-xl cursor-pointer">
@@ -650,18 +726,18 @@
               <div class="border-b border-dashed border-stone-400 my-2"></div>
 
               <!-- Items Table -->
-              <div class="space-y-1 text-[11px]">
-                <div class="flex justify-between font-bold border-b border-stone-300 pb-1">
+              <div id="prevCashierItemsContainer" class="space-y-1 text-[11px]">
+                <div id="prevCashierItemHeader" class="flex justify-between font-bold border-b border-stone-300 pb-1">
                   <span>الكمية والصنف</span>
                   <span>السعر</span>
                 </div>
-                <div class="flex justify-between">
+                <div id="prevCashierItem1" class="flex justify-between">
                   <span>2x كابتشينو كراميل</span>
                   <span class="font-mono font-semibold">70.00</span>
                 </div>
-                <div class="text-[10px] text-stone-500 pr-2">* حليب شوفان - سكر خفيف</div>
+                <div id="prevCashierItemNote" class="text-[10px] text-stone-500 pr-2">* حليب شوفان - سكر خفيف</div>
 
-                <div class="flex justify-between">
+                <div id="prevCashierItem2" class="flex justify-between">
                   <span>1x مولتن كيك شوكولاتة</span>
                   <span class="font-mono font-semibold">45.00</span>
                 </div>

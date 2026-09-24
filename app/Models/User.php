@@ -373,8 +373,8 @@ class User extends Authenticatable implements MustVerifyEmail
             ],
         ];
 
-        // فواتير الشراء خاصة بالأدمن
-        if ($this->role === 'admin') {
+        // فواتير الشراء خاصة بالمدراء
+        if ($this->isManager()) {
             $items['purchase_invoices'] = [
                 'key'            => 'purchase_invoices',
                 'title'          => 'فواتير الشراء',
@@ -385,8 +385,8 @@ class User extends Authenticatable implements MustVerifyEmail
                 'group'          => 'inventory',
                 'group_label'    => 'المخزن والمشتريات',
                 'group_icon'     => 'fa-solid fa-boxes-stacked',
-                'subgroup'       => 'stock',
-                'subgroup_label' => 'المخزون',
+                'subgroup'       => 'purchases',
+                'subgroup_label' => 'المشتريات والتوريدات',
             ];
         }
 
@@ -405,12 +405,12 @@ class User extends Authenticatable implements MustVerifyEmail
             'subgroup_label' => 'العملاء',
         ];
 
-        // إدارة الموظفين (أدمن فقط)
-        if ($this->role === 'admin') {
+        // إدارة الموظفين والرواتب (للمدراء)
+        if ($this->isManager()) {
             $items['employees'] = [
                 'key'            => 'employees',
-                'title'          => 'إدارة الموظفين',
-                'title_en'       => 'Staff Management',
+                'title'          => 'إدارة الموظفين والرواتب',
+                'title_en'       => 'Staff & Payroll',
                 'route'          => 'employees.index',
                 'active_pattern' => 'employees*',
                 'icon'           => 'fa-solid fa-users-gear',

@@ -297,8 +297,38 @@
                 </div>
             </div>
 
+            {{-- قسم بيانات العميل (اختياري لربط الزيارة والولاء) --}}
+            <div class="border border-gray-100 bg-gray-50/70 rounded-2xl p-3 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-black text-gray-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-check text-blue-600"></i>
+                        <span>بيانات العميل (اختياري)</span>
+                    </label>
+                    <span class="text-[10px] text-gray-400">لتسجيل الزيارة والولاء</span>
+                </div>
+
+                {{-- حقل رقم الهاتف مع بحث تلقائي حي --}}
+                <div class="relative">
+                    <input type="tel" id="showModalCustomerPhone" placeholder="رقم الهاتف (مثال: 01xxxxxxxxx)..."
+                        autocomplete="off"
+                        oninput="lookupShowCustomerPhone(this.value)"
+                        class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                </div>
+
+                {{-- حقل اسم العميل --}}
+                <div class="relative">
+                    <input type="text" id="showModalCustomerName" placeholder="اسم العميل (اختياري)..."
+                        class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                </div>
+
+                <input type="hidden" id="showModalCustomerId">
+
+                {{-- شارة التنبيه التلقائي بحالة العميل --}}
+                <div id="showCustomerLookupStatus" class="hidden text-[10px] p-2 rounded-xl border font-bold"></div>
+            </div>
+
             <button type="button" id="confirmCheckoutBtn" onclick="executeCheckout()"
-                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-95">
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-95 cursor-pointer">
                 <i class="fa-solid fa-check"></i>
                 <span>تأكيد السداد وتفريغ الطاولة</span>
             </button>
@@ -310,13 +340,56 @@
 <script>
     let activeCheckoutOrderId = null;
     let selectedCheckoutMethod = 'cash';
+    let showCustomerLookupTimer = null;
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    function lookupShowCustomerPhone(phone) {
+        clearTimeout(showCustomerLookupTimer);
+        const statusBox = document.getElementById('showCustomerLookupStatus');
+        const nameInput = document.getElementById('showModalCustomerName');
+        const idInput = document.getElementById('showModalCustomerId');
+
+        const cleanPhone = (phone || '').trim();
+        if (cleanPhone.length < 3) {
+            statusBox.classList.add('hidden');
+            idInput.value = '';
+            return;
+        }
+
+        showCustomerLookupTimer = setTimeout(() => {
+            fetch(`/customers/ajax-search?phone=${encodeURIComponent(cleanPhone)}`)
+                .then(res => res.json())
+                .then(matches => {
+                    if (matches && matches.length > 0) {
+                        const match = matches[0];
+                        idInput.value = match.id;
+                        nameInput.value = match.name;
+                        statusBox.className = 'text-[10px] p-2 rounded-xl border font-bold bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center gap-1.5';
+                        statusBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>عميل مسجل: <strong>${match.name}</strong> (${match.visits_count} زيارة • ${match.total_spent} ج)</span>`;
+                        statusBox.classList.remove('hidden');
+                    } else {
+                        idInput.value = '';
+                        statusBox.className = 'text-[10px] p-2 rounded-xl border font-bold bg-purple-50 text-purple-800 border-purple-200 flex items-center gap-1.5';
+                        statusBox.innerHTML = `<i class="fa-solid fa-sparkles text-purple-600"></i> <span>عميل جديد: سيتم حفظ بياناته وربط الفاتورة باسمه</span>`;
+                        statusBox.classList.remove('hidden');
+                    }
+                })
+                .catch(() => {});
+        }, 250);
+    }
 
     function openCheckoutModal(orderId, orderNumber, total) {
         activeCheckoutOrderId = orderId;
         document.getElementById('checkoutOrderNumber').textContent = 'طلب رقم #' + orderNumber;
         document.getElementById('checkoutOrderTotal').textContent = total + ' ج.م';
         selectCheckoutMethod('cash');
+
+        // مسح بيانات العميل
+        document.getElementById('showModalCustomerPhone').value = '';
+        document.getElementById('showModalCustomerName').value = '';
+        document.getElementById('showModalCustomerId').value = '';
+        document.getElementById('showCustomerLookupStatus').classList.add('hidden');
+
         document.getElementById('checkoutModal').classList.remove('hidden');
     }
 
@@ -329,9 +402,9 @@
         ['cash', 'InstaPay', 'card'].forEach(m => {
             const btn = document.getElementById('cpm_' + m);
             if (m === method) {
-                btn.className = 'px-2 py-2.5 rounded-xl border text-xs font-black text-center transition bg-emerald-600 text-white border-emerald-600 shadow-xs';
+                btn.className = 'px-2 py-2.5 rounded-xl border text-xs font-black text-center transition bg-emerald-600 text-white border-emerald-600 shadow-xs cursor-pointer';
             } else {
-                btn.className = 'px-2 py-2.5 rounded-xl border text-xs font-bold text-center transition bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100';
+                btn.className = 'px-2 py-2.5 rounded-xl border text-xs font-bold text-center transition bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 cursor-pointer';
             }
         });
     }
@@ -341,6 +414,10 @@
         const btn = document.getElementById('confirmCheckoutBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> جاري السداد...';
+
+        const customerId = document.getElementById('showModalCustomerId').value || null;
+        const customerPhone = document.getElementById('showModalCustomerPhone').value.trim() || null;
+        const customerName = document.getElementById('showModalCustomerName').value.trim() || null;
 
         fetch(`/orders/${activeCheckoutOrderId}/checkout`, {
             method: 'POST',
@@ -352,6 +429,9 @@
             body: JSON.stringify({
                 payment_method: selectedCheckoutMethod,
                 force: true,
+                customer_id: customerId,
+                customer_phone: customerPhone,
+                customer_name: customerName,
             })
         })
         .then(async res => {

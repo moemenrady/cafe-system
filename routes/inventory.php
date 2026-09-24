@@ -6,6 +6,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Controllers\StaffWithdrawalController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -29,6 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/inventory/movements', [InventoryController::class, 'movements'])->name('inventory.movements');
         Route::get('/inventory/daily-tracking', [InventoryController::class, 'dailyTracking'])->name('inventory.daily_tracking');
         Route::get('/inventory/export-tracking', [InventoryController::class, 'exportTrackingCsv'])->name('inventory.export_tracking');
+        Route::get('/inventory/ajax-search', [PurchaseInvoiceController::class, 'searchInventoryItems'])->name('inventory.ajaxSearch');
         Route::resource('categories', CategoryController::class)->except(['index']);
         Route::resource('menu', MenuController::class)->except(['index']);
         Route::resource('inventory', InventoryController::class);

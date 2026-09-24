@@ -20,6 +20,10 @@ class CheckoutRequest extends FormRequest
             'note'            => ['nullable', 'string', 'max:500'],
             'force'           => ['nullable', 'boolean'],
             'device_uuid'     => ['nullable', 'string', 'max:100'],
+            'customer_id'     => ['nullable', 'integer', 'exists:customers,id'],
+            'customer_phone'  => ['nullable', 'string', 'max:50'],
+            'customer_name'   => ['nullable', 'string', 'max:255'],
+            'phone'           => ['nullable', 'string', 'max:50'],
         ];
     }
 

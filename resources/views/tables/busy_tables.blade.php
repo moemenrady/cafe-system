@@ -366,6 +366,36 @@
                 </div>
             </div>
 
+            {{-- قسم بيانات العميل (اختياري لربط الزيارة والولاء) --}}
+            <div class="border border-gray-100 bg-gray-50/70 rounded-2xl p-3 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-black text-gray-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-check text-blue-600"></i>
+                        <span>بيانات العميل (اختياري)</span>
+                    </label>
+                    <span class="text-[10px] text-gray-400">لتسجيل الزيارة والولاء</span>
+                </div>
+
+                {{-- حقل رقم الهاتف مع بحث تلقائي حي --}}
+                <div class="relative">
+                    <input type="tel" id="modalCustomerPhone" placeholder="رقم الهاتف (مثال: 01xxxxxxxxx)..."
+                        autocomplete="off"
+                        oninput="lookupCustomerPhone(this.value)"
+                        class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                </div>
+
+                {{-- حقل اسم العميل --}}
+                <div class="relative">
+                    <input type="text" id="modalCustomerName" placeholder="اسم العميل (اختياري)..."
+                        class="w-full bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                </div>
+
+                <input type="hidden" id="modalCustomerId">
+
+                {{-- شارة التنبيه التلقائي بحالة العميل --}}
+                <div id="customerLookupStatus" class="hidden text-[10px] p-2 rounded-xl border font-bold"></div>
+            </div>
+
             {{-- زر التأكيد والسداد --}}
             <button type="button" id="confirmQuickPayBtn" onclick="submitQuickCheckout()"
                 class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 cursor-pointer">
@@ -441,12 +471,56 @@
     }
 
     // ========== إدارة مودال المحاسبة السريعة ==========
+    let customerLookupTimer = null;
+
+    function lookupCustomerPhone(phone) {
+        clearTimeout(customerLookupTimer);
+        const statusBox = document.getElementById('customerLookupStatus');
+        const nameInput = document.getElementById('modalCustomerName');
+        const idInput = document.getElementById('modalCustomerId');
+
+        const cleanPhone = (phone || '').trim();
+        if (cleanPhone.length < 3) {
+            statusBox.classList.add('hidden');
+            idInput.value = '';
+            return;
+        }
+
+        customerLookupTimer = setTimeout(() => {
+            fetch(`/customers/ajax-search?phone=${encodeURIComponent(cleanPhone)}`)
+                .then(res => res.json())
+                .then(matches => {
+                    if (matches && matches.length > 0) {
+                        const match = matches[0];
+                        idInput.value = match.id;
+                        nameInput.value = match.name;
+                        statusBox.className = 'text-[10px] p-2 rounded-xl border font-bold bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center gap-1.5';
+                        statusBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>عميل مسجل: <strong>${match.name}</strong> (${match.visits_count} زيارة سابقة • إجمالي ${match.total_spent} ج)</span>`;
+                        statusBox.classList.remove('hidden');
+                    } else {
+                        idInput.value = '';
+                        statusBox.className = 'text-[10px] p-2 rounded-xl border font-bold bg-purple-50 text-purple-800 border-purple-200 flex items-center gap-1.5';
+                        statusBox.innerHTML = `<i class="fa-solid fa-sparkles text-purple-600"></i> <span>عميل جديد: سيتم حفظ بياناته وربط الفاتورة باسمه</span>`;
+                        statusBox.classList.remove('hidden');
+                    }
+                })
+                .catch(() => {});
+        }, 250);
+    }
+
     function openQuickCheckout(orderId, orderNumber, total, tableName) {
         activeOrderId = orderId;
         document.getElementById('modalTableTitle').textContent = 'محاسبة ' + tableName;
         document.getElementById('modalOrderSubtitle').textContent = 'طلب رقم #' + orderNumber;
         document.getElementById('modalOrderTotal').textContent = total + ' ج.م';
         selectPayMethod('cash');
+
+        // إعادة ضبط حقول العميل
+        document.getElementById('modalCustomerPhone').value = '';
+        document.getElementById('modalCustomerName').value = '';
+        document.getElementById('modalCustomerId').value = '';
+        document.getElementById('customerLookupStatus').classList.add('hidden');
+
         document.getElementById('quickCheckoutModal').classList.remove('hidden');
     }
 
@@ -472,6 +546,10 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> جاري السداد...';
 
+        const customerId = document.getElementById('modalCustomerId').value || null;
+        const customerPhone = document.getElementById('modalCustomerPhone').value.trim() || null;
+        const customerName = document.getElementById('modalCustomerName').value.trim() || null;
+
         fetch(`/orders/${activeOrderId}/checkout`, {
             method: 'POST',
             headers: {
@@ -482,6 +560,9 @@
             body: JSON.stringify({
                 payment_method: selectedPayMethod,
                 force: true,
+                customer_id: customerId,
+                customer_phone: customerPhone,
+                customer_name: customerName,
             })
         })
         .then(async res => {

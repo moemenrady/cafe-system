@@ -1,19 +1,28 @@
 {
   "device_uuid": "pos-cashier-01",
-  "laravel_backend_url": "http://127.0.0.1:8000",
+  "laravel_backend_url": "https://sana-beach-uno.com",
   "reverb": {
-    "host": "127.0.0.1",
-    "port": 8080,
+    "host": "sana-beach-uno.com",
+    "port": 8081,
     "scheme": "http",
     "app_key": "zjlmatbcy55ncococ8lw"
   },
   "printers": [
     {
-      "id": "printer-1790096631475",
-      "name": "XP-80C",
+      "id": "printer-cashier",
+      "name": "طابعة الكاشير (XP-80C)",
       "type": "windows",
       "windows_printer_name": "XP-80C",
-      "role": "all",
+      "role": "cashier",
+      "enabled": true,
+      "timeout_ms": 4000
+    },
+    {
+      "id": "printer-barista",
+      "name": "طابعة الباريستا (XP-80C copy 1)",
+      "type": "windows",
+      "windows_printer_name": "XP-80C (copy 1)",
+      "role": "barista",
       "enabled": true,
       "timeout_ms": 4000
     }
@@ -26,13 +35,17 @@
         "tax_number": "",
         "phone": "",
         "align": "center",
-        "store_name_size": "double"
+        "store_name_size": "large",
+        "store_name_weight": "extrabold"
       },
       "body": {
         "show_table": true,
         "show_server": false,
         "show_tax_breakdown": true,
-        "show_drawer_kick": false
+        "show_drawer_kick": false,
+        "item_font_size": "large",
+        "item_font_weight": "bold",
+        "general_font_weight": "medium"
       },
       "footer": {
         "thank_you_message": "شكراً لزيارتكم! نتشرف بكم دائماً",
@@ -45,13 +58,16 @@
       "header": {
         "title": "تكت باريستا - مشروبات",
         "align": "center",
-        "title_size": "double"
+        "title_size": "large",
+        "title_weight": "extrabold"
       },
       "body": {
         "show_table": true,
         "show_order_type": true,
         "show_notes": true,
-        "item_font_size": "double"
+        "item_font_size": "large",
+        "item_font_weight": "extrabold",
+        "notes_font_weight": "bold"
       },
       "footer": {
         "show_cut": true

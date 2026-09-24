@@ -6,6 +6,7 @@ use App\Models\Expense;
 use App\Models\InventoryItem;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\PurchaseInvoice;
 use App\Models\Shift;
 use App\Models\Table;
 use Carbon\Carbon;
@@ -49,21 +50,30 @@ class DashboardController extends Controller
             }
         }
 
-        // 2. مصروفات وصافي ربح اليوم
+        // 2. فواتير وتوريدات المشتريات لليوم
+        $todayPurchases = PurchaseInvoice::whereDate('invoice_date', $today)
+            ->where('status', '!=', 'cancelled')
+            ->get();
+        $todayPurchasesTotal = (float) $todayPurchases->sum('net_amount');
+        $todayPurchasesCount = $todayPurchases->count();
+        $todayPurchasesPaid = (float) $todayPurchases->sum('paid_amount');
+        $todayPurchasesUnpaid = (float) $todayPurchases->sum('remaining_amount');
+
+        // 3. مصروفات وصافي دخل/سيولة اليوم
         $todayExpenses = (float) Expense::whereDate('expense_date', $today)->sum('amount');
         $todayExpensesCount = Expense::whereDate('expense_date', $today)->count();
-        $todayNetProfit = round($todaySales - $todayExpenses, 2);
+        $todayNetProfit = round($todaySales - $todayExpenses - $todayPurchasesPaid, 2);
 
-        // 3. الشيفتات والورديات اليوم
+        // 4. الشيفتات والورديات اليوم
         $openShiftsCount = Shift::where('status', 'open')->count();
         $closedShiftsTodayCount = Shift::where('status', 'closed')->whereDate('end_time', $today)->count();
 
-        // 4. حالة الطاولات في الصالة
+        // 5. حالة الطاولات في الصالة
         $activeTables = Table::active()->get();
         $totalTablesCount = $activeTables->count();
         $occupiedTablesCount = $activeTables->filter(fn($t) => $t->isOccupied())->count();
 
-        // 5. الأصناف الأكثر مبيعاً اليوم (Top 5)
+        // 6. الأصناف الأكثر مبيعاً اليوم (Top 5)
         $topProductsToday = InvoiceItem::whereHas('invoice', function ($q) use ($today) {
                 $q->whereDate('created_at', $today);
             })
@@ -74,7 +84,7 @@ class DashboardController extends Controller
             ->with('menu:id,name,price,category_id')
             ->get();
 
-        // 6. نواقص المخزن والتنبيهات اليوم
+        // 7. نواقص المخزن والتنبيهات اليوم
         $lowStockItems = InventoryItem::where(function ($q) {
                 $q->whereColumn('quantity', '<=', 'reorder_level')
                   ->orWhere('quantity', '<=', 0);
@@ -87,11 +97,18 @@ class DashboardController extends Controller
                   ->orWhere('quantity', '<=', 0);
             })->count();
 
-        // 7. آخر عمليات وفواتير اليوم (Latest 10)
+        // 8. آخر عمليات وفواتير مبيعات اليوم (Latest 10)
         $latestInvoices = Invoice::whereDate('created_at', $today)
             ->latest('id')
             ->take(10)
             ->with(['client', 'creator', 'items.menu', 'order.table'])
+            ->get();
+
+        // 9. أحدث فواتير مشتريات وتوريد اليوم (Latest 5)
+        $latestPurchaseInvoices = PurchaseInvoice::whereDate('invoice_date', $today)
+            ->latest('id')
+            ->take(5)
+            ->with('items')
             ->get();
 
         return view('dashboard', compact(
@@ -100,6 +117,10 @@ class DashboardController extends Controller
             'cashSales',
             'cardSales',
             'instapaySales',
+            'todayPurchasesTotal',
+            'todayPurchasesCount',
+            'todayPurchasesPaid',
+            'todayPurchasesUnpaid',
             'todayExpenses',
             'todayExpensesCount',
             'todayNetProfit',
@@ -110,7 +131,8 @@ class DashboardController extends Controller
             'topProductsToday',
             'lowStockItems',
             'lowStockCount',
-            'latestInvoices'
+            'latestInvoices',
+            'latestPurchaseInvoices'
         ));
     }
 }

@@ -13,6 +13,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/customers/ajax-search', [CustomerController::class, 'ajaxSearch'])->name('customers.ajaxSearch');
+    Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
+    Route::get('/customers/{customer}/export', [CustomerController::class, 'exportSingle'])->name('customers.exportSingle');
     Route::resource('customers', CustomerController::class);
     Route::resource('sales-invoices', SalesInvoiceController::class);
 });

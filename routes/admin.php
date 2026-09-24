@@ -4,13 +4,25 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\PurchaseInvoiceController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // 🔒 1. صلاحيات المدراء أولاً (Admins Only)
+    // 🔒 1. مسارات إدارة الموظفين والرواتب (للمدراء والمشرفين)
+    Route::middleware('role:admin|supervisor')->group(function () {
+        Route::get('/employees/export', [EmployeeController::class, 'exportAll'])->name('employees.export');
+        Route::get('/employees/{employee}/export', [EmployeeController::class, 'exportSingle'])->name('employees.exportSingle');
+        Route::post('/employees/{employee}/adjustments', [EmployeeController::class, 'addAdjustment'])->name('employees.addAdjustment');
+        Route::delete('/employees/adjustments/{adjustment}', [EmployeeController::class, 'deleteAdjustment'])->name('employees.deleteAdjustment');
+        Route::post('/employees/payrolls/{payroll}/pay', [EmployeeController::class, 'payMonth'])->name('employees.payMonth');
+        Route::post('/employees/{employee}/pay-all', [EmployeeController::class, 'payAllDues'])->name('employees.payAllDues');
+        Route::resource('employees', EmployeeController::class);
+    });
+
+    // 🔒 2. صلاحيات المدراء أولاً (Admins Only)
     // تم تقديمها للأعلى ليتم قراءة مسار /recipes/create قبل المسار العام المفتوح
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/movements', [InvoiceController::class, 'movements'])->name('admin.movements');
@@ -21,11 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/recipes/{recipe}/edit', [RecipeController::class, 'edit'])->name('recipes.edit');
         Route::delete('/recipes/{recipe}', [RecipeController::class, 'destroy'])->name('recipes.destroy');
         Route::put('/recipes/update/{recipe}', [RecipeController::class, 'update'])->name('recipes.update');
+        // مسارات فواتير الشراء وإدارتها
+        Route::get('/inventory/ajax-search', [PurchaseInvoiceController::class, 'searchInventoryItems'])->name('inventory.ajaxSearch');
         Route::resource('purchase-invoices', PurchaseInvoiceController::class);
-
-        Route::get('/employees', function () {
-            return view('employees.index');
-        })->name('employees.index');
         Route::get('/management', function () {
             return view('management.index');
         })->name('management.index');

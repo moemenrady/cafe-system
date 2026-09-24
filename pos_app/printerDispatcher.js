@@ -35,8 +35,11 @@ const ALIGN_MAP = {
 };
 
 const SIZE_MAP = {
-  normal: Buffer.from([GS, 0x21, 0x00]),
+  normal: Buffer.from([GS, 0x21, 0x00]), // Level 1 (1x1)
+  medium: Buffer.from([GS, 0x21, 0x01]), // Level 2 (1x2 double height)
+  large: Buffer.from([GS, 0x21, 0x11]),  // Level 3 (2x2 double height & width)
   double: Buffer.from([GS, 0x21, 0x11]),
+  xlarge: Buffer.from([GS, 0x21, 0x22]), // Level 4 (3x3 triple magnification)
   double_height: Buffer.from([GS, 0x21, 0x01]),
   double_width: Buffer.from([GS, 0x21, 0x10])
 };
@@ -46,6 +49,8 @@ const COMMANDS = {
   ENABLE_UTF8: Buffer.from([FS, 0x26]), // FS & Enable UTF-8 / Multi-byte mode
   BOLD_ON: Buffer.from([ESC, 0x45, 0x01]),
   BOLD_OFF: Buffer.from([ESC, 0x45, 0x00]),
+  DOUBLE_STRIKE_ON: Buffer.from([ESC, 0x47, 0x01]),
+  DOUBLE_STRIKE_OFF: Buffer.from([ESC, 0x47, 0x00]),
   DRAWER_KICK: Buffer.from([ESC, 0x70, 0x00, 0x19, 0xFA]), // Pin 2 Solenoid (50ms pulse)
   FEED_3_LINES: Buffer.from([ESC, 0x64, 0x03]),
   FEED_5_LINES: Buffer.from([ESC, 0x64, 0x05]),
@@ -167,6 +172,9 @@ class PrinterDispatcher {
           activeRolesSet.add('kitchen');
         } else {
           activeRolesSet.add(printer.role);
+          if (printer.role === 'barista') {
+            activeRolesSet.add('kitchen');
+          }
         }
       }
     });

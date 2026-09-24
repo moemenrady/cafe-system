@@ -25,13 +25,17 @@ const DEFAULT_TEMPLATES = {
       tax_number: "TR-9821389",
       phone: "01000000000",
       align: "center", // 'left' | 'center' | 'right'
-      store_name_size: "double" // 'normal' | 'double'
+      store_name_size: "large", // 'normal' | 'medium' | 'large' | 'xlarge'
+      store_name_weight: "extrabold" // 'normal' | 'medium' | 'bold' | 'extrabold'
     },
     body: {
       show_table: true,
       show_server: true,
       show_tax_breakdown: true,
-      show_drawer_kick: true
+      show_drawer_kick: true,
+      item_font_size: "medium", // 'normal' | 'medium' | 'large' | 'xlarge'
+      item_font_weight: "bold", // 'normal' | 'medium' | 'bold' | 'extrabold'
+      general_font_weight: "medium" // 'normal' | 'medium' | 'bold' | 'extrabold'
     },
     footer: {
       thank_you_message: "شكراً لزيارتكم! نتشرف بكم دائماً",
@@ -44,13 +48,16 @@ const DEFAULT_TEMPLATES = {
     header: {
       title: "تكت باريستا - مشروبات",
       align: "center",
-      title_size: "double"
+      title_size: "large", // 'normal' | 'medium' | 'large' | 'xlarge'
+      title_weight: "extrabold" // 'normal' | 'medium' | 'bold' | 'extrabold'
     },
     body: {
       show_table: true,
       show_order_type: true,
       show_notes: true,
-      item_font_size: "double" // 'normal' | 'double'
+      item_font_size: "large", // 'normal' | 'medium' | 'large' | 'xlarge'
+      item_font_weight: "extrabold", // 'normal' | 'medium' | 'bold' | 'extrabold'
+      notes_font_weight: "bold" // 'normal' | 'medium' | 'bold' | 'extrabold'
     },
     footer: {
       show_cut: true

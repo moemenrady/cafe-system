@@ -56,6 +56,37 @@ class OrderService
                 throw new InvalidArgumentException('Cannot checkout a cancelled order.');
             }
 
+            // معالجة بيانات العميل الاختيارية لربط الزيارة والفاتورة
+            $customerId = $paymentData['customer_id'] ?? null;
+            $customerPhone = trim((string) ($paymentData['customer_phone'] ?? $paymentData['phone'] ?? ''));
+            $customerName = trim((string) ($paymentData['customer_name'] ?? ''));
+
+            if (!$customerId && !empty($customerPhone)) {
+                $customer = \App\Models\Customer::where('phone', $customerPhone)->first();
+                if (!$customer) {
+                    $customer = \App\Models\Customer::create([
+                        'name'  => $customerName ?: ('عميل ' . substr($customerPhone, -4)),
+                        'phone' => $customerPhone,
+                    ]);
+                } elseif (!empty($customerName) && (empty($customer->name) || str_starts_with($customer->name, 'عميل '))) {
+                    $customer->update(['name' => $customerName]);
+                }
+                $customerId = $customer->id;
+            } elseif (!$customerId && !empty($customerName)) {
+                $customer = \App\Models\Customer::create([
+                    'name' => $customerName,
+                ]);
+                $customerId = $customer->id;
+            }
+
+            if ($customerId) {
+                $lockedOrder->customer_id = $customerId;
+                if (!empty($customerPhone)) {
+                    $lockedOrder->phone = $customerPhone;
+                }
+                $lockedOrder->save();
+            }
+
             if (in_array($lockedOrder->type, ['dine_in', 'delivery'], true)) {
                 $this->invoiceService->createInvoice($lockedOrder, $paymentData);
             }

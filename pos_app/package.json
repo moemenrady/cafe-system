@@ -1,38 +1,24 @@
 {
   "name": "pos-print-agent",
   "version": "1.0.0",
-  "description": "Production-grade offline-first Desktop POS Print Agent for Cafe Management System",
-  "main": "server.js",
-  "bin": "server.js",
+  "description": "Commercial Windows Desktop POS Print Agent for Cafe Management System",
+  "main": "main.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "electron .",
+    "dev": "electron .",
+    "cli": "node server.js",
     "virtual-printer": "node virtualPrinter.js",
-    "build:win": "pkg . --targets node18-win-x64 --output dist/pos-agent.exe",
-    "build:mac": "pkg . --targets node18-macos-x64 --output dist/pos-agent-mac",
-    "build:linux": "pkg . --targets node18-linux-x64 --output dist/pos-agent-linux"
-  },
-  "pkg": {
-    "scripts": [
-      "arabicHelper.js",
-      "configManager.js",
-      "printerDiscovery.js",
-      "printerDispatcher.js",
-      "printHistory.js",
-      "reverbClient.js",
-      "server.js",
-      "updater.js"
-    ],
-    "assets": [
-      "public/**/*"
-    ]
+    "pack": "electron-builder --dir",
+    "build": "electron-builder --win",
+    "dist": "electron-builder --win"
   },
   "keywords": [
     "pos",
     "thermal-printer",
     "esc-pos",
     "laravel-reverb",
-    "websockets"
+    "electron",
+    "desktop-agent"
   ],
   "author": "Cafe System Engineering",
   "license": "UNLICENSED",
@@ -45,6 +31,39 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@yao-pkg/pkg": "^5.14.1"
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.cafesystem.printagent",
+    "productName": "Cafe Print Agent",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!*.bat"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "shortcutName": "Cafe Print Agent",
+      "artifactName": "Cafe-Print-Agent-Setup-${version}.${ext}"
+    }
   }
 }

@@ -21,6 +21,7 @@ const Pusher = require('pusher-js');
 const WebSocket = require('ws');
 const printerDispatcher = require('./printerDispatcher');
 const printHistory = require('./printHistory');
+const logger = require('./logger');
 
 // Polyfill global WebSocket for Pusher-JS in pure Node.js runtime
 global.WebSocket = WebSocket;
@@ -112,6 +113,7 @@ class ReverbClient {
       this.reconnectAttempts = 0;
       this.lastError = null;
       console.log(`[ReverbClient] WebSocket connected successfully to Laravel Reverb (Socket ID: ${this.pusher.connection.socket_id})`);
+      logger.info(`تم الاتصال بنجاح بـ Laravel Reverb (Socket ID: ${this.pusher.connection.socket_id})`);
 
       // Subscribe to device-specific print agent channel
       const channelName = `print-agent.${deviceUuid}`;
@@ -120,10 +122,12 @@ class ReverbClient {
 
       this.channel.bind('pusher:subscription_succeeded', () => {
         console.log(`[ReverbClient] Subscribed successfully to "${channelName}". Ready to receive print jobs.`);
+        logger.info(`تم الاشتراك في قناة الاستماع للطباعة: "${channelName}"`);
       });
 
       this.channel.bind('pusher:subscription_error', (status) => {
         console.error(`[ReverbClient] Subscription failed for "${channelName}": Status ${status}`);
+        logger.error(`فشل الاشتراك في القناة "${channelName}": كود ${status}`);
       });
 
       // Listen for print job events
@@ -215,6 +219,7 @@ class ReverbClient {
       jobRecord.details = dispatchResult.results;
       printHistory.recordJob({ job, dispatchResult, status: 'printed', source: 'reverb' });
       console.log(`[ReverbClient] Print job [${jobUuid}] completed successfully.`);
+      logger.print(`تمت طباعة الفاتورة [${jobUuid}] بنجاح`, true, { uuid: jobUuid, role: job.role || 'all' });
 
       // 3. Notify Laravel backend of job completion
       await this.notifyBackendJobStatus(jobUuid, 'complete');
@@ -224,6 +229,7 @@ class ReverbClient {
       jobRecord.failed_at = new Date().toISOString();
       printHistory.recordJob({ job, dispatchResult: null, status: 'failed', source: 'reverb', error: err.message });
       console.error(`[ReverbClient] Print job [${jobUuid}] failed: ${err.message}`);
+      logger.print(`فشل طباعة الفاتورة [${jobUuid}]: ${err.message}`, false, { uuid: jobUuid, error: err.message });
 
       // 4. Notify Laravel backend of failure with error diagnostic
       await this.notifyBackendJobStatus(jobUuid, 'failed', err.message);

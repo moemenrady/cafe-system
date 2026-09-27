@@ -1,5 +1,131 @@
 [
   {
+    "id": "48693b7c-8947-42f9-a3eb-915b23116e14",
+    "order_number": "ORD-20260924-00020",
+    "type": "kitchen",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T10:44:03.243Z",
+    "formatted_time": "٠١:٤٤:٠٣ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "كاشير",
+    "total": "0.00",
+    "items_count": 2,
+    "items_summary": "1x Mixed Cheese, 1x Tuna",
+    "printers": [
+      {
+        "id": "printer-barista",
+        "name": "XP-80C (copy 1)",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 38,
+      "uuid": "48693b7c-8947-42f9-a3eb-915b23116e14",
+      "device_uuid": "pos-cashier-01",
+      "type": "kitchen",
+      "order_id": 20,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "quantity": 1
+          },
+          {
+            "name": "Tuna",
+            "notes": null,
+            "quantity": 1
+          }
+        ],
+        "notes": null,
+        "table": null,
+        "order_id": 20,
+        "created_at": "2026-09-24 10:43",
+        "order_number": "ORD-20260924-00020"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T10:43:57.000000Z",
+      "updated_at": "2026-09-24T10:43:57.000000Z"
+    },
+    "error": null
+  },
+  {
+    "id": "a8ec0174-75ce-47cf-9cf3-12c66b04ee61",
+    "order_number": "ORD-20260924-00020",
+    "type": "customer",
+    "source": "reverb",
+    "status": "printed",
+    "timestamp": "2026-09-24T10:44:01.954Z",
+    "formatted_time": "٠١:٤٤:٠١ م",
+    "formatted_date": "٢٤‏/٩‏/٢٠٢٦",
+    "table": "takeaway",
+    "cashier": "المدير العام",
+    "total": "310.00",
+    "items_count": 2,
+    "items_summary": "1x Mixed Cheese, 1x Tuna",
+    "printers": [
+      {
+        "id": "printer-cashier",
+        "name": "XP-80C",
+        "success": true
+      }
+    ],
+    "raw_job": {
+      "id": 37,
+      "uuid": "a8ec0174-75ce-47cf-9cf3-12c66b04ee61",
+      "device_uuid": "pos-cashier-01",
+      "type": "customer",
+      "order_id": 20,
+      "payload": {
+        "type": "takeaway",
+        "items": [
+          {
+            "name": "Mixed Cheese",
+            "notes": null,
+            "price": 140,
+            "total": 140,
+            "quantity": 1
+          },
+          {
+            "name": "Tuna",
+            "notes": null,
+            "price": 170,
+            "total": 170,
+            "quantity": 1
+          }
+        ],
+        "table": null,
+        "total": 310,
+        "invoice": null,
+        "discount": 0,
+        "order_id": 20,
+        "subtotal": 310,
+        "created_at": "2026-09-24 10:43",
+        "cashier_name": "المدير العام",
+        "order_number": "ORD-20260924-00020"
+      },
+      "status": "pending",
+      "attempts": 0,
+      "started_at": null,
+      "printed_at": null,
+      "error_message": null,
+      "copies": 1,
+      "printer_name": null,
+      "created_at": "2026-09-24T10:43:57.000000Z",
+      "updated_at": "2026-09-24T10:43:57.000000Z"
+    },
+    "error": null
+  },
+  {
     "id": "88196d87-b91c-4724-bfea-10fedf97309a",
     "order_number": "ORD-20260924-00018",
     "type": "kitchen",

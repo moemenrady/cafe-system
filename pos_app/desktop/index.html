@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafe Print Agent | نظام الطباعة المكتبي</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>نظام طباعة الكافيه المكتبي</h1>
+          <span class="sub-badge">Cafe Print Agent v1.0.0</span>
+        </div>
+      </div>
+
+      <!-- Live Connectivity Badges -->
+      <div class="status-strip">
+        <div class="status-badge" id="badge-port">
+          <span class="dot green"></span>
+          <span>المنفذ المحلي: <b id="port-label">3210</b></span>
+        </div>
+        <div class="status-badge" id="badge-reverb">
+          <span class="dot gray" id="reverb-dot"></span>
+          <span>Reverb: <b id="reverb-label">جاري الفحص...</b></span>
+        </div>
+        <div class="status-badge" id="badge-backend">
+          <span class="dot gray" id="backend-dot"></span>
+          <span>مزامنة السيرفر: <b id="backend-label">جاري التحقق...</b></span>
+        </div>
+        <div class="status-badge" id="badge-device">
+          <span class="dot blue"></span>
+          <span>المحطة: <b id="device-label">...</b></span>
+        </div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="header-actions">
+        <button id="btn-minimize-tray" class="btn-icon" title="تصغير إلى شريط المهام (System Tray)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="tab-dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        لوحة التحكم الرئيسية
+      </button>
+      <button class="tab-btn" data-tab="tab-printers">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        تعيين وتخصيص الطابعات
+      </button>
+      <button class="tab-btn" data-tab="tab-settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        إعدادات الربط والنظام
+      </button>
+      <button class="tab-btn" data-tab="tab-logs">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+        سجل العمليات المباشر
+      </button>
+    </nav>
+
+    <!-- Main Content Body -->
+    <main class="content-body">
+
+      <!-- ================= TAB 1: DASHBOARD ================= -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <!-- Role Status Cards -->
+        <div class="cards-grid">
+          <!-- Cashier Card -->
+          <div class="role-card" id="card-cashier">
+            <div class="role-header">
+              <div class="role-title">
+                <span class="badge-role cashier">كاشير</span>
+                <h3>طابعة إيصالات الكاشير</h3>
+              </div>
+              <span class="status-indicator-chip" id="chip-cashier">جاري الفحص...</span>
+            </div>
+            <div class="role-body">
+              <div class="info-row">
+                <span class="label">اسم الطابعة:</span>
+                <span class="value" id="val-cashier-name">--</span>
+              </div>
+              <div class="info-row">
+                <span class="label">منفذ الويندوز:</span>
+                <span class="value" id="val-cashier-port">--</span>
+              </div>
+              <div class="info-row">
+                <span class="label">النوع:</span>
+                <span class="value" id="val-cashier-type">حرارية (ESC/POS)</span>
+              </div>
+            </div>
+            <div class="role-footer">
+              <button class="btn btn-primary" id="btn-test-cashier">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                طباعة تجريبية للكاشير
+              </button>
+            </div>
+          </div>
+
+          <!-- Barista Card -->
+          <div class="role-card" id="card-barista">
+            <div class="role-header">
+              <div class="role-title">
+                <span class="badge-role barista">باريستا</span>
+                <h3>طابعة طلبات الباريستا والمشروبات</h3>
+              </div>
+              <span class="status-indicator-chip" id="chip-barista">جاري الفحص...</span>
+            </div>
+            <div class="role-body">
+              <div class="info-row">
+                <span class="label">اسم الطابعة:</span>
+                <span class="value" id="val-barista-name">--</span>
+              </div>
+              <div class="info-row">
+                <span class="label">منفذ الويندوز:</span>
+                <span class="value" id="val-barista-port">--</span>
+              </div>
+              <div class="info-row">
+                <span class="label">النوع:</span>
+                <span class="value" id="val-barista-type">حرارية (ESC/POS)</span>
+              </div>
+            </div>
+            <div class="role-footer">
+              <button class="btn btn-secondary" id="btn-test-barista">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                طباعة تجريبية للباريستا
+              </button>
+            </div>
+          </div>
+
+          <!-- Kitchen Card -->
+          <div class="role-card" id="card-kitchen">
+            <div class="role-header">
+              <div class="role-title">
+                <span class="badge-role kitchen">مطبخ</span>
+                <h3>طابعة بونات المطبخ</h3>
+              </div>
+              <span class="status-indicator-chip" id="chip-kitchen">جاري الفحص...</span>
+            </div>
+            <div class="role-body">
+              <div class="info-row">
+                <span class="label">اسم الطابعة:</span>
+                <span class="value" id="val-kitchen-name">--</span>
+              </div>
+              <div class="info-row">
+                <span class="label">منفذ الويندوز:</span>
+                <span class="value" id="val-kitchen-port">--</span>
+              </div>
+              <div class="info-row">
+                <span class="label">النوع:</span>
+                <span class="value" id="val-kitchen-type">حرارية (ESC/POS)</span>
+              </div>
+            </div>
+            <div class="role-footer">
+              <button class="btn btn-secondary" id="btn-test-kitchen">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                طباعة تجريبية للمطبخ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Telemetry & Health -->
+        <div class="telemetry-bar">
+          <div class="telemetry-item">
+            <span class="telemetry-title">عنوان الربط السحابي:</span>
+            <span class="telemetry-val" id="telemetry-backend-url">--</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-title">قناة الاستماع اللحظي:</span>
+            <span class="telemetry-val" id="telemetry-channel">--</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-title">آخر نبض مزامنة:</span>
+            <span class="telemetry-val" id="telemetry-heartbeat">--</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: PRINTER CONFIG ================= -->
+      <section id="tab-printers" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h2>تعيين الطابعات وتفريق الموديلات المتطابقة</h2>
+            <p class="section-desc">إذا كان لديك أكثر من طابعة من نفس الموديل (مثل طابعتين Xprinter)، يعرض البرنامج منفذ كل طابعة (USB001 / USB002) لتمييزها بدقة متناهية.</p>
+          </div>
+          <button class="btn btn-outline" id="btn-refresh-printers">
+            <svg class="spin-on-click" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            إعادة فحص الطابعات
+          </button>
+        </div>
+
+        <!-- Role Assignment Form -->
+        <div class="assignment-box">
+          <div class="assignment-item">
+            <label>طابعة الكاشير الرئيسية (إيصال الحساب للعميل):</label>
+            <select id="select-role-cashier" class="form-select">
+              <option value="">-- اختر الطابعة للكاشير --</option>
+            </select>
+          </div>
+
+          <div class="assignment-item">
+            <label>طابعة الباريستا (تكت تجهيز المشروبات):</label>
+            <select id="select-role-barista" class="form-select">
+              <option value="">-- اختر الطابعة للباريستا --</option>
+            </select>
+          </div>
+
+          <div class="assignment-item">
+            <label>طابعة المطبخ (تكت تجهيز المأكولات):</label>
+            <select id="select-role-kitchen" class="form-select">
+              <option value="">-- اختر الطابعة للمطبخ --</option>
+            </select>
+          </div>
+
+          <div class="assignment-actions">
+            <button class="btn btn-primary" id="btn-save-assignments">حفظ وتفعيل تعيين الطابعات</button>
+            <span id="assign-save-status" class="save-status-msg"></span>
+          </div>
+        </div>
+
+        <!-- Detected Printers Table -->
+        <h3 class="subsection-title">الطابعات المعرفة على نظام Windows حالياً:</h3>
+        <div class="table-container">
+          <table class="printers-table">
+            <thead>
+              <tr>
+                <th>اسم الطابعة</th>
+                <th>منفذ التوصيل (Port)</th>
+                <th>نوع التعريف (Driver)</th>
+                <th>الحالة</th>
+                <th>الدور المخصص</th>
+              </tr>
+            </thead>
+            <tbody id="printers-table-body">
+              <tr>
+                <td colspan="5" style="text-align: center; color: #94a3b8;">جاري البحث عن الطابعات المتصلة بالجهاز...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: SYSTEM SETTINGS ================= -->
+      <section id="tab-settings" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h2>إعدادات النظام والاتصال بالسيرفر</h2>
+            <p class="section-desc">تعديل بارامترات الربط مع Laravel Reverb والسيرفر السحابي، والتحكم في بدء تشغيل البرنامج مع الويندوز.</p>
+          </div>
+        </div>
+
+        <form id="form-settings" class="settings-grid">
+          <div class="form-group full-width">
+            <label>معرف المحطة الفريد (Device UUID):</label>
+            <input type="text" id="setting-device-uuid" class="form-input" placeholder="pos-cashier-01" required>
+            <span class="field-hint">يجب أن يتطابق مع الإعداد في جهاز الكاشير في لوحة إدارة الكافيه.</span>
+          </div>
+
+          <div class="form-group full-width">
+            <label>رابط سيرفر لارافيل (Laravel Backend URL):</label>
+            <input type="url" id="setting-backend-url" class="form-input" placeholder="https://sana-beach-uno.com" required>
+            <span class="field-hint">رابط السيرفر الأساسي (محلي أو سحابي) الذي يتلقى نبضات الطابعة.</span>
+          </div>
+
+          <div class="form-group">
+            <label>مضيف Reverb (Host):</label>
+            <input type="text" id="setting-reverb-host" class="form-input" placeholder="127.0.0.1" required>
+          </div>
+
+          <div class="form-group">
+            <label>منفذ Reverb (Port):</label>
+            <input type="number" id="setting-reverb-port" class="form-input" placeholder="8080" required>
+          </div>
+
+          <div class="form-group">
+            <label>بروتوكول Reverb (Scheme):</label>
+            <select id="setting-reverb-scheme" class="form-select">
+              <option value="http">HTTP (غير مشفر / محلي)</option>
+              <option value="https">HTTPS (مشفر TLS / سحابي)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>مفتاح التطبيق (Reverb App Key):</label>
+            <input type="text" id="setting-reverb-key" class="form-input" placeholder="reverb app key" required>
+          </div>
+
+          <div class="form-group full-width autostart-box">
+            <label class="checkbox-container">
+              <input type="checkbox" id="setting-autostart">
+              <span class="checkmark"></span>
+              <span class="checkbox-text">تشغيل البرنامج تلقائياً في الخلفية عند إقلاع Windows (Auto-Start)</span>
+            </label>
+            <span class="field-hint">يضمن جاهزية الطابعات واستقبال الأوامر فور فتح الكمبيوتر دون تدخل من الكاشير.</span>
+          </div>
+
+          <div class="form-actions full-width">
+            <button type="submit" class="btn btn-primary" id="btn-save-settings">حفظ التغييرات وإعادة الاتصال</button>
+            <button type="button" class="btn btn-outline" id="btn-reconnect-now">إعادة الاتصال الفوري بالسيرفر</button>
+            <span id="settings-save-status" class="save-status-msg"></span>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================= TAB 4: LIVE LOGS ================= -->
+      <section id="tab-logs" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h2>سجل العمليات والطباعة المباشر</h2>
+            <p class="section-desc">مراقبة حية لجميع الأحداث وأوامر الطباعة القادمة عبر الويب سوكيت وحالة تنفيذها على الهاردوير.</p>
+          </div>
+          <div class="logs-controls">
+            <button class="btn btn-outline" id="btn-clear-logs">تفريغ الشاشة</button>
+            <button class="btn btn-outline" id="btn-open-logs-dir">فتح مجلد السجلات في Explorer</button>
+          </div>
+        </div>
+
+        <div class="log-viewer" id="log-viewer">
+          <div class="log-empty-msg">جاري تحميل السجلات المباشرة...</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Status -->
+    <footer class="app-footer">
+      <div>
+        <span>مسار ملف الإعدادات: </span>
+        <code id="footer-config-path">--</code>
+      </div>
+      <div class="footer-links">
+        <span>لوحة التحكم المحلية متاحة للمتصفح على: <code>http://127.0.0.1:3210</code></span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -494,13 +494,14 @@ const server = app.listen(PORT, async () => {
   const intervalMs = config.heartbeat_interval_ms || 30000;
   heartbeatIntervalTimer = setInterval(runPrinterProbesAndHeartbeat, intervalMs);
 
-  if (!configManager.isConfigured()) {
+  if (!configManager.isConfigured() && !process.versions.electron) {
     console.log('[Server] أول تشغيل للبرنامج. جاري فتح لوحة التحكم في المتصفح...');
     setTimeout(() => openBrowser(`http://localhost:${PORT}`), 1200);
   }
 });
 
 function handleShutdown(signal) {
+  if (process.versions && process.versions.electron) return;
   console.log(`\n[Server] استلام إشارة الإغلاق ${signal}...`);
   if (heartbeatIntervalTimer) clearInterval(heartbeatIntervalTimer);
   reverbClient.disconnect();
@@ -514,4 +515,13 @@ function handleShutdown(signal) {
 process.on('SIGINT', () => handleShutdown('SIGINT'));
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
-module.exports = { app, server };
+module.exports = {
+  app,
+  server,
+  runPrinterProbesAndHeartbeat,
+  getStatusData: () => ({
+    lastHeartbeatStatus,
+    cachedPrinterHealth,
+    cachedActiveRoles
+  })
+};

@@ -14,7 +14,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE_DIR = process.pkg ? path.dirname(process.execPath) : __dirname;
+const BASE_DIR = process.env.POS_CONFIG_PATH
+  ? path.dirname(process.env.POS_CONFIG_PATH)
+  : (process.pkg ? path.dirname(process.execPath) : __dirname);
 const HISTORY_FILE = path.join(BASE_DIR, 'history.json');
 const MAX_HISTORY = 100;
 

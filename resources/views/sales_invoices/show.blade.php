@@ -54,6 +54,13 @@
         </div>
 
         <div class="flex items-center gap-2">
+            @if(auth()->user()->isManager())
+            <a href="{{ route('sales-invoices.edit', $invoice->id) }}"
+                class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center gap-2 shadow-xs">
+                <i class="fa-solid fa-pen"></i>
+                <span class="hidden sm:inline">تعديل الفاتورة</span>
+            </a>
+            @endif
             <button type="button" onclick="window.print()"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center gap-2 shadow-xs">
                 <i class="fa-solid fa-print"></i>

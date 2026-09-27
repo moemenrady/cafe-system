@@ -138,6 +138,15 @@
                 title="صوت النقر والتأكيد">
                 <i id="soundIcon" class="fa-solid fa-volume-high"></i>
             </button>
+
+            {{-- زر الديلفري مع Badge --}}
+            <button type="button" onclick="openDeliveryModal()"
+                class="relative flex items-center gap-1.5 px-3 py-2 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs transition-all active:scale-95"
+                title="طلبات الديلفري المعلقة">
+                <i class="fa-solid fa-motorcycle text-xs"></i>
+                <span class="hidden sm:inline">ديلفري</span>
+                <span id="deliveryBadge" class="hidden absolute -top-1.5 -left-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow">0</span>
+            </button>
         </div>
     </header>
 
@@ -1557,5 +1566,235 @@
             searchInput.focus();
         }
     });
+
+    // ==========================================
+    // 🚴 فلو الديلفري – تحميل وعرض وإدارة الطلبات
+    // ==========================================
+
+    let deliveryOrders = [];
+    let deliveryRefreshInterval = null;
+
+    async function loadDeliveryOrders() {
+        try {
+            const res  = await fetch('{{ route("orders.delivery.active") }}', {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                deliveryOrders = data.data || [];
+                updateDeliveryBadge(deliveryOrders.length);
+                renderDeliveryList();
+            }
+        } catch (e) {
+            console.warn('تعذر تحميل طلبات الديلفري', e);
+        }
+    }
+
+    function updateDeliveryBadge(count) {
+        const badge = document.getElementById('deliveryBadge');
+        if (!badge) return;
+        if (count > 0) {
+            badge.textContent = count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function renderDeliveryList() {
+        const container = document.getElementById('deliveryOrdersContainer');
+        if (!container) return;
+
+        if (deliveryOrders.length === 0) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <i class="fa-solid fa-motorcycle text-4xl mb-3 text-gray-300"></i>
+                    <p class="font-bold text-sm">لا توجد طلبات ديلفري معلقة</p>
+                    <p class="text-xs mt-1">ستظهر الطلبات هنا فور إضافتها من POS</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = deliveryOrders.map(order => `
+            <div class="border border-gray-200 rounded-2xl p-4 space-y-3 bg-white hover:shadow-sm transition" id="delivery-card-${order.id}">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100">#${order.order_number}</span>
+                            <span class="text-[10px] text-orange-600 bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100 font-bold">
+                                <i class="fa-regular fa-clock"></i> منذ ${order.waiting_minutes} دقيقة
+                            </span>
+                        </div>
+                        <div class="mt-1.5 text-xs text-gray-600 space-y-0.5">
+                            ${order.phone ? `<div><i class="fa-solid fa-phone text-[10px] text-gray-400 ml-1"></i> ${order.phone}</div>` : ''}
+                            ${order.delivery_address ? `<div><i class="fa-solid fa-location-dot text-[10px] text-gray-400 ml-1"></i> ${order.delivery_address}</div>` : ''}
+                            ${order.delivery_person ? `<div><i class="fa-solid fa-person-biking text-[10px] text-purple-400 ml-1"></i> المندوب: ${order.delivery_person}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="text-left shrink-0">
+                        <div class="text-base font-black text-emerald-600">${order.total} ج.م</div>
+                        <div class="text-[10px] text-gray-400 text-left">${order.created_at}</div>
+                    </div>
+                </div>
+
+                {{-- الأصناف --}}
+                <div class="flex flex-wrap gap-1.5">
+                    ${order.items.map(i => `
+                        <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-lg font-bold">
+                            ${i.name} × ${i.quantity}
+                        </span>
+                    `).join('')}
+                </div>
+
+                ${order.notes ? `<div class="text-[11px] bg-amber-50 border border-amber-100 rounded-xl px-2.5 py-1.5 text-amber-700"><i class="fa-solid fa-note-sticky ml-1"></i>${order.notes}</div>` : ''}
+
+                {{-- تعيين مندوب --}}
+                <div class="flex items-center gap-2 pt-1">
+                    <input type="text" id="driver-${order.id}"
+                        value="${order.delivery_person || ''}"
+                        placeholder="اسم المندوب (اختياري)"
+                        class="flex-1 text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200">
+                    <button type="button" onclick="deliverOrder(${order.id})"
+                        class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-check"></i>
+                        تم التسليم
+                    </button>
+                    <button type="button" onclick="cancelDeliveryOrder(${order.id})"
+                        class="w-9 h-9 bg-red-50 hover:bg-red-100 text-red-500 font-bold text-xs rounded-xl transition flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function deliverOrder(orderId) {
+        const driverInput = document.getElementById(`driver-${orderId}`);
+        const driverName  = driverInput ? driverInput.value.trim() : '';
+
+        try {
+            const res  = await fetch(`/orders/${orderId}/assign-driver`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ delivery_person: driverName }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                await loadDeliveryOrders();
+                showDeliveryToast('✅ ' + data.message, 'success');
+            } else {
+                showDeliveryToast('❌ ' + data.message, 'error');
+            }
+        } catch (e) {
+            showDeliveryToast('❌ حدث خطأ في الاتصال.', 'error');
+        }
+    }
+
+    async function cancelDeliveryOrder(orderId) {
+        if (!confirm('هل تريد إلغاء هذا الطلب؟ سيتم إعادة المخزن.')) return;
+        try {
+            const res  = await fetch(`/orders/${orderId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({}),
+            });
+            const data = await res.json();
+            if (data.success) {
+                await loadDeliveryOrders();
+                showDeliveryToast('✅ ' + data.message, 'success');
+            } else {
+                showDeliveryToast('❌ ' + data.message, 'error');
+            }
+        } catch (e) {
+            showDeliveryToast('❌ حدث خطأ في الاتصال.', 'error');
+        }
+    }
+
+    function showDeliveryToast(msg, type) {
+        const toast = document.getElementById('deliveryToast');
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-2xl text-sm font-bold shadow-lg z-[200] transition-all ${type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`;
+        toast.classList.remove('opacity-0');
+        setTimeout(() => { toast.classList.add('opacity-0'); }, 3000);
+    }
+
+    function openDeliveryModal() {
+        document.getElementById('deliveryModal').classList.remove('hidden');
+        loadDeliveryOrders();
+        deliveryRefreshInterval = setInterval(loadDeliveryOrders, 30000);
+    }
+
+    function closeDeliveryModal() {
+        document.getElementById('deliveryModal').classList.add('hidden');
+        clearInterval(deliveryRefreshInterval);
+    }
+
+    // تحميل أولي للـ badge عند فتح الصفحة
+    loadDeliveryOrders();
+    setInterval(() => {
+        // تحديث badge فقط بدون فتح المودال
+        fetch('{{ route("orders.delivery.active") }}', { headers: { 'Accept': 'application/json' } })
+            .then(r => r.json())
+            .then(d => d.success && updateDeliveryBadge((d.data || []).length))
+            .catch(() => {});
+    }, 60000);
+
 </script>
+
+{{-- ==========================================
+     مودال الديلفري
+     ========================================== --}}
+<div id="deliveryModal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4" dir="rtl">
+    {{-- خلفية شفافة --}}
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDeliveryModal()"></div>
+
+    {{-- كارت المودال --}}
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden z-10">
+
+        {{-- رأس المودال --}}
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-gray-800 text-sm">طلبات الديلفري المعلقة</h3>
+                    <p class="text-[11px] text-gray-400">اضغط "تم التسليم" لإغلاق الطلب</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="loadDeliveryOrders()"
+                    class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-xs transition"
+                    title="تحديث">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+                <button type="button" onclick="closeDeliveryModal()"
+                    class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center text-sm transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        {{-- قائمة الطلبات --}}
+        <div id="deliveryOrdersContainer" class="flex-1 overflow-y-auto p-4 space-y-3 pos-scrollbar">
+            <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+                <p class="text-xs">جارٍ التحميل...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Toast notification --}}
+<div id="deliveryToast" class="opacity-0 fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-2xl text-sm font-bold shadow-lg z-[200] bg-emerald-600 text-white transition-all pointer-events-none"></div>
+
 @endpush

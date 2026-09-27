@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
@@ -30,10 +31,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return response()->json(['status' => 'ok', 'timestamp' => now()->timestamp]);
     })->name('keep_alive');
 
-    // ⚙️ الإعدادات وتخصيص ترتيب القائمة
-    Route::get('/settings', function () { return view('settings.index'); })->name('settings.index');
+    // ⚙️ الإعدادات – الصفحة الرئيسية (تمرر بيانات المستخدمين للأدمن والمشرف)
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+
+    // ⚙️ تخصيص ترتيب القائمة الجانبية (متاح للجميع)
     Route::post('/user/sidebar-order', [UserController::class, 'updateSidebarOrder'])->name('user.sidebar_order.update');
     Route::post('/user/sidebar-order/reset', [UserController::class, 'resetSidebarOrder'])->name('user.sidebar_order.reset');
+
+    // ==========================================
+    // 👥 إدارة المستخدمين – أدمن ومشرف فقط
+    // ==========================================
+    Route::middleware('role:admin|supervisor')->prefix('settings')->name('users.')->group(function () {
+        Route::post('/users', [UserController::class, 'store'])->name('store');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('destroy');
+        Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+    });
 });
 
 /*

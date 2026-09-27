@@ -287,6 +287,13 @@
                                         title="طباعة الفاتورة">
                                         <i class="fa-solid fa-print text-xs"></i>
                                     </a>
+                                    @if(auth()->user()->isManager())
+                                    <a href="{{ route('sales-invoices.edit', $invoice->id) }}"
+                                        class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition"
+                                        title="تعديل الفاتورة">
+                                        <i class="fa-solid fa-pen text-xs"></i>
+                                    </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

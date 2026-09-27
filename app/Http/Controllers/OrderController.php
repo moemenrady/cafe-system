@@ -163,4 +163,109 @@ class OrderController extends Controller
 
         return response()->json(['data' => $order]);
     }
+
+    /**
+     * GET /orders/delivery/active – قائمة طلبات الديلفري المعلقة
+     */
+    public function activeDeliveries(): JsonResponse
+    {
+        $orders = Order::with(['items.menu', 'creator'])
+            ->where('type', 'delivery')
+            ->where('status', 'waiting_delivery')
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id'               => $order->id,
+                    'order_number'     => $order->order_number,
+                    'phone'            => $order->phone,
+                    'delivery_address' => $order->delivery_address,
+                    'delivery_person'  => $order->delivery_person,
+                    'total'            => number_format($order->total, 2),
+                    'notes'            => $order->notes,
+                    'created_at'       => $order->created_at->format('h:i A'),
+                    'waiting_minutes'  => (int) $order->created_at->diffInMinutes(now()),
+                    'items'            => $order->items->map(fn($i) => [
+                        'name'     => $i->menu->name ?? 'صنف محذوف',
+                        'quantity' => $i->quantity,
+                    ]),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'count'   => $orders->count(),
+            'data'    => $orders,
+        ]);
+    }
+
+    /**
+     * POST /orders/{order}/assign-driver – تعيين مندوب وتسليم الطلب
+     */
+    public function assignDriver(Order $order, Request $request): JsonResponse
+    {
+        if ($order->type !== 'delivery' || $order->status !== 'waiting_delivery') {
+            return response()->json([
+                'success' => false,
+                'message' => 'هذا الطلب ليس ديلفري معلق.',
+            ], 422);
+        }
+
+        $request->validate([
+            'delivery_person' => 'nullable|string|max:100',
+        ]);
+
+        $order->update([
+            'delivery_person' => $request->input('delivery_person', $order->delivery_person),
+            'status'          => 'completed',
+            'payment_status'  => 'paid',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسليم الطلب وإغلاقه بنجاح.',
+        ]);
+    }
+
+    /**
+     * POST /orders/{order}/cancel – إلغاء طلب ديلفري وإعادة المخزن
+     */
+    public function cancel(Order $order, Request $request): JsonResponse
+    {
+        if (! in_array($order->status, ['waiting_delivery', 'open'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن إلغاء هذا الطلب في حالته الحالية.',
+            ], 422);
+        }
+
+        // إذا كانت الفاتورة قد تم إنشاؤها نحتاج نرجع المخزن
+        if ($order->invoice) {
+            $invoice = $order->invoice->load('items');
+            foreach ($invoice->items as $item) {
+                $product = \App\Models\Menu::with('recipes.inventoryItem')->find($item->menu_id);
+                if ($product) {
+                    foreach ($product->recipes as $recipe) {
+                        $returnedQty = $recipe->quantity_used * $item->quantity;
+                        $recipe->inventoryItem->increment('quantity', $returnedQty);
+                        \App\Models\InventoryMovement::create([
+                            'inventory_item_id' => $recipe->inventoryItem->id,
+                            'type'              => 'sale_cancel',
+                            'quantity'          => $returnedQty,
+                            'balance_after'     => $recipe->inventoryItem->quantity,
+                            'invoice_id'        => $invoice->id,
+                            'user_id'           => auth()->id() ?? 1,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        $order->update(['status' => 'cancelled']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إلغاء الطلب بنجاح.',
+        ]);
+    }
 }

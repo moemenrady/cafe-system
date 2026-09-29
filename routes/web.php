@@ -39,13 +39,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/user/sidebar-order/reset', [UserController::class, 'resetSidebarOrder'])->name('user.sidebar_order.reset');
 
     // ==========================================
-    // 👥 إدارة المستخدمين – أدمن ومشرف فقط
+    // 👥 إدارة المستخدمين (CRUD كامل) – أدمن فقط
     // ==========================================
-    Route::middleware('role:admin|supervisor')->prefix('settings')->name('users.')->group(function () {
+    Route::middleware('role:admin')->prefix('settings')->name('users.')->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('index');
         Route::post('/users', [UserController::class, 'store'])->name('store');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('show');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('destroy');
         Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/users/{user}/toggle-shift', [UserController::class, 'toggleShiftPermission'])->name('toggle-shift');
     });
 });
 

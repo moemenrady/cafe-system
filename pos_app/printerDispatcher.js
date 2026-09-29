@@ -72,8 +72,11 @@ class PrinterDispatcher {
     if (type === 'windows' || type === 'system_spooler' || conn === 'windows' || conn === 'usb' || conn === 'spooler') {
       return true;
     }
-    // If no host or 127.0.0.1 without dedicated network port, check if matches installed Windows printer
-    if (!printer.host && printer.name) {
+    if (printer.windows_printer_name) {
+      return true;
+    }
+    // If no host or missing port with a valid printer name, treat as Windows spooler
+    if (!printer.host || (!printer.port && printer.name)) {
       return true;
     }
     return false;
@@ -144,6 +147,7 @@ class PrinterDispatcher {
           name: printer.name,
           role: printer.role,
           type: isWin ? 'windows' : 'tcp',
+          windows_printer_name: printer.windows_printer_name || printer.name,
           host: printer.host,
           port: printer.port,
           online: false,
@@ -158,6 +162,7 @@ class PrinterDispatcher {
         name: printer.name,
         role: printer.role,
         type: isWin ? 'windows' : 'tcp',
+        windows_printer_name: printer.windows_printer_name || printer.name,
         host: printer.host,
         port: printer.port,
         online: res.online,

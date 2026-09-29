@@ -5,12 +5,102 @@
  * Transmits binary buffers directly to Windows USB/Spooler printers using winspool.drv.
  */
 
-const { spawn, exec } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
 class WindowsSpooler {
+  constructor() {
+    this._cachedPrinters = null;
+    this._cacheTime = 0;
+  }
+
+  /**
+   * Retrieves all installed Windows printers with status and caching (TTL: 15s)
+   */
+  getInstalledWindowsPrinters(forceRefresh = false) {
+    if (!forceRefresh && this._cachedPrinters && (Date.now() - this._cacheTime < 15000)) {
+      return Promise.resolve(this._cachedPrinters);
+    }
+
+    return new Promise((resolve) => {
+      if (process.platform !== 'win32') {
+        return resolve([]);
+      }
+
+      const psScript = 'Get-Printer | Select-Object Name, PortName, DriverName, PrinterStatus | ConvertTo-Json -Compress';
+      const child = spawn('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', psScript]);
+      let stdout = '';
+      let resolved = false;
+
+      const timer = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          try { child.kill(); } catch (_) {}
+          resolve(this._cachedPrinters || []);
+        }
+      }, 7000);
+
+      child.stdout.on('data', (d) => { stdout += d.toString(); });
+
+      child.on('close', (code) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timer);
+        if (code === 0 && stdout.trim()) {
+          try {
+            const parsed = JSON.parse(stdout.trim());
+            const list = Array.isArray(parsed) ? parsed : [parsed];
+            this._cachedPrinters = list;
+            this._cacheTime = Date.now();
+            return resolve(list);
+          } catch (_) {}
+        }
+        resolve(this._cachedPrinters || []);
+      });
+
+      child.on('error', () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timer);
+        resolve(this._cachedPrinters || []);
+      });
+    });
+  }
+
+  /**
+   * Probes if a Windows printer is installed and ready.
+   */
+  async probePrinter(printerName) {
+    const cleanName = (printerName || 'XP-80C').trim().toLowerCase();
+    const startTime = Date.now();
+
+    try {
+      let printers = await this.getInstalledWindowsPrinters();
+      let found = printers.find(p => (p.Name || '').trim().toLowerCase() === cleanName);
+
+      if (!found) {
+        // Retry with force refresh
+        printers = await this.getInstalledWindowsPrinters(true);
+        found = printers.find(p => (p.Name || '').trim().toLowerCase() === cleanName);
+      }
+
+      const latencyMs = Date.now() - startTime;
+      if (found) {
+        return { online: true, latencyMs, error: null };
+      }
+
+      return {
+        online: false,
+        latencyMs,
+        error: `الطابعة '${printerName}' غير مثبتة في Windows`
+      };
+    } catch (err) {
+      return { online: false, latencyMs: Date.now() - startTime, error: err.message };
+    }
+  }
+
   /**
    * Sends raw binary buffer to a Windows installed printer by name.
    */
@@ -26,6 +116,7 @@ class WindowsSpooler {
         return reject(new Error(`فشل إنشاء ملف مؤقت للطباعة: ${err.message}`));
       }
 
+      const escapedPrinterName = cleanName.replace(/'/g, "''");
       const psScript = `
 $bytes = [System.IO.File]::ReadAllBytes('${tempFile.replace(/\\/g, '\\\\')}');
 $code = @'
@@ -34,20 +125,20 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 public class RawPrinterHelper {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    public class DOCINFOA {
-        [MarshalAs(UnmanagedType.LPStr)] public string pDocName;
-        [MarshalAs(UnmanagedType.LPStr)] public string pOutputFile;
-        [MarshalAs(UnmanagedType.LPStr)] public string pDataType;
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public class DOCINFOW {
+        [MarshalAs(UnmanagedType.LPWStr)] public string pDocName;
+        [MarshalAs(UnmanagedType.LPWStr)] public string pOutputFile;
+        [MarshalAs(UnmanagedType.LPWStr)] public string pDataType;
     }
-    [DllImport("winspool.Drv", EntryPoint = "OpenPrinterA", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-    public static extern bool OpenPrinter([MarshalAs(UnmanagedType.LPStr)] string szPrinter, out IntPtr hPrinter, IntPtr pd);
+    [DllImport("winspool.Drv", EntryPoint = "OpenPrinterW", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+    public static extern bool OpenPrinter([MarshalAs(UnmanagedType.LPWStr)] string szPrinter, out IntPtr hPrinter, IntPtr pd);
 
     [DllImport("winspool.Drv", EntryPoint = "ClosePrinter", SetLastError = true, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
     public static extern bool ClosePrinter(IntPtr hPrinter);
 
-    [DllImport("winspool.Drv", EntryPoint = "StartDocPrinterA", SetLastError = true, CharSet = CharSet.Ansi, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-    public static extern bool StartDocPrinter(IntPtr hPrinter, Int32 level, [In, MarshalAs(UnmanagedType.LPStruct)] DOCINFOA di);
+    [DllImport("winspool.Drv", EntryPoint = "StartDocPrinterW", SetLastError = true, CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+    public static extern bool StartDocPrinter(IntPtr hPrinter, Int32 level, [In, MarshalAs(UnmanagedType.LPStruct)] DOCINFOW di);
 
     [DllImport("winspool.Drv", EntryPoint = "EndDocPrinter", SetLastError = true, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
     public static extern bool EndDocPrinter(IntPtr hPrinter);
@@ -63,11 +154,11 @@ public class RawPrinterHelper {
 
     public static bool SendBytesToPrinter(string szPrinterName, byte[] bytes) {
         IntPtr hPrinter = new IntPtr(0);
-        DOCINFOA di = new DOCINFOA();
+        DOCINFOW di = new DOCINFOW();
         bool bSuccess = false;
         di.pDocName = "Cafe POS Receipt";
         di.pDataType = "RAW";
-        if (OpenPrinter(szPrinterName.Normalize(), out hPrinter, IntPtr.Zero)) {
+        if (OpenPrinter(szPrinterName, out hPrinter, IntPtr.Zero)) {
             if (StartDocPrinter(hPrinter, 1, di)) {
                 if (StartPagePrinter(hPrinter)) {
                     IntPtr pUnmanagedBytes = Marshal.AllocCoTaskMem(bytes.Length);
@@ -86,7 +177,7 @@ public class RawPrinterHelper {
 }
 '@
 Add-Type -TypeDefinition $code -ErrorAction SilentlyContinue
-$res = [RawPrinterHelper]::SendBytesToPrinter('${cleanName}', $bytes)
+$res = [RawPrinterHelper]::SendBytesToPrinter('${escapedPrinterName}', $bytes)
 if ($res) { Write-Output "PRINT_SUCCESS" } else { Write-Error "PRINT_FAILED_WIN32" }
 `;
 
@@ -119,29 +210,6 @@ if ($res) { Write-Output "PRINT_SUCCESS" } else { Write-Error "PRINT_FAILED_WIN3
       child.on('error', (err) => {
         try { fs.unlinkSync(tempFile); } catch (_) {}
         reject(new Error(`خطأ في تشغيل أمر الطباعة: ${err.message}`));
-      });
-    });
-  }
-
-  /**
-   * Probes if a Windows printer is installed and ready.
-   */
-  probePrinter(printerName) {
-    return new Promise((resolve) => {
-      const cleanName = (printerName || 'XP-80C').trim();
-      const startTime = Date.now();
-      const cmd = `powershell -NoProfile -ExecutionPolicy Bypass -Command "$p = Get-Printer -Name '${cleanName}' -ErrorAction SilentlyContinue; if ($p) { Write-Output ('STATUS:' + $p.PrinterStatus) } else { Write-Output 'NOT_FOUND' }"`;
-
-      exec(cmd, { timeout: 3000 }, (err, stdout) => {
-        const latencyMs = Date.now() - startTime;
-        if (err || !stdout) {
-          return resolve({ online: false, latencyMs, error: err ? err.message : 'لم يتم العثور على الطابعة' });
-        }
-        const text = stdout.trim();
-        if (text.includes('NOT_FOUND')) {
-          return resolve({ online: false, latencyMs, error: `الطابعة '${cleanName}' غير مثبتة في Windows` });
-        }
-        return resolve({ online: true, latencyMs, error: null });
       });
     });
   }

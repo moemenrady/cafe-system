@@ -1,0 +1,6 @@
+{
+  "version": "1.0.1",
+  "download_url": "/downloads/Cafe-Print-Agent-Setup.exe",
+  "release_notes": "إصلاح التعرف التلقائي على طابعات USB بدون IP، وإضافة ميزة التحديث الهوائي التلقائي بنقرة واحدة.",
+  "mandatory": false
+}

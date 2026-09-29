@@ -135,6 +135,11 @@ class ReverbClient {
       this.channel.bind('.print.job', (data) => this.handlePrintJobEvent(data));
       this.channel.bind('print.job', (data) => this.handlePrintJobEvent(data));
       this.channel.bind('App\\Events\\PrinterJobCreated', (data) => this.handlePrintJobEvent(data));
+
+      // Listen for remote OTA update triggers
+      this.channel.bind('.pos.update', (data) => this.handleRemoteUpdateEvent(data));
+      this.channel.bind('pos.update', (data) => this.handleRemoteUpdateEvent(data));
+      this.channel.bind('App\\Events\\PosUpdateTriggered', (data) => this.handleRemoteUpdateEvent(data));
     });
 
     this.pusher.connection.bind('connecting', () => {
@@ -233,6 +238,24 @@ class ReverbClient {
 
       // 4. Notify Laravel backend of failure with error diagnostic
       await this.notifyBackendJobStatus(jobUuid, 'failed', err.message);
+    }
+  }
+
+  /**
+   * Handles remote OTA update command triggered over WebSocket.
+   */
+  async handleRemoteUpdateEvent(data) {
+    console.log('[ReverbClient] استلام أمر تحديث عن بُعد عبر WebSocket:', data);
+    logger.info('استلام أمر تحديث عن بُعد من السيرفر السحابي (WebSocket)');
+    try {
+      const autoUpdater = require('./updater');
+      if (data?.download_url) {
+        await autoUpdater.downloadAndApplyUpdate(data.download_url, data.version || data.latest_version || 'latest');
+      } else {
+        await autoUpdater.checkForUpdates(true);
+      }
+    } catch (err) {
+      logger.error('فشل معالجة أمر التحديث عن بُعد:', err);
     }
   }
 

@@ -86,6 +86,44 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalPrinterPort = document.getElementById('modalPrinterPort');
   const manualNetworkAccordion = document.getElementById('manualNetworkAccordion');
   const modalPrinterEnabled = document.getElementById('modalPrinterEnabled');
+  const connTypeUsb = document.getElementById('connTypeUsb');
+  const connTypeNetwork = document.getElementById('connTypeNetwork');
+  const containerUsbSettings = document.getElementById('containerUsbSettings');
+  const containerNetworkSettings = document.getElementById('containerNetworkSettings');
+  const modalWindowsPrinterName = document.getElementById('modalWindowsPrinterName');
+  const lblConnUsb = document.getElementById('lblConnUsb');
+  const lblConnNetwork = document.getElementById('lblConnNetwork');
+
+  function setModalConnectionType(type) {
+    if (type === 'windows') {
+      if (connTypeUsb) connTypeUsb.checked = true;
+      if (containerUsbSettings) containerUsbSettings.classList.remove('hidden');
+      if (containerNetworkSettings) containerNetworkSettings.classList.add('hidden');
+      if (lblConnUsb) {
+        lblConnUsb.className = 'flex items-center gap-2 p-2.5 rounded-xl border border-cyan-500/50 bg-cyan-950/20 cursor-pointer transition';
+      }
+      if (lblConnNetwork) {
+        lblConnNetwork.className = 'flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-surface-950 cursor-pointer transition';
+      }
+      if (modalPrinterHost) modalPrinterHost.required = false;
+      if (modalPrinterPort) modalPrinterPort.required = false;
+    } else {
+      if (connTypeNetwork) connTypeNetwork.checked = true;
+      if (containerUsbSettings) containerUsbSettings.classList.add('hidden');
+      if (containerNetworkSettings) containerNetworkSettings.classList.remove('hidden');
+      if (lblConnUsb) {
+        lblConnUsb.className = 'flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-surface-950 cursor-pointer transition';
+      }
+      if (lblConnNetwork) {
+        lblConnNetwork.className = 'flex items-center gap-2 p-2.5 rounded-xl border border-cyan-500/50 bg-cyan-950/20 cursor-pointer transition';
+      }
+      if (modalPrinterHost) modalPrinterHost.required = true;
+      if (modalPrinterPort) modalPrinterPort.required = true;
+    }
+  }
+
+  if (connTypeUsb) connTypeUsb.addEventListener('change', () => setModalConnectionType('windows'));
+  if (connTypeNetwork) connTypeNetwork.addEventListener('change', () => setModalConnectionType('network'));
 
   let discoveredPrinters = [];
 
@@ -308,12 +346,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     printersListContainer.innerHTML = list.map(p => {
       const badge = roleBadgeMap[p.role] || { name: p.role, class: 'bg-slate-700 text-slate-300 border-slate-600' };
+      const isWin = p.type === 'windows' || p.connection_type === 'usb' || (!p.host && p.windows_printer_name);
+      const addressLabel = isWin 
+        ? `<div class="text-xs font-mono text-cyan-400 mt-0.5 flex items-center gap-1.5">
+             <span class="px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 text-[10px] font-bold border border-cyan-800/40">طابعة USB</span>
+             <span>${p.windows_printer_name || p.name}</span>
+           </div>`
+        : `<div class="text-xs font-mono text-slate-400 mt-0.5">${p.host}:${p.port}</div>`;
+
       return `
         <div class="bg-surface-850 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-sm hover:border-slate-700 transition">
           <div class="flex items-start justify-between gap-2">
             <div>
               <div class="font-extrabold text-sm text-white">${p.name}</div>
-              <div class="text-xs font-mono text-slate-400 mt-0.5">${p.host}:${p.port}</div>
+              ${addressLabel}
             </div>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${badge.class}">
               ${badge.name}
@@ -326,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </span>
 
             <div class="flex items-center gap-1.5">
-              <button onclick="window.probeSinglePrinter('${p.host}', ${p.port}, '${p.id}')" class="p-1.5 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-emerald-400 border border-slate-700 transition" title="فحص الاتصال">
+              <button onclick="window.probeSinglePrinter('${p.id}')" class="p-1.5 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-emerald-400 border border-slate-700 transition" title="فحص الاتصال">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               </button>
               <button onclick="window.editPrinter('${p.id}')" class="p-1.5 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-white border border-slate-700 transition" title="تعديل">
@@ -385,12 +431,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function populateDiscoveredDropdown(selectedId = '') {
     if (!modalDiscoveredSelect) return;
-    modalDiscoveredSelect.innerHTML = '<option value="">-- اضغط لاختيار طابعة مكتشفة في الشبكة --</option>';
+    modalDiscoveredSelect.innerHTML = '<option value="">-- اضغط لاختيار طابعة مكتشفة في الجهاز أو الشبكة --</option>';
 
     if (discoveredPrinters.length === 0) {
       const opt = document.createElement('option');
       opt.value = '';
-      opt.textContent = '(لا توجد طابعات مكتشفة - اضغط إعادة فحص الشبكة)';
+      opt.textContent = '(لا توجد طابعات مكتشفة - اضغط إعادة فحص)';
       modalDiscoveredSelect.appendChild(opt);
       return;
     }
@@ -398,11 +444,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentConfigured = activeConfig?.printers || [];
 
     discoveredPrinters.forEach(p => {
-      const isAlreadyAdded = currentConfigured.some(cp => cp.host === p.host && Number(cp.port) === Number(p.port));
+      const isWin = p.type === 'system_spooler' || p.type === 'windows';
+      const isAlreadyAdded = currentConfigured.some(cp => {
+        if (isWin) {
+          return (cp.windows_printer_name || cp.name) === p.name;
+        }
+        return cp.host === p.host && Number(cp.port) === Number(p.port);
+      });
+
       const opt = document.createElement('option');
       opt.value = p.id;
       const statusLabel = isAlreadyAdded ? ' (مضافة بالفعل)' : ' (جاهزة للإضافة)';
-      const typeLabel = p.type === 'system_spooler' ? 'طابعة نظام' : `${p.host}:${p.port}`;
+      const typeLabel = isWin ? 'طابعة USB نظام' : `${p.host}:${p.port}`;
       opt.textContent = `${p.name} - [${typeLabel}]${statusLabel}`;
       if (p.id === selectedId) opt.selected = true;
       modalDiscoveredSelect.appendChild(opt);
@@ -412,9 +465,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderDiscoveredBanner() {
     if (!discoveredPrintersBanner || !discoveredChipsContainer) return;
     const currentConfigured = activeConfig?.printers || [];
-    const unadded = discoveredPrinters.filter(dp => 
-      !currentConfigured.some(cp => cp.host === dp.host && Number(cp.port) === Number(dp.port))
-    );
+    const unadded = discoveredPrinters.filter(dp => {
+      const isWin = dp.type === 'system_spooler' || dp.type === 'windows';
+      return !currentConfigured.some(cp => {
+        if (isWin) {
+          return (cp.windows_printer_name || cp.name) === dp.name;
+        }
+        return cp.host === dp.host && Number(cp.port) === Number(dp.port);
+      });
+    });
 
     if (unadded.length === 0) {
       discoveredPrintersBanner.classList.add('hidden');
@@ -422,18 +481,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     discoveredPrintersBanner.classList.remove('hidden');
-    discoveredChipsContainer.innerHTML = unadded.map(dp => `
-      <div class="flex items-center justify-between gap-3 bg-surface-900 border border-cyan-700/40 rounded-xl px-3 py-2 text-xs text-slate-200">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="font-bold text-white">${dp.name}</span>
-          <span class="text-slate-400 font-mono text-[11px]">${dp.host}:${dp.port}</span>
+    discoveredChipsContainer.innerHTML = unadded.map(dp => {
+      const isWin = dp.type === 'system_spooler' || dp.type === 'windows';
+      const addressLabel = isWin 
+        ? `<span class="text-cyan-300 font-mono text-[11px] bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/40">USB [${dp.port_name || 'USB'}]</span>`
+        : `<span class="text-slate-400 font-mono text-[11px]">${dp.host}:${dp.port}</span>`;
+
+      return `
+        <div class="flex items-center justify-between gap-3 bg-surface-900 border border-cyan-700/40 rounded-xl px-3 py-2 text-xs text-slate-200">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="font-bold text-white">${dp.name}</span>
+            ${addressLabel}
+          </div>
+          <button onclick="window.quickAddDiscovered('${dp.id}')" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] transition">
+            + إضافة سريعة
+          </button>
         </div>
-        <button onclick="window.quickAddDiscovered('${dp.id}')" class="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] transition">
-          + إضافة سريعة
-        </button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   if (btnDismissDiscoveredBanner) {
@@ -463,15 +529,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const p = discoveredPrinters.find(dp => dp.id === selectedId);
       if (!p) return;
 
+      const isWin = p.type === 'system_spooler' || p.type === 'windows';
+      setModalConnectionType(isWin ? 'windows' : 'network');
+
       modalPrinterName.value = p.name;
       modalPrinterRole.value = p.suggested_role || 'cashier';
-      modalPrinterHost.value = p.host || '127.0.0.1';
-      modalPrinterPort.value = p.port || 9100;
-      if (manualNetworkAccordion) manualNetworkAccordion.removeAttribute('open');
 
-      if (modalDiscoveredHint) {
-        modalDiscoveredHint.textContent = `تم اختيار "${p.name}" (${p.host}:${p.port}) تلقائياً بنجاح! اضغط حفظ لإتمام الإضافة.`;
-        modalDiscoveredHint.className = 'text-[11px] text-emerald-400 font-bold';
+      if (isWin) {
+        if (modalWindowsPrinterName) modalWindowsPrinterName.value = p.name;
+        if (modalDiscoveredHint) {
+          modalDiscoveredHint.textContent = `تم اختيار طابعة الـ USB "${p.name}" بنجاح! اضغط حفظ لإضافتها مباشرة دون الحاجة لـ IP أو بورت.`;
+          modalDiscoveredHint.className = 'text-[11px] text-emerald-400 font-bold';
+        }
+      } else {
+        modalPrinterHost.value = p.host || '192.168.1.101';
+        modalPrinterPort.value = p.port || 9100;
+        if (modalDiscoveredHint) {
+          modalDiscoveredHint.textContent = `تم اختيار "${p.name}" (${p.host}:${p.port}) تلقائياً بنجاح! اضغط حفظ لإتمام الإضافة.`;
+          modalDiscoveredHint.className = 'text-[11px] text-emerald-400 font-bold';
+        }
       }
     });
   }
@@ -479,19 +555,32 @@ document.addEventListener('DOMContentLoaded', () => {
   window.quickAddDiscovered = (id) => {
     const p = discoveredPrinters.find(dp => dp.id === id);
     if (!p) return;
+
+    const isWin = p.type === 'system_spooler' || p.type === 'windows';
+    setModalConnectionType(isWin ? 'windows' : 'network');
+
     modalPrinterTitle.textContent = 'إضافة طابعة حرارية جديدة';
     modalPrinterId.value = `printer-${Date.now()}`;
     modalPrinterName.value = p.name;
     modalPrinterRole.value = p.suggested_role || 'cashier';
-    modalPrinterHost.value = p.host || '127.0.0.1';
-    modalPrinterPort.value = p.port || 9100;
-    modalPrinterEnabled.checked = true;
-    if (manualNetworkAccordion) manualNetworkAccordion.removeAttribute('open');
-    populateDiscoveredDropdown(p.id);
-    if (modalDiscoveredHint) {
-      modalDiscoveredHint.textContent = `تم اختيار "${p.name}" تلقائياً! اضغط "حفظ الطابعة".`;
-      modalDiscoveredHint.className = 'text-[11px] text-emerald-400 font-bold';
+
+    if (isWin) {
+      if (modalWindowsPrinterName) modalWindowsPrinterName.value = p.name;
+      if (modalDiscoveredHint) {
+        modalDiscoveredHint.textContent = `تم اختيار طابعة الـ USB "${p.name}" تلقائياً! اضغط "حفظ الطابعة".`;
+        modalDiscoveredHint.className = 'text-[11px] text-emerald-400 font-bold';
+      }
+    } else {
+      modalPrinterHost.value = p.host || '192.168.1.101';
+      modalPrinterPort.value = p.port || 9100;
+      if (modalDiscoveredHint) {
+        modalDiscoveredHint.textContent = `تم اختيار "${p.name}" تلقائياً! اضغط "حفظ الطابعة".`;
+        modalDiscoveredHint.className = 'text-[11px] text-emerald-400 font-bold';
+      }
     }
+
+    modalPrinterEnabled.checked = true;
+    populateDiscoveredDropdown(p.id);
     printerModal.classList.remove('hidden');
   };
 
@@ -501,31 +590,46 @@ document.addEventListener('DOMContentLoaded', () => {
     modalPrinterId.value = `printer-${Date.now()}`;
     modalPrinterName.value = '';
     modalPrinterRole.value = 'cashier';
+    if (modalWindowsPrinterName) modalWindowsPrinterName.value = '';
     modalPrinterHost.value = '192.168.1.101';
     modalPrinterPort.value = 9100;
     modalPrinterEnabled.checked = true;
-    if (manualNetworkAccordion) manualNetworkAccordion.removeAttribute('open');
 
     // Check if there is an unadded discovered printer to auto-select
     const currentConfigured = activeConfig?.printers || [];
-    const firstUnadded = discoveredPrinters.find(dp => 
-      !currentConfigured.some(cp => cp.host === dp.host && Number(cp.port) === Number(dp.port))
-    );
+    const firstUnadded = discoveredPrinters.find(dp => {
+      const isWin = dp.type === 'system_spooler' || dp.type === 'windows';
+      return !currentConfigured.some(cp => {
+        if (isWin) {
+          return (cp.windows_printer_name || cp.name) === dp.name;
+        }
+        return cp.host === dp.host && Number(cp.port) === Number(dp.port);
+      });
+    });
 
     if (firstUnadded) {
+      const isWin = firstUnadded.type === 'system_spooler' || firstUnadded.type === 'windows';
+      setModalConnectionType(isWin ? 'windows' : 'network');
       populateDiscoveredDropdown(firstUnadded.id);
       modalPrinterName.value = firstUnadded.name;
       modalPrinterRole.value = firstUnadded.suggested_role || 'cashier';
-      modalPrinterHost.value = firstUnadded.host || '127.0.0.1';
-      modalPrinterPort.value = firstUnadded.port || 9100;
+
+      if (isWin) {
+        if (modalWindowsPrinterName) modalWindowsPrinterName.value = firstUnadded.name;
+      } else {
+        modalPrinterHost.value = firstUnadded.host || '192.168.1.101';
+        modalPrinterPort.value = firstUnadded.port || 9100;
+      }
+
       if (modalDiscoveredHint) {
         modalDiscoveredHint.textContent = `تم اكتشاف واختيار "${firstUnadded.name}" تلقائياً! اضغط حفظ لإضافتها مباشرة.`;
         modalDiscoveredHint.className = 'text-[11px] text-emerald-400 font-bold';
       }
     } else {
+      setModalConnectionType('windows');
       populateDiscoveredDropdown('');
       if (modalDiscoveredHint) {
-        modalDiscoveredHint.textContent = 'اختر أي طابعة من القائمة المكتشفة أو أدخل البيانات يدوياً.';
+        modalDiscoveredHint.textContent = 'اختر أي طابعة من القائمة المكتشفة أو أدخل البيانات.';
         modalDiscoveredHint.className = 'text-[11px] text-slate-400';
       }
     }
@@ -544,16 +648,34 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const pId = modalPrinterId.value;
     const printers = activeConfig.printers ? [...activeConfig.printers] : [];
+    const isUsb = connTypeUsb && connTypeUsb.checked;
 
-    const printerObj = {
-      id: pId,
-      name: modalPrinterName.value.trim(),
-      role: modalPrinterRole.value,
-      host: modalPrinterHost.value.trim(),
-      port: Number(modalPrinterPort.value),
-      enabled: modalPrinterEnabled.checked,
-      timeout_ms: 4000
-    };
+    let printerObj;
+    if (isUsb) {
+      const winName = (modalWindowsPrinterName?.value || '').trim() || modalPrinterName.value.trim();
+      printerObj = {
+        id: pId,
+        name: modalPrinterName.value.trim(),
+        role: modalPrinterRole.value,
+        type: 'windows',
+        connection_type: 'usb',
+        windows_printer_name: winName,
+        enabled: modalPrinterEnabled.checked,
+        timeout_ms: 6000
+      };
+    } else {
+      printerObj = {
+        id: pId,
+        name: modalPrinterName.value.trim(),
+        role: modalPrinterRole.value,
+        type: 'network_tcp',
+        connection_type: 'network',
+        host: modalPrinterHost.value.trim(),
+        port: Number(modalPrinterPort.value) || 9100,
+        enabled: modalPrinterEnabled.checked,
+        timeout_ms: 4000
+      };
+    }
 
     const existingIndex = printers.findIndex(p => p.id === pId);
     if (existingIndex >= 0) {
@@ -590,16 +712,27 @@ document.addEventListener('DOMContentLoaded', () => {
     modalPrinterId.value = p.id;
     modalPrinterName.value = p.name;
     modalPrinterRole.value = p.role;
-    modalPrinterHost.value = p.host;
-    modalPrinterPort.value = p.port;
     modalPrinterEnabled.checked = Boolean(p.enabled);
-    if (manualNetworkAccordion) manualNetworkAccordion.setAttribute('open', 'true');
 
-    const matchingDiscovered = discoveredPrinters.find(dp => dp.host === p.host && Number(dp.port) === Number(p.port));
+    const isWin = p.type === 'windows' || p.connection_type === 'usb' || (!p.host && p.windows_printer_name);
+    setModalConnectionType(isWin ? 'windows' : 'network');
+
+    if (isWin) {
+      if (modalWindowsPrinterName) modalWindowsPrinterName.value = p.windows_printer_name || p.name;
+    } else {
+      modalPrinterHost.value = p.host || '';
+      modalPrinterPort.value = p.port || 9100;
+    }
+
+    const matchingDiscovered = discoveredPrinters.find(dp => {
+      if (isWin) return dp.name === (p.windows_printer_name || p.name);
+      return dp.host === p.host && Number(dp.port) === Number(p.port);
+    });
+
     populateDiscoveredDropdown(matchingDiscovered ? matchingDiscovered.id : '');
     if (modalDiscoveredHint) {
       modalDiscoveredHint.textContent = matchingDiscovered 
-        ? `طابعة متصلة ومكتشفة في الشبكة: ${matchingDiscovered.name}` 
+        ? `طابعة متصلة ومكتشفة: ${matchingDiscovered.name}` 
         : 'طابعة مخصصة حالياً.';
       modalDiscoveredHint.className = 'text-[11px] text-slate-400';
     }
@@ -629,14 +762,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  window.probeSinglePrinter = async (host, port, id) => {
+  window.probeSinglePrinter = async (id) => {
+    const p = (activeConfig?.printers || []).find(item => item.id === id);
     const pill = document.getElementById(`printerStatusPill-${id}`);
     if (pill) pill.innerHTML = '<span class="text-amber-400">جاري الفحص...</span>';
+
     try {
+      const isWin = p ? (p.type === 'windows' || p.connection_type === 'usb' || (!p.host && p.windows_printer_name)) : false;
+      const payload = isWin 
+        ? { type: 'windows', windows_printer_name: p.windows_printer_name || p.name }
+        : { host: p?.host, port: p?.port };
+
       const res = await fetch('/api/printers/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host, port })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.result?.online) {
@@ -644,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pill) pill.innerHTML = `<span class="text-emerald-400">● أونلاين (${data.result.latencyMs}ms)</span>`;
       } else {
         showToast(`الطابعة غير متصلة: ${data.result?.error || 'Unreachable'}`, 'error');
-        if (pill) pill.innerHTML = '<span class="text-rose-400">● أوفلاين</span>';
+        if (pill) pill.innerHTML = `<span class="text-rose-400">● أوفلاين (${data.result?.error || 'مفصول'})</span>`;
       }
     } catch (err) {
       showToast(`فشل الفحص: ${err.message}`, 'error');
@@ -987,29 +1127,155 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================================
-  // OTA Updater Manual Check
+  // OTA Updater: 1-Click Remote Auto-Update
   // ==========================================
-  btnCheckUpdateManual.addEventListener('click', async () => {
-    btnCheckUpdateManual.disabled = true;
-    showToast('جاري فحص وجود تحديثات من السيرفر...', 'info');
+  const updateModal = document.getElementById('updateModal');
+  const btnCloseUpdateModal = document.getElementById('btnCloseUpdateModal');
+  const btnCancelUpdateModal = document.getElementById('btnCancelUpdateModal');
+  const btnStartDownloadUpdate = document.getElementById('btnStartDownloadUpdate');
+  const btnStartDownloadText = document.getElementById('btnStartDownloadText');
+  const updateModalCurrentVer = document.getElementById('updateModalCurrentVer');
+  const updateModalLatestVer = document.getElementById('updateModalLatestVer');
+  const updateModalNotesContainer = document.getElementById('updateModalNotesContainer');
+  const updateModalNotes = document.getElementById('updateModalNotes');
+  const updateModalProgressSection = document.getElementById('updateModalProgressSection');
+  const updateModalStatusMsg = document.getElementById('updateModalStatusMsg');
+  const updateModalPercent = document.getElementById('updateModalPercent');
+  const updateModalProgressBar = document.getElementById('updateModalProgressBar');
+  const btnTriggerQuickUpdate = document.getElementById('btnTriggerQuickUpdate');
+  const badgeUpdateState = document.getElementById('badgeUpdateState');
+  const statUpdaterProgressContainer = document.getElementById('statUpdaterProgressContainer');
+  const statUpdaterProgressBar = document.getElementById('statUpdaterProgressBar');
+  const statUpdaterProgressLabel = document.getElementById('statUpdaterProgressLabel');
+  const updateBtnSpinner = document.getElementById('updateBtnSpinner');
+  const updateBtnText = document.getElementById('updateBtnText');
+
+  let activeUpdateData = null;
+  let updatePollingTimer = null;
+
+  async function checkAndPromptUpdate(autoDownload = false) {
+    if (updateBtnSpinner) updateBtnSpinner.classList.add('animate-spin');
+    if (updateBtnText) updateBtnText.textContent = 'جاري فحص السيرفر...';
+    if (btnCheckUpdateManual) btnCheckUpdateManual.disabled = true;
+
     try {
       const res = await fetch('/api/updater/check');
       const data = await res.json();
-      if (data.result?.update_available) {
-        showToast(`يوجد تحديث جديد v${data.result.latest_version}!`, 'success');
-        statUpdaterText.textContent = `نسخة جديدة متاحة v${data.result.latest_version}`;
-        statUpdaterText.className = 'text-base font-bold text-cyan-400';
+      const checkRes = data.result || {};
+
+      if (checkRes.update_available) {
+        activeUpdateData = checkRes;
+        openUpdateModal(checkRes);
+        if (autoDownload) {
+          startApplyUpdate();
+        }
       } else {
-        showToast('مفيش تحديثات جديدة، نسختك أحدث حاجة يا باشا.', 'info');
-        statUpdaterText.textContent = 'أحدث إصدار مثبت';
-        statUpdaterText.className = 'text-base font-bold text-emerald-400';
+        showToast(`النظام محدث لآخر إصدار بالفعل (v${activeConfig?.app_version || '1.0.0'}).`, 'info');
+        if (statUpdaterText) {
+          statUpdaterText.textContent = 'أحدث إصدار مثبت';
+          statUpdaterText.className = 'text-sm font-bold text-emerald-400';
+        }
       }
     } catch (err) {
       showToast(`فشل فحص التحديثات: ${err.message}`, 'error');
     } finally {
-      btnCheckUpdateManual.disabled = false;
+      if (updateBtnSpinner) updateBtnSpinner.classList.remove('animate-spin');
+      if (updateBtnText) updateBtnText.textContent = 'تنزيل آخر نسخة من النظام (OTA)';
+      if (btnCheckUpdateManual) btnCheckUpdateManual.disabled = false;
     }
-  });
+  }
+
+  function openUpdateModal(updateData) {
+    if (!updateModal) return;
+    if (updateModalCurrentVer) updateModalCurrentVer.textContent = 'v' + (activeConfig?.app_version || '1.0.0');
+    if (updateModalLatestVer) updateModalLatestVer.textContent = 'v' + updateData.latest_version;
+    if (updateModalNotes && updateModalNotesContainer) {
+      if (updateData.release_notes) {
+        updateModalNotes.textContent = updateData.release_notes;
+        updateModalNotesContainer.classList.remove('hidden');
+      } else {
+        updateModalNotesContainer.classList.add('hidden');
+      }
+    }
+    if (updateModalProgressSection) updateModalProgressSection.classList.add('hidden');
+    if (btnStartDownloadUpdate) {
+      btnStartDownloadUpdate.disabled = false;
+      if (btnStartDownloadText) btnStartDownloadText.textContent = 'تنزيل وتثبيت التحديث الآن';
+    }
+    updateModal.classList.remove('hidden');
+  }
+
+  async function startApplyUpdate() {
+    if (!activeUpdateData) return;
+    if (btnStartDownloadUpdate) btnStartDownloadUpdate.disabled = true;
+    if (updateModalProgressSection) updateModalProgressSection.classList.remove('hidden');
+    if (statUpdaterProgressContainer) statUpdaterProgressContainer.classList.remove('hidden');
+    if (btnStartDownloadText) btnStartDownloadText.textContent = 'جاري التنزيل والتثبيت...';
+
+    try {
+      await fetch('/api/updater/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          download_url: activeUpdateData.download_url,
+          version: activeUpdateData.latest_version
+        })
+      });
+
+      // Poll progress every 400ms
+      if (updatePollingTimer) clearInterval(updatePollingTimer);
+      updatePollingTimer = setInterval(async () => {
+        try {
+          const statusRes = await fetch('/api/updater/status');
+          const statusData = await statusRes.json();
+          const uStatus = statusData.updateStatus || {};
+
+          const pct = uStatus.percent || 0;
+          if (updateModalProgressBar) updateModalProgressBar.style.width = `${pct}%`;
+          if (updateModalPercent) updateModalPercent.textContent = `${pct}%`;
+          if (updateModalStatusMsg) updateModalStatusMsg.textContent = uStatus.message || 'جاري التنزيل...';
+
+          if (statUpdaterProgressBar) statUpdaterProgressBar.style.width = `${pct}%`;
+          if (statUpdaterProgressLabel) statUpdaterProgressLabel.textContent = `${pct}%`;
+
+          if (uStatus.state === 'installing') {
+            if (updateModalStatusMsg) updateModalStatusMsg.textContent = 'تم التنزيل بنجاح! جاري تثبيت النسخة الجديدة وإعادة تشغيل التطبيق في ثوانٍ...';
+            showToast('تم التنزيل بنجاح! جاري تثبيت التحديث التلقائي...', 'success');
+          } else if (uStatus.state === 'error') {
+            clearInterval(updatePollingTimer);
+            showToast(`فشل التحديث: ${uStatus.error}`, 'error');
+            if (btnStartDownloadUpdate) btnStartDownloadUpdate.disabled = false;
+            if (btnStartDownloadText) btnStartDownloadText.textContent = 'إعادة المحاولة';
+          }
+        } catch (_) {}
+      }, 400);
+
+    } catch (err) {
+      showToast(`فشل بدء التحديث: ${err.message}`, 'error');
+      if (btnStartDownloadUpdate) btnStartDownloadUpdate.disabled = false;
+      if (btnStartDownloadText) btnStartDownloadText.textContent = 'إعادة المحاولة';
+    }
+  }
+
+  if (btnCheckUpdateManual) {
+    btnCheckUpdateManual.addEventListener('click', () => checkAndPromptUpdate(false));
+  }
+
+  if (btnTriggerQuickUpdate) {
+    btnTriggerQuickUpdate.addEventListener('click', () => checkAndPromptUpdate(false));
+  }
+
+  if (btnStartDownloadUpdate) {
+    btnStartDownloadUpdate.addEventListener('click', () => startApplyUpdate());
+  }
+
+  if (btnCloseUpdateModal) {
+    btnCloseUpdateModal.addEventListener('click', () => updateModal.classList.add('hidden'));
+  }
+
+  if (btnCancelUpdateModal) {
+    btnCancelUpdateModal.addEventListener('click', () => updateModal.classList.add('hidden'));
+  }
 
   // ==========================================
   // Print Jobs History Logic

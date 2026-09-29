@@ -1,6 +1,6 @@
 {
   "name": "pos-print-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Commercial Windows Desktop POS Print Agent for Cafe Management System",
   "main": "main.js",
   "scripts": {

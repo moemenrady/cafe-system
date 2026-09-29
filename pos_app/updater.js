@@ -1,20 +1,19 @@
 /**
  * updater.js
  * 
- * Over-The-Air (OTA) Background Auto-Updater for POS Print Agent.
+ * Over-The-Air (OTA) Background & 1-Click Remote Auto-Updater for Cafe Print Agent.
  * 
- * Architectural Highlights:
- * 1. Periodic Version Polling: Queries Laravel's `/api/pos/check-update` on startup and every 6 hours.
- * 2. Non-Blocking Chunked Download: Streams replacement binary directly to disk as `pos-agent-new.exe`.
- * 3. Self-Terminating Atomic Replacement: On Windows, generates and spawns a detached `updater.bat`
- *    which waits for file lock release, overwrites `pos-agent.exe`, starts the new process,
- *    and removes itself.
- * 4. Cross-Platform Guard: On macOS/Linux development environments, safely reports update availability
- *    without executing Windows batch routines.
+ * Features:
+ * 1. Automatic Periodic Checks & Instant On-Demand Manual Triggers.
+ * 2. Real-time Download Progress Tracking (0-100%).
+ * 3. Silent Windows Installer Execution (/S) with zero user prompts.
+ * 4. Automatic Application Relaunch after upgrade.
+ * 5. Reverb WebSocket remote trigger support (.pos.update).
  */
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { spawn } = require('child_process');
 
 class AutoUpdater {
@@ -26,6 +25,17 @@ class AutoUpdater {
       timestamp: null,
       update_available: false,
       latest_version: null,
+      download_url: null,
+      release_notes: null,
+      error: null
+    };
+    this.updateStatus = {
+      state: 'idle', // 'idle' | 'checking' | 'downloading' | 'installing' | 'completed' | 'error'
+      percent: 0,
+      downloadedBytes: 0,
+      totalBytes: 0,
+      version: null,
+      message: 'البرنامج محدث لآخر إصدار',
       error: null
     };
   }
@@ -41,38 +51,52 @@ class AutoUpdater {
       return;
     }
 
-    console.log(`[AutoUpdater] تم تفعيل التحديث التلقائي (الإصدار الحالي: v${config.app_version || '1.0.0'})`);
+    console.log(`[AutoUpdater] تم تفعيل نظام التحديث الهوائي عن بُعد (الإصدار الحالي: v${config.app_version || '1.0.0'})`);
 
-    // Initial check after 10s delay to allow agent bootstrap
+    // Initial check after 8s delay to allow agent bootstrap
     setTimeout(() => {
-      this.checkForUpdates();
-    }, 10000);
+      this.checkForUpdates(false);
+    }, 8000);
 
-    // Run check every 6 hours (6 * 3600 * 1000 ms)
-    const SIX_HOURS = 6 * 60 * 60 * 1000;
+    // Run check every 1 hour (1 * 3600 * 1000 ms)
+    const ONE_HOUR = 60 * 60 * 1000;
+    if (this.checkIntervalTimer) clearInterval(this.checkIntervalTimer);
     this.checkIntervalTimer = setInterval(() => {
-      this.checkForUpdates();
-    }, SIX_HOURS);
+      this.checkForUpdates(false);
+    }, ONE_HOUR);
+  }
+
+  isProductionWindows() {
+    if (process.platform !== 'win32') return false;
+    const execPath = (process.execPath || '').toLowerCase();
+    // Packaged Electron or compiled executable
+    if (execPath.endsWith('cafe print agent.exe') || execPath.endsWith('pos-agent.exe') || (process.versions?.electron && !execPath.includes('node_modules'))) {
+      return true;
+    }
+    return false;
   }
 
   /**
    * Checks Laravel API for available updates.
    */
-  async checkForUpdates() {
+  async checkForUpdates(forceApply = false) {
     if (!this.config || !this.config.laravel_backend_url) {
-      return { update_available: false, error: 'عنوان السيرفر غير متوفر.' };
+      this.lastCheck.error = 'عنوان السيرفر غير متوفر في الإعدادات.';
+      return { update_available: false, error: this.lastCheck.error };
     }
 
     const currentVersion = this.config.app_version || '1.0.0';
     const baseUrl = this.config.laravel_backend_url.replace(/\/+$/, '');
     const endpoint = `${baseUrl}/api/pos/check-update?version=${encodeURIComponent(currentVersion)}`;
 
-    console.log(`[AutoUpdater] فحص التحديثات من: ${endpoint}...`);
+    console.log(`[AutoUpdater] فحص التحديثات من السيرفر: ${endpoint}...`);
+    this.updateStatus.state = 'checking';
+    this.updateStatus.message = 'جاري فحص وجود تحديثات من السيرفر...';
 
     try {
       const res = await fetch(endpoint, {
         headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(8000)
+        signal: AbortSignal.timeout(10000)
       });
 
       if (!res.ok) {
@@ -80,135 +104,198 @@ class AutoUpdater {
       }
 
       const data = await res.json();
+      const updateAvailable = Boolean(data.update_available);
+      const latestVersion = data.latest_version || currentVersion;
+      const downloadUrl = data.download_url || null;
+
       this.lastCheck = {
         timestamp: new Date().toISOString(),
-        update_available: Boolean(data.update_available),
-        latest_version: data.latest_version || currentVersion,
+        update_available: updateAvailable,
+        latest_version: latestVersion,
+        download_url: downloadUrl,
+        release_notes: data.release_notes || null,
         error: null
       };
 
-      console.log(`[AutoUpdater] نتيجة الفحص: النسخة الحالية = ${currentVersion} | أحدث نسخة = ${data.latest_version || 'N/A'} | تحديث متوفر = ${data.update_available}`);
+      console.log(`[AutoUpdater] نتيجة الفحص: النسخة الحالية = ${currentVersion} | أحدث نسخة = ${latestVersion} | يوجد تحديث = ${updateAvailable}`);
 
-      if (data.update_available && data.download_url) {
-        console.log(`[AutoUpdater] تم العثور على إصدار أحدث v${data.latest_version}. رابط التحميل: ${data.download_url}`);
+      if (updateAvailable && downloadUrl) {
+        this.updateStatus.message = `يوجد إصدار جديد متاح: v${latestVersion}`;
         
-        // If on Windows and in production package, trigger auto-upgrade
-        if (process.platform === 'win32' && process.pkg) {
-          await this.downloadAndApplyUpdate(data.download_url, data.latest_version);
-        } else {
-          console.log('[AutoUpdater] تخطي تطبيق التحديث التلقائي (البيئة الحالية ليست بيئة تشغيل إنتاجية لويندوز .exe).');
+        // Auto-apply if mandatory, or if forceApply requested, or if auto_update_enabled
+        if (forceApply || data.mandatory || (this.config.auto_update_enabled && this.isProductionWindows())) {
+          console.log(`[AutoUpdater] بدء تطبيق التحديث تلقائياً للإصدار v${latestVersion}...`);
+          this.downloadAndApplyUpdate(downloadUrl, latestVersion).catch(e => {
+            console.error('[AutoUpdater] خطأ أثناء تطبيق التحديث التلقائي:', e.message);
+          });
         }
+      } else {
+        this.updateStatus.state = 'idle';
+        this.updateStatus.message = `البرنامج محدث لآخر إصدار (v${currentVersion})`;
       }
 
       return this.lastCheck;
     } catch (err) {
-      console.warn(`[AutoUpdater] فشل فحص التحديثات: ${err.message}`);
+      console.warn(`[AutoUpdater] تعذر فحص التحديثات: ${err.message}`);
       this.lastCheck = {
         timestamp: new Date().toISOString(),
         update_available: false,
         latest_version: currentVersion,
+        download_url: null,
+        release_notes: null,
         error: err.message
       };
+      this.updateStatus.state = 'error';
+      this.updateStatus.error = err.message;
+      this.updateStatus.message = `تعذر فحص التحديثات: ${err.message}`;
       return this.lastCheck;
     }
   }
 
   /**
-   * Downloads replacement binary and spawns detached Windows updater.bat
+   * Downloads replacement binary and spawns detached Windows silent installer
    */
   async downloadAndApplyUpdate(downloadUrl, newVersion) {
     if (this.isUpdating) {
-      console.log('[AutoUpdater] التحديث قيد التحميل بالفعل.');
+      console.log('[AutoUpdater] التحديث قيد التحميل والتثبيت بالفعل.');
       return;
     }
 
     this.isUpdating = true;
-    const baseDir = path.dirname(process.execPath);
-    const tempExePath = path.join(baseDir, 'pos-agent-new.exe');
-    const targetExeName = path.basename(process.execPath);
-    const batchPath = path.join(baseDir, 'updater.bat');
+    this.updateStatus.state = 'downloading';
+    this.updateStatus.percent = 0;
+    this.updateStatus.version = newVersion;
+    this.updateStatus.message = `جاري تنزيل التحديث v${newVersion}... 0%`;
 
-    console.log(`[AutoUpdater] بدء تنزيل الإصدار الجديد إلى: ${tempExePath}...`);
+    const tempDir = os.tmpdir();
+    const isAsar = downloadUrl.toLowerCase().endsWith('.asar');
+    const tempFileName = isAsar ? `pos_app_update_${Date.now()}.asar` : `pos_setup_update_${Date.now()}.exe`;
+    const tempFilePath = path.join(tempDir, tempFileName);
+    const batchPath = path.join(tempDir, `pos_apply_update_${Date.now()}.bat`);
+
+    console.log(`[AutoUpdater] بدء تنزيل ملف التحديث من: ${downloadUrl}`);
+    console.log(`[AutoUpdater] مسار الحفظ المؤقت: ${tempFilePath}`);
 
     try {
       const response = await fetch(downloadUrl, {
-        headers: { 'User-Agent': 'CafePOS-PrintAgent-Updater' }
+        headers: { 'User-Agent': 'CafePOS-PrintAgent-AutoUpdater' },
+        signal: AbortSignal.timeout(180000) // 3 minutes timeout for download
       });
 
       if (!response.ok) {
-        throw new Error(`فشل تحميل ملف التحديث: HTTP ${response.status}`);
+        throw new Error(`فشل تحميل ملف التحديث من السيرفر: HTTP ${response.status}`);
       }
 
-      const fileStream = fs.createWriteStream(tempExePath);
+      const contentLength = Number(response.headers.get('content-length')) || 0;
+      this.updateStatus.totalBytes = contentLength;
+
+      const fileStream = fs.createWriteStream(tempFilePath);
       const reader = response.body.getReader();
+      let downloadedBytes = 0;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        downloadedBytes += value.length;
         fileStream.write(Buffer.from(value));
+
+        if (contentLength > 0) {
+          const percent = Math.min(99, Math.round((downloadedBytes / contentLength) * 100));
+          this.updateStatus.percent = percent;
+          this.updateStatus.downloadedBytes = downloadedBytes;
+          this.updateStatus.message = `جاري تنزيل التحديث v${newVersion}... (${percent}%)`;
+        }
       }
 
       fileStream.end();
-
       await new Promise((resolve) => fileStream.on('finish', resolve));
-      console.log('[AutoUpdater] تم تنزيل الملف بنجاح. تجهيز سيناريو الترقية...');
 
-      // اسم خدمة الويندوز المعتمد
-      const SERVICE_NAME = 'CafePrintAgent';
-      const targetExePath = path.join(baseDir, targetExeName);
+      console.log(`[AutoUpdater] اكتمل تنزيل ملف التحديث بنجاح (${downloadedBytes} بايت).`);
+      this.updateStatus.percent = 100;
+      this.updateStatus.state = 'installing';
+      this.updateStatus.message = `تم التنزيل بنجاح! جاري تثبيت النسخة الجديدة v${newVersion} وإعادة التشغيل...`;
 
-      const batContent = `@echo off
+      // Check current executable path
+      const currentExecPath = process.execPath;
+      const currentExecDir = path.dirname(currentExecPath);
+      const execName = path.basename(currentExecPath);
+
+      let batContent = '';
+
+      if (isAsar) {
+        // Hot patch resources/app.asar
+        const targetAsarPath = path.join(currentExecDir, 'resources', 'app.asar');
+        batContent = `@echo off
 chcp 65001 > NUL
-echo [POS Updater] الانتظار لتحرير الملف...
-timeout /t 3 /nobreak > NUL
+echo [POS Updater] إغلاق البرنامج لتطبيق التحديث السريع...
+timeout /t 2 /nobreak > NUL
+taskkill /F /IM "${execName}" > NUL 2>&1
+timeout /t 1 /nobreak > NUL
 
-:: محاولة إيقاف الخدمة لو شغالة كـ Windows Service
-sc query "${SERVICE_NAME}" > NUL 2>&1
-if %ERRORLEVEL% EQU 0 (
-    echo [POS Updater] إيقاف خدمة الويندوز...
-    net stop "${SERVICE_NAME}" > NUL 2>&1
-    timeout /t 2 /nobreak > NUL
-)
+echo [POS Updater] استبدال ملفات الكود...
+move /y "${tempFilePath}" "${targetAsarPath}"
 
-echo [POS Updater] استبدال الملف التنفيذي...
-move /y "${tempExePath}" "${targetExePath}"
-
-:: إعادة التشغيل: كخدمة لو موجودة، أو كـ process عادي
-sc query "${SERVICE_NAME}" > NUL 2>&1
-if %ERRORLEVEL% EQU 0 (
-    echo [POS Updater] إعادة تشغيل خدمة الويندوز...
-    net start "${SERVICE_NAME}"
-) else (
-    echo [POS Updater] إعادة تشغيل التطبيق...
-    start "" "${targetExePath}"
-)
-
-echo [POS Updater] تم التحديث بنجاح.
+echo [POS Updater] إعادة تشغيل البرنامج...
+timeout /t 1 /nobreak > NUL
+start "" "${currentExecPath}"
 del "%~f0"
 `;
+      } else {
+        // Full NSIS Silent Installer update
+        batContent = `@echo off
+chcp 65001 > NUL
+echo ==============================================
+echo    تحديث برنامج طباعة الكافيه تلقائياً عن بُعد  
+echo ==============================================
+echo [POS Updater] إغلاق التطبيق الحالي لتثبيت التحديث...
+timeout /t 2 /nobreak > NUL
+taskkill /F /IM "${execName}" > NUL 2>&1
+taskkill /F /IM "Cafe Print Agent.exe" > NUL 2>&1
+taskkill /F /IM "pos-agent.exe" > NUL 2>&1
+timeout /t 2 /nobreak > NUL
+
+echo [POS Updater] تشغيل التحديث الصامت للنسخة الجديدة...
+start /wait "" "${tempFilePath}" /S
+timeout /t 3 /nobreak > NUL
+
+echo [POS Updater] إعادة تشغيل البرنامج المحدث تلقائياً...
+if exist "%LOCALAPPDATA%\\Programs\\Cafe Print Agent\\Cafe Print Agent.exe" (
+    start "" "%LOCALAPPDATA%\\Programs\\Cafe Print Agent\\Cafe Print Agent.exe"
+) else if exist "${currentExecPath.replace(/\\/g, '\\\\')}" (
+    start "" "${currentExecPath.replace(/\\/g, '\\\\')}"
+)
+
+timeout /t 2 /nobreak > NUL
+del "${tempFilePath}" > NUL 2>&1
+del "%~f0"
+`;
+      }
 
       fs.writeFileSync(batchPath, batContent, 'utf8');
 
-      console.log('[AutoUpdater] تشغيل سكريبت التحديث المنفصل وإغلاق التطبيق الحالي...');
+      console.log('[AutoUpdater] تشغيل سكريبت التحديث الصامت وإعادة تشغيل التطبيق...');
 
-      // Spawn detached batch script
+      // Spawn detached batch script with completely independent process lifecycle
       const child = spawn('cmd.exe', ['/c', batchPath], {
         detached: true,
-        stdio: 'ignore',
-        cwd: baseDir
+        stdio: 'ignore'
       });
       child.unref();
 
-      // Gracefully exit current process
+      // Exit current process cleanly so installer can overwrite files
       setTimeout(() => {
         process.exit(0);
-      }, 500);
+      }, 1000);
 
     } catch (err) {
       this.isUpdating = false;
+      this.updateStatus.state = 'error';
+      this.updateStatus.error = err.message;
+      this.updateStatus.message = `فشل تطبيق التحديث: ${err.message}`;
       console.error(`[AutoUpdater] حدث خطأ أثناء تطبيق التحديث: ${err.message}`);
+
       try {
-        if (fs.existsSync(tempExePath)) fs.unlinkSync(tempExePath);
+        if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
         if (fs.existsSync(batchPath)) fs.unlinkSync(batchPath);
       } catch (_) {}
     }
@@ -216,6 +303,14 @@ del "%~f0"
 
   getLastCheck() {
     return this.lastCheck;
+  }
+
+  getStatus() {
+    return {
+      lastCheck: this.lastCheck,
+      updateStatus: this.updateStatus,
+      isUpdating: this.isUpdating
+    };
   }
 }
 

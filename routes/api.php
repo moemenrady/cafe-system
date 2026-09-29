@@ -112,9 +112,20 @@ Route::get('/pos/printer-status', function (Request $request) {
 Route::get('/pos/check-update', function (Request $request) {
     $currentVersion = $request->query('version', '1.0.0');
     
-    // يمكنك تعديل رقم النسخة الأحدث ورابط التحميل عند إطلاق إصدار جديد
-    $latestVersion = '1.0.0'; 
-    $downloadUrl = url('/downloads/pos-agent-latest.exe');
+    $updateConfigFile = storage_path('app/pos_update.json');
+    if (file_exists($updateConfigFile)) {
+        $meta = json_decode(file_get_contents($updateConfigFile), true) ?: [];
+        $latestVersion = $meta['version'] ?? '1.0.1';
+        $relativeUrl = $meta['download_url'] ?? '/downloads/Cafe-Print-Agent-Setup.exe';
+        $downloadUrl = str_starts_with($relativeUrl, 'http') ? $relativeUrl : url($relativeUrl);
+        $releaseNotes = $meta['release_notes'] ?? 'تحديثات وتحسينات للنظام';
+        $mandatory = $meta['mandatory'] ?? false;
+    } else {
+        $latestVersion = '1.0.1';
+        $downloadUrl = url('/downloads/Cafe-Print-Agent-Setup.exe');
+        $releaseNotes = 'إصلاح طابعات الـ USB والتحديث التلقائي عن بُعد';
+        $mandatory = false;
+    }
 
     $updateAvailable = version_compare($currentVersion, $latestVersion, '<');
 
@@ -122,8 +133,31 @@ Route::get('/pos/check-update', function (Request $request) {
         'latest_version' => $latestVersion,
         'update_available' => $updateAvailable,
         'download_url' => $updateAvailable ? $downloadUrl : null,
-        'mandatory' => false,
+        'release_notes' => $releaseNotes,
+        'mandatory' => $mandatory,
     ]);
+});
+
+Route::post('/pos/publish-update', function (Request $request) {
+    $version = $request->input('version');
+    $downloadUrl = $request->input('download_url');
+    $notes = $request->input('release_notes', 'تحديث تلقائي جديد للنظام');
+
+    if (!$version || !$downloadUrl) {
+        return response()->json(['success' => false, 'message' => 'version and download_url are required'], 400);
+    }
+
+    $data = [
+        'version' => $version,
+        'download_url' => $downloadUrl,
+        'release_notes' => $notes,
+        'mandatory' => (bool)$request->input('mandatory', false),
+        'published_at' => now()->toIso8601String(),
+    ];
+
+    file_put_contents(storage_path('app/pos_update.json'), json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    return response()->json(['success' => true, 'message' => "تم نشر الإصدار v{$version} بنجاح."]);
 });
 
 /*

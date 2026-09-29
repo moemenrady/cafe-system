@@ -282,9 +282,15 @@ app.post('/api/printers/test-template', async (req, res) => {
  */
 app.post('/api/printers/test-connection', async (req, res) => {
   try {
-    const { host, port } = req.body;
+    const { host, port, type, windows_printer_name, name } = req.body;
+    if (type === 'windows' || (!host && (windows_printer_name || name))) {
+      const pName = windows_printer_name || name || 'XP-80C';
+      const result = await printerDispatcher.probePrinter({ type: 'windows', windows_printer_name: pName });
+      return res.json({ success: true, type: 'windows', printer_name: pName, result });
+    }
+
     if (!host || !port) {
-      return res.status(400).json({ success: false, message: 'عنوان IP والمنفذ مطلوبان.' });
+      return res.status(400).json({ success: false, message: 'عنوان IP والمنفذ مطلوبان لطابعات الشبكة.' });
     }
 
     const result = await printerDispatcher.probePrinter(host, port, 3000);
@@ -294,16 +300,46 @@ app.post('/api/printers/test-connection', async (req, res) => {
   }
 });
 
-/**
- * GET /api/updater/check
- */
 app.get('/api/updater/check', async (req, res) => {
   try {
-    const checkResult = await autoUpdater.checkForUpdates();
-    res.json({ success: true, result: checkResult });
+    const checkResult = await autoUpdater.checkForUpdates(false);
+    res.json({ success: true, result: checkResult, status: autoUpdater.getStatus() });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+});
+
+/**
+ * POST /api/updater/apply
+ * Triggers downloading and applying the update remotely
+ */
+app.post('/api/updater/apply', async (req, res) => {
+  try {
+    const status = autoUpdater.getStatus();
+    const downloadUrl = req.body?.download_url || status.lastCheck?.download_url;
+    const version = req.body?.version || status.lastCheck?.latest_version || 'latest';
+
+    if (downloadUrl) {
+      // Trigger download & install in background
+      autoUpdater.downloadAndApplyUpdate(downloadUrl, version).catch(err => {
+        console.error('[Server] خطأ في تطبيق التحديث:', err);
+      });
+      res.json({ success: true, message: 'بدأ تنزيل وتثبيت التحديث عن بُعد.', status: autoUpdater.getStatus() });
+    } else {
+      // Check first, and force apply if available
+      const checkResult = await autoUpdater.checkForUpdates(true);
+      res.json({ success: true, result: checkResult, status: autoUpdater.getStatus() });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/**
+ * GET /api/updater/status
+ */
+app.get('/api/updater/status', (req, res) => {
+  res.json({ success: true, ...autoUpdater.getStatus() });
 });
 
 /**

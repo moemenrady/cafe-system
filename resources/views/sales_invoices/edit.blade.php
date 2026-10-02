@@ -171,14 +171,7 @@
     let items = [];
 
     // بيانات الأصناف الحالية من الـ PHP
-    const currentItems = @json($invoice->items->map(function($item) {
-        return [
-            'menu_id'  => $item->menu_id,
-            'name'     => $item->menu->name ?? 'صنف محذوف',
-            'price'    => (float) $item->item_price,
-            'quantity' => $item->quantity,
-        ];
-    }));
+    const currentItems = @json($currentItems);
 
     // تحميل الأصناف الحالية فور فتح الصفحة
     window.addEventListener('DOMContentLoaded', () => {

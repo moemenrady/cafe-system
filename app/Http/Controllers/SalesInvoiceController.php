@@ -231,7 +231,17 @@ class SalesInvoiceController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('sales_invoices.edit', compact('invoice', 'menus'));
+        // تجهيز بيانات الأصناف الحالية بشكل نظيف للواجهة الأمامية
+        $currentItems = $invoice->items->map(function ($item) {
+            return [
+                'menu_id'  => $item->menu_id,
+                'name'     => $item->menu->name ?? 'صنف محذوف',
+                'price'    => (float) $item->item_price,
+                'quantity' => (int) $item->quantity,
+            ];
+        })->values();
+
+        return view('sales_invoices.edit', compact('invoice', 'menus', 'currentItems'));
     }
 
     /**
@@ -442,10 +452,17 @@ class SalesInvoiceController extends Controller
 
             // 3. إلغاء الطلب المرتبط إن وجد
             if ($invoice->order_id) {
-                Order::where('id', $invoice->order_id)->update([
-                    'status'         => 'cancelled',
-                    'payment_status' => 'refunded',
-                ]);
+                try {
+                    Order::where('id', $invoice->order_id)->update([
+                        'status'         => 'cancelled',
+                        'payment_status' => 'refunded',
+                    ]);
+                } catch (\Throwable $e) {
+                    // حماية إضافية في حال كان عمود payment_status في قاعدة البيانات لم يحدث بعد بالميجراشن
+                    Order::where('id', $invoice->order_id)->update([
+                        'status' => 'cancelled',
+                    ]);
+                }
             }
 
             // 4. تسجيل في سجل الرقابة InvoiceTransaction

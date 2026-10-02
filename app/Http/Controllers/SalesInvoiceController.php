@@ -173,7 +173,8 @@ class SalesInvoiceController extends Controller
             'order.customer',
             'items.menu.category',
             'shift',
-            'refunder'
+            'refunder',
+            'transactions.creator'
         ])->findOrFail($id);
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -249,16 +250,21 @@ class SalesInvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $user      = Auth::user();
+        $isManager = $user?->isManager();
+
         $request->validate([
             'items'            => 'required|array|min:1',
             'items.*.menu_id'  => 'required|exists:menu,id',
             'items.*.quantity' => 'required|integer|min:1',
             'discount'         => 'nullable|numeric|min:0',
-            'reason'           => 'nullable|string|max:500',
+            'reason'           => ($isManager ? 'nullable' : 'required') . '|string|min:3|max:500',
+        ], [
+            'reason.required'  => 'يجب كتابة سبب تعديل الفاتورة للرقابة وتوثيق الشيفت.',
+            'reason.min'       => 'سبب التعديل يجب ألا يقل عن 3 أحرف.',
         ]);
 
         $invoice = Invoice::with('items')->findOrFail($id);
-        $user    = Auth::user();
 
         $check = $this->canModifyInvoice($user, $invoice);
         if (!$check['allowed']) {
@@ -362,18 +368,28 @@ class SalesInvoiceController extends Controller
             $roleLabel = $user->isManager() ? 'إدارة/مشرف' : 'موظف';
             $reasonNote = $request->filled('reason') ? " | سبب التعديل: {$request->reason}" : '';
 
-            InvoiceTransaction::create([
-                'invoice_id'  => $invoice->id,
-                'action'      => 'update',
-                'old_data'    => $oldDataSnapshot,
-                'new_data'    => $invoice->load('items')->toArray(),
-                'description' => "قام [{$user->name}] ({$roleLabel}) بتعديل الفاتورة رقم {$invoice->invoice_number}{$reasonNote}",
-                'created_by'  => $user->id,
-            ]);
+            try {
+                InvoiceTransaction::create([
+                    'invoice_id'  => $invoice->id,
+                    'action'      => 'update',
+                    'old_data'    => $oldDataSnapshot,
+                    'new_data'    => $invoice->load('items')->toArray(),
+                    'description' => "قام [{$user->name}] ({$roleLabel}) بتعديل الفاتورة رقم {$invoice->invoice_number}{$reasonNote}",
+                    'created_by'  => $user->id,
+                ]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("InvoiceTransaction update error: " . $e->getMessage());
+            }
 
             app(ShiftActionService::class)->logInvoiceUpdate(
                 $invoice->fresh(['items.menu', 'client', 'creator']),
-                ['old_data' => $oldDataSnapshot, 'new_data' => $invoice->load('items')->toArray()]
+                [
+                    'old_total' => (float) $oldDataSnapshot['total'],
+                    'new_total' => (float) $invoice->total,
+                    'diff'      => (float) ($invoice->total - $oldDataSnapshot['total']),
+                    'reason'    => $request->reason,
+                ],
+                $user
             );
 
             DB::commit();
@@ -467,14 +483,27 @@ class SalesInvoiceController extends Controller
 
             // 4. تسجيل في سجل الرقابة InvoiceTransaction
             $roleLabel = $user->isManager() ? 'إدارة/مشرف' : 'موظف';
-            InvoiceTransaction::create([
-                'invoice_id'  => $invoice->id,
-                'action'      => 'refund',
-                'old_data'    => $oldDataSnapshot,
-                'new_data'    => $invoice->fresh()->toArray(),
-                'description' => "قام [{$user->name}] ({$roleLabel}) باسترجاع الفاتورة رقم {$invoice->invoice_number}. السبب: {$request->reason}",
-                'created_by'  => $user->id,
-            ]);
+            $refundDesc = "قام [{$user->name}] ({$roleLabel}) باسترجاع الفاتورة رقم {$invoice->invoice_number}. السبب: {$request->reason}";
+            try {
+                InvoiceTransaction::create([
+                    'invoice_id'  => $invoice->id,
+                    'action'      => 'refund',
+                    'old_data'    => $oldDataSnapshot,
+                    'new_data'    => $invoice->fresh()->toArray(),
+                    'description' => $refundDesc,
+                    'created_by'  => $user->id,
+                ]);
+            } catch (\Throwable $e) {
+                // توافقية كاملة في حال كان عمود action لا يزال enum القديم قبل تشغيل الميجراشن
+                InvoiceTransaction::create([
+                    'invoice_id'  => $invoice->id,
+                    'action'      => 'update',
+                    'old_data'    => $oldDataSnapshot,
+                    'new_data'    => $invoice->fresh()->toArray(),
+                    'description' => "[استرجاع] " . $refundDesc,
+                    'created_by'  => $user->id,
+                ]);
+            }
 
             // 5. تسجيل حركة استرجاع في الوردية
             app(ShiftActionService::class)->logInvoiceRefund($invoice, $request->reason, $user);

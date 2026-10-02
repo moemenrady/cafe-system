@@ -150,11 +150,66 @@ class ShiftActionService
     }
 
     /**
-     * تسجيل تعديل على فاتورة
+     * تسجيل تعديل على فاتورة في الشيفت
      */
-    public function logInvoiceUpdate(Invoice $invoice, array $changes = []): ?ShiftAction
+    public function logInvoiceUpdate(Invoice $invoice, array $changes = [], ?User $user = null): ?ShiftAction
     {
-        return $this->logInvoice($invoice, 'invoice_updated');
+        $user = $user ?: Auth::user();
+        $shiftId = $invoice->shift_id;
+        if (!$shiftId && $user) {
+            $shiftId = Shift::where('user_id', $user->id)
+                ->where('status', 'open')
+                ->latest('id')
+                ->value('id');
+        }
+
+        if (!$shiftId) {
+            return null;
+        }
+
+        $invoice->loadMissing(['items.menu', 'client', 'creator']);
+
+        $roleLabel = $user?->isManager() ? 'إدارة' : 'موظف';
+        $userName  = $user?->name ?? 'مستخدم';
+        $title     = sprintf('تعديل فاتورة مبيعات #%s بواسطة [%s]', $invoice->invoice_number, $userName);
+
+        $items = $invoice->items->map(function ($item) {
+            return [
+                'id'       => $item->id,
+                'name'     => $item->menu->name ?? 'صنف غير معروف',
+                'quantity' => (int) $item->quantity,
+                'price'    => (float) $item->item_price,
+                'total'    => (float) $item->total,
+            ];
+        })->toArray();
+
+        $details = [
+            'invoice_id'     => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'updated_by'     => $userName,
+            'updated_by_id'  => $user?->id,
+            'role'           => $roleLabel,
+            'reason'         => $changes['reason'] ?? null,
+            'old_total'      => $changes['old_total'] ?? null,
+            'new_total'      => $changes['new_total'] ?? (float) $invoice->total,
+            'diff'           => $changes['diff'] ?? 0,
+            'customer_name'  => $invoice->client->name ?? null,
+            'payment_method' => $invoice->payment_method,
+            'items'          => $items,
+            'time'           => now()->format('Y-m-d h:i A'),
+        ];
+
+        return ShiftAction::create([
+            'shift_id'       => $shiftId,
+            'user_id'        => $user?->id ?: ($invoice->created_by ?: (Auth::id() ?? 1)),
+            'action_type'    => 'invoice_updated',
+            'action_title'   => $title,
+            'model_type'     => Invoice::class,
+            'model_id'       => $invoice->id,
+            'amount'         => (float) $invoice->total,
+            'payment_method' => $invoice->payment_method,
+            'details'        => $details,
+        ]);
     }
 
     /**
@@ -175,11 +230,15 @@ class ShiftActionService
             return null;
         }
 
+        $roleLabel = $user?->isManager() ? 'إدارة' : 'موظف';
+        $userName  = $user?->name ?? 'النظام';
+        $title     = sprintf('إرجاع فاتورة مبيعات #%s بواسطة [%s]', $invoice->invoice_number, $userName);
+
         return ShiftAction::create([
             'shift_id'       => $shiftId,
             'user_id'        => $user?->id ?: ($invoice->created_by ?: (Auth::id() ?? 1)),
             'action_type'    => 'invoice_refunded',
-            'action_title'   => sprintf('إرجاع فاتورة مبيعات #%s', $invoice->invoice_number),
+            'action_title'   => $title,
             'model_type'     => Invoice::class,
             'model_id'       => $invoice->id,
             'amount'         => (float) $invoice->total,
@@ -187,7 +246,9 @@ class ShiftActionService
             'details'        => [
                 'invoice_id'     => $invoice->id,
                 'invoice_number' => $invoice->invoice_number,
-                'refunded_by'    => $user?->name ?? 'النظام',
+                'refunded_by'    => $userName,
+                'refunded_by_id' => $user?->id,
+                'role'           => $roleLabel,
                 'refund_reason'  => $reason,
                 'total_refunded' => (float) $invoice->total,
                 'payment_method' => $invoice->payment_method,

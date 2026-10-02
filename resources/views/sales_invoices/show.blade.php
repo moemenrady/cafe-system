@@ -304,6 +304,40 @@
 
     </div>
 
+    {{-- ==================== سجل الرقابة والتدقيق (التعديل والاسترجاع) ==================== --}}
+    @if($invoice->transactions && $invoice->transactions->isNotEmpty())
+        <div class="no-print bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+            <h3 class="text-sm font-black text-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-check text-blue-500"></i>
+                <span>سجل الرقابة وحركات الفاتورة (Audit Trail)</span>
+                <span class="text-xs text-gray-400 font-normal">({{ $invoice->transactions->count() }} حركة مسجلة)</span>
+            </h3>
+
+            <div class="divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden text-xs">
+                @foreach($invoice->transactions->sortByDesc('id') as $tx)
+                    <div class="p-3 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                @if($tx->action === 'refund')
+                                    <span class="px-2 py-0.5 rounded-lg bg-red-100 text-red-700 font-black text-[10px]">استرجاع</span>
+                                @elseif($tx->action === 'update')
+                                    <span class="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 font-black text-[10px]">تعديل</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 font-black text-[10px]">{{ $tx->action }}</span>
+                                @endif
+                                <span class="font-bold text-gray-800">{{ $tx->description }}</span>
+                            </div>
+                            <div class="text-[11px] text-gray-400 flex items-center gap-3">
+                                <span><i class="fa-solid fa-user ml-1 text-gray-400"></i> المنفذ: <strong class="text-gray-700">{{ $tx->creator->name ?? 'مستخدم غير معروف' }}</strong></span>
+                                <span><i class="fa-solid fa-clock ml-1 text-gray-400"></i> {{ $tx->created_at->format('Y-m-d h:i A') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
 </div>
 
 {{-- نافذة استرجاع الفاتورة --}}

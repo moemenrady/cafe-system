@@ -25,7 +25,11 @@ class AuthenticatedSessionController extends Controller
       return redirect()->route($targetRoute);
     }
 
-    return view('auth.login');
+    return response()
+      ->view('auth.login')
+      ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+      ->header('Pragma', 'no-cache')
+      ->header('Expires', 'Sun, 02 Jan 1990 00:00:00 GMT');
   }
 
   /**
@@ -47,21 +51,27 @@ class AuthenticatedSessionController extends Controller
     return redirect()->route($targetRoute);
   }
 
-
   /**
    * Destroy an authenticated session.
    */
   public function destroy(Request $request): RedirectResponse
   {
+    $user = Auth::user();
+    if ($user) {
+      $user->setRememberToken(null);
+      $user->save();
+    }
 
-
-    // لو مسجل دخول بالفعل -> اعمل تسجيل خروج عادي
     Auth::guard('web')->logout();
 
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('/'); // أو صفحة login حسب ما تحب
+    if (\Illuminate\Support\Facades\Cookie::has(Auth::getRecallerName())) {
+      \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget(Auth::getRecallerName()));
+    }
+
+    return redirect()->route('login');
   }
 
 }

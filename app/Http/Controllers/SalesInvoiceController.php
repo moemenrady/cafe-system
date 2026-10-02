@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Menu;
+use App\Models\Order;
+use App\Models\User;
 use App\Models\InventoryMovement;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceTransaction;
+use App\Services\ShiftActionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +18,77 @@ use Illuminate\Support\Facades\Auth;
 class SalesInvoiceController extends Controller
 {
     /**
+     * التحقق من صلاحية تعديل الفاتورة
+     * - المدير أو المشرف: حرية كاملة في أي وقت ولأي فاتورة
+     * - الموظف/الكاشير: مقيد بفواتير ورديته الحالية المفتوحة فقط، مع التحقق من عدم استرجاع الفاتورة مسبقاً
+     */
+    public function canModifyInvoice(?User $user, Invoice $invoice): array
+    {
+        if (!$user) {
+            return ['allowed' => false, 'message' => 'يجب تسجيل الدخول أولاً.'];
+        }
+
+        if ($invoice->isRefunded()) {
+            return ['allowed' => false, 'message' => 'هذه الفاتورة تم استرجاعها بالفعل ولا يمكن تعديلها.'];
+        }
+
+        // المدير والمشرف لديهم صلاحية كاملة
+        if ($user->isManager()) {
+            return ['allowed' => true, 'message' => null];
+        }
+
+        // قيود الموظف
+        $activeShift = $user->activeShift;
+        if (!$activeShift) {
+            return ['allowed' => false, 'message' => 'لا يمكنك تعديل الفاتورة لعدم وجود وردية نشطة ومفتوحة لك حالياً.'];
+        }
+
+        if ((int) $invoice->shift_id !== (int) $activeShift->id) {
+            return ['allowed' => false, 'message' => 'غير مصرح لك بتعديل هذه الفاتورة. يسمح للموظف فقط بتعديل فواتير ورديته الحالية المفتوحة.'];
+        }
+
+        return ['allowed' => true, 'message' => null];
+    }
+
+    /**
+     * التحقق من صلاحية استرجاع/إلغاء الفاتورة (Refund)
+     * - المدير أو المشرف: حرية كاملة
+     * - الموظف/الكاشير: مقيد بفواتير ورديته الحالية المفتوحة فقط وبشرط ألا تكون مسترجعة سابقاً
+     */
+    public function canRefundInvoice(?User $user, Invoice $invoice): array
+    {
+        if (!$user) {
+            return ['allowed' => false, 'message' => 'يجب تسجيل الدخول أولاً.'];
+        }
+
+        if ($invoice->isRefunded()) {
+            return ['allowed' => false, 'message' => 'تم استرجاع هذه الفاتورة بالفعل سابقاً.'];
+        }
+
+        // المدير والمشرف لديهم صلاحية كاملة
+        if ($user->isManager()) {
+            return ['allowed' => true, 'message' => null];
+        }
+
+        // قيود الموظف
+        $activeShift = $user->activeShift;
+        if (!$activeShift) {
+            return ['allowed' => false, 'message' => 'لا يمكنك استرجاع الفاتورة لعدم وجود وردية نشطة ومفتوحة لك حالياً.'];
+        }
+
+        if ((int) $invoice->shift_id !== (int) $activeShift->id) {
+            return ['allowed' => false, 'message' => 'غير مصرح لك باسترجاع هذه الفاتورة؛ تخص وردية أخرى أو وردية مغلقة. يرجى مراجعة المشرف أو الإدارة.'];
+        }
+
+        return ['allowed' => true, 'message' => null];
+    }
+
+    /**
      * عرض قائمة الفواتير المسجلة مع الإحصائيات والفلاتر
      */
     public function index(Request $request)
     {
-        $query = Invoice::with(['creator', 'client', 'order.table', 'items.menu'])
+        $query = Invoice::with(['creator', 'client', 'order.table', 'items.menu', 'refunder'])
             ->orderBy('created_at', 'desc');
 
         // البحث برقم الفاتورة أو الملاحظات أو اسم العميل
@@ -28,11 +97,23 @@ class SalesInvoiceController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_number', 'like', "%{$search}%")
                   ->orWhere('note', 'like', "%{$search}%")
+                  ->orWhere('refund_reason', 'like', "%{$search}%")
                   ->orWhereHas('client', function ($cq) use ($search) {
                       $cq->where('name', 'like', "%{$search}%")
                          ->orWhere('phone', 'like', "%{$search}%");
                   });
             });
+        }
+
+        // فلترة حالة الفاتورة (مدفوعة، مرتجعة، الكل)
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'refunded') {
+                $query->where('status', 'refunded');
+            } elseif ($request->status === 'paid') {
+                $query->where(function ($q) {
+                    $q->whereNull('status')->orWhere('status', '!=', 'refunded');
+                });
+            }
         }
 
         // فلترة طريقة الدفع
@@ -58,15 +139,21 @@ class SalesInvoiceController extends Controller
             }
         }
 
-        // حساب الإحصائيات العامة لسجل الفواتير
+        // استبعاد الفواتير المرتجعة من إجمالي المبيعات النشطة لحساب دقيق
+        $activeInvoicesQuery = Invoice::where(function ($q) {
+            $q->whereNull('status')->orWhere('status', '!=', 'refunded');
+        });
+
         $stats = [
-            'total_sales'      => Invoice::sum('total'),
-            'invoices_count'   => Invoice::count(),
-            'cash_total'       => Invoice::where('payment_method', 'cash')->sum('total'),
-            'instapay_total'   => Invoice::where('payment_method', 'InstaPay')->sum('total'),
-            'card_total'       => Invoice::where('payment_method', 'card')->sum('total'),
-            'today_sales'      => Invoice::whereDate('created_at', Carbon::today())->sum('total'),
-            'today_count'      => Invoice::whereDate('created_at', Carbon::today())->count(),
+            'total_sales'      => (clone $activeInvoicesQuery)->sum('total'),
+            'invoices_count'   => (clone $activeInvoicesQuery)->count(),
+            'cash_total'       => (clone $activeInvoicesQuery)->where('payment_method', 'cash')->sum('total'),
+            'instapay_total'   => (clone $activeInvoicesQuery)->where('payment_method', 'InstaPay')->sum('total'),
+            'card_total'       => (clone $activeInvoicesQuery)->where('payment_method', 'card')->sum('total'),
+            'today_sales'      => (clone $activeInvoicesQuery)->whereDate('created_at', Carbon::today())->sum('total'),
+            'today_count'      => (clone $activeInvoicesQuery)->whereDate('created_at', Carbon::today())->count(),
+            'refunded_count'   => Invoice::where('status', 'refunded')->count(),
+            'refunded_total'   => Invoice::where('status', 'refunded')->sum('total'),
         ];
 
         $invoices = $query->paginate(15)->appends($request->query());
@@ -85,12 +172,18 @@ class SalesInvoiceController extends Controller
             'order.table',
             'order.customer',
             'items.menu.category',
-            'shift'
+            'shift',
+            'refunder'
         ])->findOrFail($id);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'invoice_number' => $invoice->invoice_number,
+                'status'         => $invoice->status,
+                'is_refunded'    => $invoice->isRefunded(),
+                'refund_reason'  => $invoice->refund_reason,
+                'refunded_at'    => $invoice->refunded_at ? $invoice->refunded_at->format('Y-m-d h:i A') : null,
+                'refunded_by'    => $invoice->refunder->name ?? null,
                 'cashier'        => $invoice->creator->name ?? 'غير معروف',
                 'created_at'     => $invoice->created_at->format('Y-m-d h:i A'),
                 'payment_method' => $invoice->payment_method,
@@ -109,16 +202,27 @@ class SalesInvoiceController extends Controller
             ]);
         }
 
-        return view('sales_invoices.show', compact('invoice'));
+        $user = Auth::user();
+        $canModify = $this->canModifyInvoice($user, $invoice);
+        $canRefund = $this->canRefundInvoice($user, $invoice);
+
+        return view('sales_invoices.show', compact('invoice', 'canModify', 'canRefund'));
     }
 
     /**
-     * صفحة تعديل الفاتورة – لمشرف وأدمن فقط
+     * صفحة تعديل الفاتورة
      */
     public function edit($id)
     {
-        $invoice = Invoice::with(['items.menu.category', 'creator', 'client', 'order.table'])
+        $invoice = Invoice::with(['items.menu.category', 'creator', 'client', 'order.table', 'shift'])
             ->findOrFail($id);
+        $user = Auth::user();
+
+        $check = $this->canModifyInvoice($user, $invoice);
+        if (!$check['allowed']) {
+            return redirect()->route('sales-invoices.show', $invoice->id)
+                ->with('error', $check['message']);
+        }
 
         // استدعاء كل الأصناف المتاحة مرتبة بالفئة
         $menus = Menu::with('category')
@@ -140,16 +244,17 @@ class SalesInvoiceController extends Controller
             'items.*.menu_id'  => 'required|exists:menu,id',
             'items.*.quantity' => 'required|integer|min:1',
             'discount'         => 'nullable|numeric|min:0',
+            'reason'           => 'nullable|string|max:500',
         ]);
 
         $invoice = Invoice::with('items')->findOrFail($id);
-        $user    = auth()->user();
+        $user    = Auth::user();
 
-        // صلاحية التعديل: مشرف أو أدمن فقط
-        if (! $user || ! in_array($user->role, ['admin', 'supervisor'], true)) {
+        $check = $this->canModifyInvoice($user, $invoice);
+        if (!$check['allowed']) {
             return response()->json([
                 'success' => false,
-                'error'   => 'غير مصرح لك بتعديل الفواتير. يتطلب صلاحية مشرف أو مدير.',
+                'error'   => $check['message'],
             ], 403);
         }
 
@@ -162,17 +267,19 @@ class SalesInvoiceController extends Controller
                 $product = Menu::with('recipes.inventoryItem')->find($oldItem->menu_id);
                 if ($product) {
                     foreach ($product->recipes as $recipe) {
-                        $returnedQty = $recipe->quantity_used * $oldItem->quantity;
-                        $recipe->inventoryItem->increment('quantity', $returnedQty);
+                        if ($recipe->inventoryItem) {
+                            $returnedQty = $recipe->quantity_used * $oldItem->quantity;
+                            $recipe->inventoryItem->increment('quantity', $returnedQty);
 
-                        InventoryMovement::create([
-                            'inventory_item_id' => $recipe->inventoryItem->id,
-                            'type'              => 'sale_update',
-                            'quantity'          => $returnedQty,
-                            'balance_after'     => $recipe->inventoryItem->quantity,
-                            'invoice_id'        => $invoice->id,
-                            'user_id'           => Auth::id() ?? 1,
-                        ]);
+                            InventoryMovement::create([
+                                'inventory_item_id' => $recipe->inventoryItem->id,
+                                'type'              => 'sale_update',
+                                'quantity'          => $returnedQty,
+                                'balance_after'     => $recipe->inventoryItem->quantity,
+                                'invoice_id'        => $invoice->id,
+                                'user_id'           => $user->id,
+                            ]);
+                        }
                     }
                 }
             }
@@ -194,10 +301,14 @@ class SalesInvoiceController extends Controller
 
                 foreach ($product->recipes as $recipe) {
                     $inventoryItem = $recipe->inventoryItem;
-                    $neededQty     = $recipe->quantity_used * $quantity;
+                    if (!$inventoryItem) {
+                        continue;
+                    }
+
+                    $neededQty = $recipe->quantity_used * $quantity;
 
                     if ($inventoryItem->quantity < $neededQty) {
-                        throw new \Exception("المخزن لا يكفي من [{$inventoryItem->name}] لتلبية التعديل الجديد.");
+                        throw new \Exception("المخزن لا يكفي من [{$inventoryItem->name}] لتلبية التعديل الجديد (المتوفر: {$inventoryItem->quantity}).");
                     }
                     $inventoryItem->decrement('quantity', $neededQty);
 
@@ -233,21 +344,24 @@ class SalesInvoiceController extends Controller
 
             foreach ($movementsToLog as $movement) {
                 $movement['invoice_id'] = $invoice->id;
-                $movement['user_id']    = Auth::id() ?? 1;
+                $movement['user_id']    = $user->id;
                 InventoryMovement::create($movement);
             }
 
             // 3. تسجيل audit log
+            $roleLabel = $user->isManager() ? 'إدارة/مشرف' : 'موظف';
+            $reasonNote = $request->filled('reason') ? " | سبب التعديل: {$request->reason}" : '';
+
             InvoiceTransaction::create([
                 'invoice_id'  => $invoice->id,
                 'action'      => 'update',
                 'old_data'    => $oldDataSnapshot,
                 'new_data'    => $invoice->load('items')->toArray(),
-                'description' => "قام [{$user->name}] بتعديل الفاتورة رقم {$invoice->invoice_number}",
+                'description' => "قام [{$user->name}] ({$roleLabel}) بتعديل الفاتورة رقم {$invoice->invoice_number}{$reasonNote}",
                 'created_by'  => $user->id,
             ]);
 
-            app(\App\Services\ShiftActionService::class)->logInvoiceUpdate(
+            app(ShiftActionService::class)->logInvoiceUpdate(
                 $invoice->fresh(['items.menu', 'client', 'creator']),
                 ['old_data' => $oldDataSnapshot, 'new_data' => $invoice->load('items')->toArray()]
             );
@@ -266,6 +380,111 @@ class SalesInvoiceController extends Controller
                 'success' => false,
                 'error'   => 'حدث خطأ أثناء تعديل الفاتورة: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * استرجاع الفاتورة بالكامل (Refund)
+     */
+    public function refund(Request $request, $id)
+    {
+        $request->validate([
+            'reason' => 'required|string|min:3|max:500',
+        ], [
+            'reason.required' => 'يجب توضيح سبب استرجاع الفاتورة.',
+            'reason.min'      => 'سبب الاسترجاع يجب ألا يقل عن 3 أحرف.',
+        ]);
+
+        $invoice = Invoice::with(['items.menu.recipes.inventoryItem', 'shift'])->findOrFail($id);
+        $user    = Auth::user();
+
+        $check = $this->canRefundInvoice($user, $invoice);
+        if (!$check['allowed']) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'error' => $check['message']], 403);
+            }
+            return redirect()->back()->with('error', $check['message']);
+        }
+
+        $oldDataSnapshot = $invoice->toArray();
+
+        DB::beginTransaction();
+        try {
+            // 1. إعادة المواد الخام للمخزن وتسجيل حركة sale_cancel
+            foreach ($invoice->items as $item) {
+                $product = Menu::with('recipes.inventoryItem')->find($item->menu_id);
+                if ($product) {
+                    foreach ($product->recipes as $recipe) {
+                        if ($recipe->inventoryItem) {
+                            $returnedQty = $recipe->quantity_used * $item->quantity;
+                            $recipe->inventoryItem->increment('quantity', $returnedQty);
+
+                            InventoryMovement::create([
+                                'inventory_item_id' => $recipe->inventoryItem->id,
+                                'type'              => 'sale_cancel',
+                                'quantity'          => $returnedQty,
+                                'balance_after'     => $recipe->inventoryItem->quantity,
+                                'invoice_id'        => $invoice->id,
+                                'user_id'           => $user->id,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            // 2. تحديث حالة الفاتورة لتصبح مرتجعة
+            $invoice->update([
+                'status'        => 'refunded',
+                'refunded_at'   => now(),
+                'refund_reason' => $request->reason,
+                'refunded_by'   => $user->id,
+            ]);
+
+            // 3. إلغاء الطلب المرتبط إن وجد
+            if ($invoice->order_id) {
+                Order::where('id', $invoice->order_id)->update([
+                    'status'         => 'cancelled',
+                    'payment_status' => 'refunded',
+                ]);
+            }
+
+            // 4. تسجيل في سجل الرقابة InvoiceTransaction
+            $roleLabel = $user->isManager() ? 'إدارة/مشرف' : 'موظف';
+            InvoiceTransaction::create([
+                'invoice_id'  => $invoice->id,
+                'action'      => 'refund',
+                'old_data'    => $oldDataSnapshot,
+                'new_data'    => $invoice->fresh()->toArray(),
+                'description' => "قام [{$user->name}] ({$roleLabel}) باسترجاع الفاتورة رقم {$invoice->invoice_number}. السبب: {$request->reason}",
+                'created_by'  => $user->id,
+            ]);
+
+            // 5. تسجيل حركة استرجاع في الوردية
+            app(ShiftActionService::class)->logInvoiceRefund($invoice, $request->reason, $user);
+
+            DB::commit();
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success'  => true,
+                    'message'  => 'تم استرجاع الفاتورة بنجاح، وإعادة المواد الخام للمخزن، وتسجيل العملية.',
+                    'redirect' => route('sales-invoices.show', $invoice->id),
+                ]);
+            }
+
+            return redirect()->route('sales-invoices.show', $invoice->id)
+                ->with('success', 'تم استرجاع الفاتورة بنجاح وإعادة المواد للمخزن.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'حدث خطأ أثناء استرجاع الفاتورة: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
         }
     }
 }

@@ -321,7 +321,7 @@
                             <div class="flex items-center justify-center gap-1.5">
                                 {{-- زر عرض التفاصيل --}}
                                 <button type="button"
-                                    onclick="openViewUserModal({{ $u->id }})"
+                                    onclick="openViewUserModal({{ $u->id }}, this)"
                                     class="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 flex items-center justify-center transition"
                                     title="عرض كافة التفاصيل">
                                     <i class="fa-solid fa-eye text-[11px]"></i>
@@ -329,7 +329,7 @@
 
                                 {{-- زر التعديل --}}
                                 <button type="button"
-                                    onclick="openEditUserModal({{ $u->id }})"
+                                    onclick="openEditUserModal({{ $u->id }}, this)"
                                     class="w-7 h-7 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 flex items-center justify-center transition"
                                     title="تعديل بيانات المستخدم">
                                     <i class="fa-solid fa-pen text-[11px]"></i>
@@ -338,7 +338,7 @@
                                 {{-- زر الحذف --}}
                                 @if($u->id !== auth()->id())
                                 <button type="button"
-                                    onclick="deleteUser({{ $u->id }}, '{{ addslashes($u->name) }}')"
+                                    onclick="deleteUser({{ $u->id }}, '{{ addslashes($u->name) }}', this)"
                                     class="w-7 h-7 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition"
                                     title="حذف المستخدم">
                                     <i class="fa-solid fa-trash text-[11px]"></i>
@@ -363,6 +363,7 @@
 
 </div>
 
+@push('modals')
 {{-- ==========================================
      مودال إضافة مستخدم جديد (بجميع البيانات)
      ========================================== --}}
@@ -486,6 +487,12 @@
             </button>
         </div>
 
+        {{-- مؤشر تحميل بيانات التعديل --}}
+        <div id="editUserLoading" class="hidden p-10 flex flex-col items-center justify-center gap-3">
+            <i class="fa-solid fa-circle-notch fa-spin text-amber-500 text-3xl"></i>
+            <span class="text-xs font-bold text-gray-500">جاري جلب بيانات المستخدم...</span>
+        </div>
+
         <form id="editUserForm" class="p-6 space-y-4">
             @csrf
             <input type="hidden" name="_method" value="PUT">
@@ -586,6 +593,12 @@
             </button>
         </div>
 
+        {{-- مؤشر تحميل تفاصيل الحساب --}}
+        <div id="viewUserLoading" class="hidden p-10 flex flex-col items-center justify-center gap-3">
+            <i class="fa-solid fa-circle-notch fa-spin text-sky-500 text-3xl"></i>
+            <span class="text-xs font-bold text-gray-500">جاري جلب تفاصيل الحساب...</span>
+        </div>
+
         <div class="p-6 space-y-4" id="viewUserContent">
             {{-- بطاقة رأسية للمستخدم --}}
             <div class="flex items-center gap-3.5 bg-sky-50/50 p-4 rounded-2xl border border-sky-100">
@@ -645,6 +658,7 @@
         </div>
     </div>
 </div>
+@endpush
 
 
 @push('scripts')
@@ -723,6 +737,26 @@
     // ==========================================
 
     const CSRF = '{{ csrf_token() }}';
+    const USERS_API_URL = '{{ url('settings/users') }}';
+
+    // ضمان وجود المودالات مباشرة في body لمنع أي مشاكل في Stacking Context أو Scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        ['addUserModal', 'editUserModal', 'viewUserModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.parentElement !== document.body) {
+                document.body.appendChild(el);
+            }
+        });
+
+        // إغلاق النوافذ عند الضغط على زر Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAddUserModal();
+                closeEditUserModal();
+                closeViewUserModal();
+            }
+        });
+    });
 
     // ---- فلترة وبحث جدول المستخدمين لحظياً ----
     function filterUsersTable() {
@@ -770,7 +804,12 @@
 
     // ---- مودال الإضافة ----
     function openAddUserModal() {
-        document.getElementById('addUserModal')?.classList.remove('hidden');
+        const modal = document.getElementById('addUserModal');
+        if (!modal) return;
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+        modal.classList.remove('hidden');
         document.getElementById('addUserForm')?.reset();
         document.getElementById('addUserError')?.classList.add('hidden');
         handleRoleChangeAdd('cashier');
@@ -780,12 +819,33 @@
     }
 
     // ---- مودال التعديل ----
-    async function openEditUserModal(id) {
+    async function openEditUserModal(id, btn = null) {
+        const modal = document.getElementById('editUserModal');
+        if (!modal) return;
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        const editForm = document.getElementById('editUserForm');
+        const loadingEl = document.getElementById('editUserLoading');
+        const errBox = document.getElementById('editUserError');
+
+        // إظهار المودال وحالة التحميل فوراً لاستجابة لحظية
+        modal.classList.remove('hidden');
+        if (loadingEl) loadingEl.classList.remove('hidden');
+        if (editForm) editForm.classList.add('hidden');
+        if (errBox) errBox.classList.add('hidden');
         document.getElementById('editUserId').value = id;
-        document.getElementById('editUserError').classList.add('hidden');
+
+        let originalHtml = '';
+        if (btn) {
+            originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
+        }
 
         try {
-            const res = await fetch(`/settings/users/${id}`, {
+            const res = await fetch(`${USERS_API_URL}/${id}`, {
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF }
             });
             const data = await res.json();
@@ -794,11 +854,11 @@
                 document.getElementById('editUserName').value  = u.name;
                 document.getElementById('editUserEmail').value = u.email;
                 document.getElementById('editUserRole').value  = u.role;
-                document.getElementById('editCanStartShift').checked = u.can_start_shift;
-                document.getElementById('editIsActive').checked      = u.is_active;
+                document.getElementById('editCanStartShift').checked = Boolean(u.can_start_shift);
+                document.getElementById('editIsActive').checked      = Boolean(u.is_active);
 
                 // لو المستخدم هو نفسه الأدمن الحالي المسجل
-                const isSelf = u.is_current_user;
+                const isSelf = Boolean(u.is_current_user);
                 const roleEl = document.getElementById('editUserRole');
                 const activeEl = document.getElementById('editIsActive');
                 if (isSelf) {
@@ -811,12 +871,20 @@
                     document.getElementById('editUserSubtitle').textContent = `تحديث بيانات المستخدم (${u.name})`;
                 }
 
-                document.getElementById('editUserModal').classList.remove('hidden');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (editForm) editForm.classList.remove('hidden');
             } else {
-                alert('فشل في جلب بيانات المستخدم.');
+                closeEditUserModal();
+                alert(data.message || 'فشل في جلب بيانات المستخدم.');
             }
         } catch {
+            closeEditUserModal();
             alert('حدث خطأ في الاتصال بالسيرفر.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
         }
     }
     function closeEditUserModal() {
@@ -824,15 +892,35 @@
     }
 
     // ---- مودال عرض تفاصيل المستخدم بالكامل ----
-    async function openViewUserModal(id) {
+    async function openViewUserModal(id, btn = null) {
+        const modal = document.getElementById('viewUserModal');
+        if (!modal) return;
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        const contentEl = document.getElementById('viewUserContent');
+        const loadingEl = document.getElementById('viewUserLoading');
+
+        modal.classList.remove('hidden');
+        if (loadingEl) loadingEl.classList.remove('hidden');
+        if (contentEl) contentEl.classList.add('hidden');
+
+        let originalHtml = '';
+        if (btn) {
+            originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
+        }
+
         try {
-            const res = await fetch(`/settings/users/${id}`, {
+            const res = await fetch(`${USERS_API_URL}/${id}`, {
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF }
             });
             const data = await res.json();
             if (data.success && data.user) {
                 const u = data.user;
-                document.getElementById('viewUserAvatar').textContent = u.name.charAt(0);
+                document.getElementById('viewUserAvatar').textContent = (u.name || '?').charAt(0);
                 document.getElementById('viewUserName').textContent   = u.name + (u.is_current_user ? ' (أنت)' : '');
                 document.getElementById('viewUserEmail').textContent  = u.email;
 
@@ -853,12 +941,20 @@
                 document.getElementById('viewUserOrdersCount').textContent = (u.orders_count || 0) + ' طلب';
                 document.getElementById('viewUserCreatedAt').textContent   = u.created_at || '—';
 
-                document.getElementById('viewUserModal').classList.remove('hidden');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (contentEl) contentEl.classList.remove('hidden');
             } else {
-                alert('فشل في جلب تفاصيل المستخدم.');
+                closeViewUserModal();
+                alert(data.message || 'فشل في جلب تفاصيل المستخدم.');
             }
         } catch {
+            closeViewUserModal();
             alert('حدث خطأ في الاتصال.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
         }
     }
     function closeViewUserModal() {
@@ -907,12 +1003,19 @@
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ التحديث...';
 
         const formData = new FormData(this);
+
+        // عند تعطيل الحقول لحساب الأدمن الحالي، يتم تضمين قيمها يدوياً حتى لا تفشل الفاليديشن بالباك إند
+        const roleEl = document.getElementById('editUserRole');
+        const activeEl = document.getElementById('editIsActive');
+        if (roleEl && roleEl.disabled) formData.append('role', roleEl.value);
+        if (activeEl && activeEl.disabled) formData.append('is_active', activeEl.checked ? '1' : '0');
+
         // ضمان إرسال checkboxes عند إلغاء التحديد
         if (!formData.has('can_start_shift')) formData.append('can_start_shift', '0');
         if (!formData.has('is_active')) formData.append('is_active', '0');
 
         try {
-            const res = await fetch(`/settings/users/${userId}?_method=PUT`, {
+            const res = await fetch(`${USERS_API_URL}/${userId}?_method=PUT`, {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
                 body: formData,
@@ -936,11 +1039,18 @@
     });
 
     // ---- حذف مستخدم ----
-    async function deleteUser(id, name) {
+    async function deleteUser(id, name, btn = null) {
         if (!confirm(`هل أنت متأكد من حذف المستخدم "${name}" نهائياً من النظام؟`)) return;
 
+        let originalHtml = '';
+        if (btn) {
+            originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
+        }
+
         try {
-            const res  = await fetch(`/settings/users/${id}`, {
+            const res  = await fetch(`${USERS_API_URL}/${id}`, {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ _method: 'DELETE' }),
@@ -956,13 +1066,18 @@
             }
         } catch {
             alert('حدث خطأ في الاتصال.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
         }
     }
 
     // ---- تفعيل / تعطيل مستخدم بنقرة زر ----
     async function toggleUserStatus(id, btn) {
         try {
-            const res  = await fetch(`/settings/users/${id}/toggle-status`, {
+            const res  = await fetch(`${USERS_API_URL}/${id}/toggle-status`, {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
             });
@@ -986,7 +1101,7 @@
     // ---- تفعيل / تعطيل صلاحية فتح الشيفت بنقرة زر ----
     async function toggleUserShiftPermission(id, btn) {
         try {
-            const res  = await fetch(`/settings/users/${id}/toggle-shift`, {
+            const res  = await fetch(`${USERS_API_URL}/${id}/toggle-shift`, {
                 method: 'POST',
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
             });

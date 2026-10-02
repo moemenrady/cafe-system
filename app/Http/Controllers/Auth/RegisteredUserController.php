@@ -53,40 +53,29 @@ class RegisteredUserController extends Controller
                 : 'client';
         }
 
-        // انشئ المستخدم (مؤقتًا غير مفعل)
+        // انشئ المستخدم مفعل تلقائياً كإيميل
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $role,
-            'email_verified_at' => null,
+            'name'              => $request->name,
+            'email'             => $request->email,
+            'password'          => Hash::make($request->password),
+            'role'              => $role,
+            'email_verified_at' => now(),
+            'is_active'         => true,
+            'can_start_shift'   => in_array($role, ['admin', 'supervisor', 'cashier'], true),
         ]);
-
-        // genereate 6-digit code
-        $code = random_int(100000, 999999);
-
-        // خزّن الكود مؤقتًا في الكاش مرتبط بالإيميل (أو استخدم جدول verification_codes لو تحب)
-        $cacheKey = 'email_verif_code_' . $user->email;
-        Cache::put($cacheKey, [
-            'code' => $code,
-            'user_id' => $user->id,
-        ], now()->addMinutes(10)); // صالح 10 دقائق
-
-        // 👇 بعد إنشاء المستخدم والكود
-
-        Mail::to($user->email)->send(new VerifyCodeMail($user, $code));
 
         // 🔥 لو العملية جاية من لوحة التحكم (admin)
         if (auth()->check() && auth()->user()->role === 'admin') {
             return redirect()
-                ->route('system-accounts.index')
-                ->with('success', 'تم إنشاء الحساب بنجاح وتم إرسال كود التفعيل 📩');
+                ->route('settings.index')
+                ->with('success', 'تم إنشاء الحساب بنجاح وتفعيله تلقائياً ✅');
         }
 
-        // 🔵 غير كده (تسجيل عادي)
-        return redirect()
-            ->route('register.verify.show')
-            ->with('email', $user->email);
+        // 🔵 تسجيل دخول تلقائي للحساب المفعل
+        Auth::login($user);
+
+        $targetRoute = $user->isManager() ? 'dashboard' : 'pos.index';
+        return redirect()->route($targetRoute)->with('success', 'تم إنشاء الحساب وتفعيله بنجاح! مرحباً بك.');
     }
 
     public function showVerifyForm()

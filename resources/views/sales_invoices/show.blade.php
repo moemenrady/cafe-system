@@ -9,7 +9,8 @@
         aside#sidebar,
         main > header,
         .no-print,
-        #mobileOverlay {
+        #mobileOverlay,
+        #refundModal {
             display: none !important;
         }
 
@@ -34,6 +35,20 @@
 @section('content')
 <div class="container mx-auto max-w-4xl space-y-4 pb-12 print-container" dir="rtl">
 
+    {{-- رسائل التنبيهات --}}
+    @if(session('success'))
+        <div class="no-print p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs font-bold text-emerald-800 flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="no-print p-3.5 bg-red-50 border border-red-200 rounded-2xl text-xs font-bold text-red-800 flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-red-600"></i>
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
+
     {{-- ==================== شريط الإجراءات والرجوع (لا يطبع) ==================== --}}
     <div class="no-print flex items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-100 shadow-xs">
         <div class="flex items-center gap-3">
@@ -45,22 +60,34 @@
             <div>
                 <h2 class="text-base font-black text-gray-800 flex items-center gap-2">
                     <span>فاتورة مبيعات</span>
-                    <span class="font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 text-xs">
+                    <span class="font-mono {{ $invoice->isRefunded() ? 'text-red-600 bg-red-50 border-red-200' : 'text-blue-600 bg-blue-50 border-blue-100' }} px-2 py-0.5 rounded-lg border text-xs">
                         #{{ $invoice->invoice_number }}
                     </span>
+                    @if($invoice->isRefunded())
+                        <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">مرتجعة</span>
+                    @endif
                 </h2>
                 <p class="text-xs text-gray-400">تاريخ الإصدار: {{ $invoice->created_at->format('Y-m-d - h:i A') }}</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2">
-            @if(auth()->user()->isManager())
+            @if(isset($canModify) && $canModify['allowed'])
             <a href="{{ route('sales-invoices.edit', $invoice->id) }}"
                 class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center gap-2 shadow-xs">
                 <i class="fa-solid fa-pen"></i>
                 <span class="hidden sm:inline">تعديل الفاتورة</span>
             </a>
             @endif
+
+            @if(isset($canRefund) && $canRefund['allowed'])
+            <button type="button" onclick="openRefundModal()"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center gap-2 shadow-xs">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span class="hidden sm:inline">استرجاع الفاتورة</span>
+            </button>
+            @endif
+
             <button type="button" onclick="window.print()"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center gap-2 shadow-xs">
                 <i class="fa-solid fa-print"></i>
@@ -78,12 +105,40 @@
     <div class="bg-white rounded-3xl border border-gray-200/80 shadow-md p-6 sm:p-8 receipt-card relative overflow-hidden">
         
         {{-- شريط زينة علوي --}}
-        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500"></div>
+        <div class="absolute top-0 inset-x-0 h-1.5 {{ $invoice->isRefunded() ? 'bg-gradient-to-r from-red-500 via-rose-500 to-amber-500' : 'bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500' }}"></div>
+
+        {{-- تنبيه الفاتورة المرتجعة --}}
+        @if($invoice->isRefunded())
+            <div class="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-2xl flex items-start gap-3.5 text-red-900">
+                <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 text-lg">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </div>
+                <div class="space-y-1 text-xs flex-1">
+                    <div class="font-black text-sm text-red-700 flex items-center justify-between">
+                        <span>هذه الفاتورة تم استرجاعها (مرتجعة)</span>
+                        <span class="text-[11px] font-mono text-red-500 bg-red-100/60 px-2 py-0.5 rounded-lg border border-red-200">
+                            {{ $invoice->refunded_at ? $invoice->refunded_at->format('Y-m-d - h:i A') : '' }}
+                        </span>
+                    </div>
+                    <p class="text-gray-700">
+                        • تم الاسترجاع بواسطة: <strong class="text-gray-900">{{ $invoice->refunder->name ?? 'المسؤول' }}</strong>
+                    </p>
+                    @if($invoice->refund_reason)
+                        <p class="text-red-800 bg-white/70 p-2 rounded-xl border border-red-100 mt-1">
+                            <strong>سبب الاسترجاع:</strong> {{ $invoice->refund_reason }}
+                        </p>
+                    @endif
+                    <p class="text-[11px] text-red-600 pt-1">
+                        • ملاحظة: تم إعادة المكونات والكميات للمخزن آلياً وتحديث الحسابات.
+                    </p>
+                </div>
+            </div>
+        @endif
 
         {{-- رأس الفاتورة والمعلومات الأساسية --}}
         <div class="flex flex-col sm:flex-row items-center justify-between pb-6 border-b border-gray-100 gap-4 text-center sm:text-right">
             <div class="flex items-center gap-3.5">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center text-2xl shadow-md shadow-blue-500/30 shrink-0">
+                <div class="w-14 h-14 rounded-2xl {{ $invoice->isRefunded() ? 'bg-gradient-to-br from-red-600 to-rose-700 shadow-red-500/30' : 'bg-gradient-to-br from-blue-600 to-indigo-700 shadow-blue-500/30' }} text-white flex items-center justify-center text-2xl shadow-md shrink-0">
                     <i class="fa-solid fa-mug-hot"></i>
                 </div>
                 <div>
@@ -230,17 +285,84 @@
 
                 <div class="border-t border-gray-200 pt-2 flex justify-between items-center text-sm font-black text-gray-900">
                     <span>الإجمالي الصافي:</span>
-                    <span class="text-xl text-emerald-600 font-mono">{{ number_format($invoice->total, 2) }} <span class="text-xs">ج.م</span></span>
+                    <span class="text-xl {{ $invoice->isRefunded() ? 'line-through text-gray-400' : 'text-emerald-600' }} font-mono">
+                        {{ number_format($invoice->total, 2) }} <span class="text-xs">ج.م</span>
+                    </span>
                 </div>
 
-                <div class="bg-emerald-50 border border-emerald-200 rounded-xl py-1 px-2.5 text-center text-emerald-700 font-black text-[11px] mt-1">
-                    <i class="fa-solid fa-circle-check ml-1"></i> تم الدفع بالكامل
-                </div>
+                @if($invoice->isRefunded())
+                    <div class="bg-red-50 border border-red-200 rounded-xl py-1 px-2.5 text-center text-red-700 font-black text-[11px] mt-1">
+                        <i class="fa-solid fa-rotate-left ml-1"></i> فاتورة مسترجعة بالكامل
+                    </div>
+                @else
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl py-1 px-2.5 text-center text-emerald-700 font-black text-[11px] mt-1">
+                        <i class="fa-solid fa-circle-check ml-1"></i> تم الدفع بالكامل
+                    </div>
+                @endif
             </div>
         </div>
 
     </div>
 
+</div>
+
+{{-- نافذة استرجاع الفاتورة --}}
+<div id="refundModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative text-right" dir="rtl">
+        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+            <h3 class="text-base font-black text-gray-800 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-sm">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </div>
+                <span>استرجاع الفاتورة #{{ $invoice->invoice_number }}</span>
+            </h3>
+            <button type="button" onclick="closeRefundModal()" class="w-8 h-8 rounded-xl bg-gray-50 text-gray-400 hover:text-gray-700 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="refundForm" onsubmit="submitRefund(event)" class="mt-4 space-y-4">
+            @csrf
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1">
+                <div class="font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                    <span>تأكيد استرجاع الفاتورة:</span>
+                </div>
+                <div class="flex justify-between items-center pt-1 font-mono">
+                    <span class="text-gray-600">رقم الفاتورة:</span>
+                    <strong class="text-gray-900">#{{ $invoice->invoice_number }}</strong>
+                </div>
+                <div class="flex justify-between items-center font-mono">
+                    <span class="text-gray-600">المبلغ المسترجع:</span>
+                    <strong class="text-red-600 text-sm">{{ number_format($invoice->total, 2) }} ج.م</strong>
+                </div>
+                <p class="text-[11px] text-amber-700 pt-1 border-t border-amber-200/70">
+                    • سيتم إرجاع كافة المكونات للمخزن تلقائياً وتحديث حسابات الوردية وتسجيل حركة الرقابة.
+                </p>
+            </div>
+
+            <div>
+                <label for="refundReason" class="block text-xs font-bold text-gray-700 mb-1.5">
+                    سبب الاسترجاع <span class="text-red-500">*</span>
+                </label>
+                <textarea id="refundReason" name="reason" rows="3" required
+                    class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-3 text-xs focus:outline-none focus:ring-2 focus:ring-red-400 font-medium"
+                    placeholder="اكتب سبب استرجاع الفاتورة (مثال: إلغاء الطلب من العميل، خطأ في الحساب)..."></textarea>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button type="submit" id="refundSubmitBtn"
+                    class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-xs">
+                    <i class="fa-solid fa-check"></i>
+                    <span>تأكيد استرجاع الفاتورة</span>
+                </button>
+                <button type="button" onclick="closeRefundModal()"
+                    class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs transition">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @push('scripts')
@@ -249,6 +371,55 @@
     if (new URLSearchParams(window.location.search).get('print') === 'true') {
         window.addEventListener('load', () => {
             setTimeout(() => { window.print(); }, 400);
+        });
+    }
+
+    function openRefundModal() {
+        document.getElementById('refundReason').value = '';
+        document.getElementById('refundModal').classList.remove('hidden');
+    }
+
+    function closeRefundModal() {
+        document.getElementById('refundModal').classList.add('hidden');
+    }
+
+    function submitRefund(e) {
+        e.preventDefault();
+        const reason = document.getElementById('refundReason').value.trim();
+
+        if (!reason || reason.length < 3) {
+            alert('يرجى إدخال سبب الاسترجاع (3 أحرف على الأقل).');
+            return;
+        }
+
+        const btn = document.getElementById('refundSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الاسترجاع...';
+
+        fetch('{{ route("sales-invoices.refund", $invoice->id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ ' + data.message);
+                window.location.reload();
+            } else {
+                alert('❌ ' + (data.error || 'حدث خطأ أثناء استرجاع الفاتورة.'));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد استرجاع الفاتورة';
+            }
+        })
+        .catch(err => {
+            alert('❌ فشل الاتصال بالخادم.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> تأكيد استرجاع الفاتورة';
         });
     }
 </script>

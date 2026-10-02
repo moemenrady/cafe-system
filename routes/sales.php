@@ -26,12 +26,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales-invoices/{id}', [SalesInvoiceController::class, 'show'])->name('sales-invoices.show');
 
     // ==========================================
-    // تعديل الفواتير – مشرف وأدمن فقط
+    // تعديل واسترجاع الفواتير (تخضع لضوابط الصلاحيات في Controller)
     // ==========================================
-    Route::middleware('role:admin|supervisor')->group(function () {
-        Route::get('/sales-invoices/{id}/edit', [SalesInvoiceController::class, 'edit'])->name('sales-invoices.edit');
-        Route::put('/sales-invoices/{id}', [SalesInvoiceController::class, 'update'])->name('sales-invoices.update');
-    });
+    Route::post('/sales-invoices/{id}/refund', [SalesInvoiceController::class, 'refund'])->name('sales-invoices.refund');
+    Route::get('/sales-invoices/{id}/edit', [SalesInvoiceController::class, 'edit'])->name('sales-invoices.edit');
+    Route::put('/sales-invoices/{id}', [SalesInvoiceController::class, 'update'])->name('sales-invoices.update');
 
     // ==========================================
     // عملاء

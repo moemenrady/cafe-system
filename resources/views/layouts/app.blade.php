@@ -74,7 +74,7 @@
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: none;
             }
         }
 
@@ -471,6 +471,9 @@
         </div>
     </div>
     @endauth
+
+    {{-- مساحة استدعاء النوافذ المنبثقة (Modals) في مستوى الـ Body لمنع مشاكل الـ Fixed والـ Stacking Context --}}
+    @stack('modals')
 
     <script>
         function openSidebarReorderModal() {

@@ -124,6 +124,13 @@
                         class="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 font-mono">
                 </div>
 
+                {{-- خانة سبب التعديل للرقابة --}}
+                <div class="flex items-center gap-3">
+                    <label class="text-xs font-bold text-gray-600 w-24 shrink-0">سبب التعديل:</label>
+                    <input type="text" id="editReason" placeholder="توضيح سبب التعديل للرقابة والتدقيق..."
+                        class="flex-1 text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-300">
+                </div>
+
                 {{-- الإجماليات --}}
                 <div class="bg-gray-50 rounded-xl p-3 space-y-2 text-xs">
                     <div class="flex justify-between text-gray-600">
@@ -285,6 +292,7 @@
             _method:  'PUT',
             _token:   '{{ csrf_token() }}',
             discount: parseFloat(document.getElementById('discount').value) || 0,
+            reason:   document.getElementById('editReason') ? document.getElementById('editReason').value.trim() : '',
             items:    items.map(i => ({ menu_id: i.menu_id, quantity: i.quantity })),
         };
 

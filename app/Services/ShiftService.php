@@ -232,7 +232,11 @@ class ShiftService
      */
     public function calculateShiftSales(int $shiftId): array
     {
-        $invoices = Invoice::where('shift_id', $shiftId)->get();
+        $invoices = Invoice::where('shift_id', $shiftId)
+            ->where(function ($q) {
+                $q->whereNull('status')->orWhere('status', '!=', 'refunded');
+            })
+            ->get();
 
         $cashSales     = 0.0;
         $cardSales     = 0.0;

@@ -566,20 +566,26 @@
              
 
 
-                <form method="POST" action="{{ route('login') }}" novalidate>
+                <form method="POST" action="{{ route('login') }}" autocomplete="off" novalidate id="loginForm">
                     @csrf
 
+                    {{-- حقول تمويهية لخداع خوارزميات المتصفحات ومديري كلمات المرور لمنع الحفظ والاقتراح التلقائي --}}
+                    <input type="text" name="fake_usernamenotused" style="position: absolute; top: -9999px; left: -9999px; width: 0; height: 0; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="off">
+                    <input type="password" name="fake_passwordnotused" style="position: absolute; top: -9999px; left: -9999px; width: 0; height: 0; opacity: 0; pointer-events: none;" tabindex="-1" autocomplete="new-password">
+
                     <div class="input-group">
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                            autofocus autocomplete="username" placeholder=" ">
+                        <input id="email" type="email" name="email" value="" required
+                            autofocus autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+                            data-lpignore="true" data-form-type="other" placeholder=" ">
                         <label for="email" data-ar="البريد الإلكتروني" data-en="Email Address">البريد
                             الإلكتروني</label>
                         <x-input-error :messages="$errors->get('email')" class="error-msg" />
                     </div>
 
                     <div class="input-group">
-                        <input id="password" type="password" name="password" required autocomplete="current-password"
-                            placeholder=" ">
+                        <input id="password" type="password" name="password" required
+                            autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false"
+                            data-lpignore="true" data-form-type="other" placeholder=" ">
                         <label for="password" data-ar="كلمة المرور" data-en="Password">كلمة المرور</label>
                         <div class="toggle-password" onclick="togglePassword()">
                             <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
@@ -592,12 +598,7 @@
                         <x-input-error :messages="$errors->get('password')" class="error-msg" />
                     </div>
 
-                    <div class="form-options">
-                        <label class="remember-me" for="remember_me">
-                            <input id="remember_me" type="checkbox" name="remember">
-                            <span data-ar="تذكر بياناتي" data-en="Remember me">تذكر بياناتي</span>
-                        </label>
-
+                    <div class="form-options" style="justify-content: flex-end;">
                         @if (Route::has('password.request'))
                             <a class="forgot-link" href="{{ route('password.request') }}" data-ar="نسيت كلمة المرور؟"
                                 data-en="Forgot Password?">نسيت كلمة المرور؟</a>
@@ -612,6 +613,11 @@
                             <polyline points="12 19 5 12 12 5"></polyline>
                         </svg>
                     </button>
+
+                    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <span>🔒</span>
+                        <span data-ar="نظام أمان نقاط البيع: تسجيل الدخول يدوي دائماً لمنع تداخل الحسابات على الأجهزة المشتركة" data-en="POS Terminal Security: Manual entry is enforced for shared device safety">نظام أمان نقاط البيع: تسجيل الدخول يدوي دائماً لمنع تداخل الحسابات على الأجهزة المشتركة</span>
+                    </div>
                 </form>
 
             </div>
@@ -679,6 +685,25 @@
                 document.querySelector('.shape-2').style.transform = `translate(${-x}px, ${-y}px)`;
             });
         });
+
+        // 4. منع وحذف أي محاولات ملء تلقائي أو استرجاع بيانات محفوظة للمتصفح
+        function wipeCachedCredentials() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            if (emailInput) {
+                emailInput.value = '';
+                emailInput.setAttribute('autocomplete', 'off');
+            }
+            if (passwordInput) {
+                passwordInput.value = '';
+                passwordInput.setAttribute('autocomplete', 'new-password');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', wipeCachedCredentials);
+        window.addEventListener('pageshow', wipeCachedCredentials);
+        setTimeout(wipeCachedCredentials, 50);
+        setTimeout(wipeCachedCredentials, 300);
     </script>
 </body>
 

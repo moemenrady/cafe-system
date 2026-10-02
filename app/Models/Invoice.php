@@ -13,17 +13,32 @@ class Invoice extends Model
         'client_id',
         'profit',
         'payment_method',
+        'status',
         'order_id',
         'shift_id',
         'created_by',
         'note',
+        'refunded_at',
+        'refund_reason',
+        'refunded_by',
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
         'discount' => 'decimal:2',
         'profit' => 'decimal:2',
+        'refunded_at' => 'datetime',
     ];
+
+    public function isRefunded(): bool
+    {
+        return $this->status === 'refunded';
+    }
+
+    public function refunder()
+    {
+        return $this->belongsTo(User::class, 'refunded_by');
+    }
 
     public function client()
     {

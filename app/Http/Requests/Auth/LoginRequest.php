@@ -41,7 +41,8 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // دائماً false لعدم حفظ الجلسة أو تذكر الحساب نظراً لطبيعة الأجهزة المشتركة بنقاط البيع
+        if (! Auth::attempt($this->only('email', 'password'), false)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

@@ -158,6 +158,45 @@ class ShiftActionService
     }
 
     /**
+     * تسجيل استرجاع فاتورة مبيعات في الشيفت
+     */
+    public function logInvoiceRefund(Invoice $invoice, string $reason = 'استرجاع الفاتورة', ?User $user = null): ?ShiftAction
+    {
+        $user = $user ?: Auth::user();
+        $shiftId = $invoice->shift_id;
+        if (!$shiftId && $user) {
+            $shiftId = Shift::where('user_id', $user->id)
+                ->where('status', 'open')
+                ->latest('id')
+                ->value('id');
+        }
+
+        if (!$shiftId) {
+            return null;
+        }
+
+        return ShiftAction::create([
+            'shift_id'       => $shiftId,
+            'user_id'        => $user?->id ?: ($invoice->created_by ?: (Auth::id() ?? 1)),
+            'action_type'    => 'invoice_refunded',
+            'action_title'   => sprintf('إرجاع فاتورة مبيعات #%s', $invoice->invoice_number),
+            'model_type'     => Invoice::class,
+            'model_id'       => $invoice->id,
+            'amount'         => (float) $invoice->total,
+            'payment_method' => $invoice->payment_method,
+            'details'        => [
+                'invoice_id'     => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'refunded_by'    => $user?->name ?? 'النظام',
+                'refund_reason'  => $reason,
+                'total_refunded' => (float) $invoice->total,
+                'payment_method' => $invoice->payment_method,
+                'time'           => now()->format('Y-m-d h:i A'),
+            ],
+        ]);
+    }
+
+    /**
      * تسجيل حركة مصروف في الشيفت
      */
     public function logExpense(Expense $expense, string $actionType = 'expense_created', array $changes = []): ?ShiftAction

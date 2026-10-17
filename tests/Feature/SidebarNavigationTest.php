@@ -19,12 +19,12 @@ class SidebarNavigationTest extends TestCase
         $available = $cashier->getAvailableSidebarItems();
         $keys = array_keys($available);
 
-        // المستخدم بصلاحية الموظف يظهر له فقط: بيع ومينيو والترابيزات المشغولة والمصروفات والشيفت ورديتي واعدادات بسس
+        // المستخدم بصلاحية الموظف يظهر له فقط: بيع ومينيو والترابيزات المشغولة وفواتير المبيعات والمصروفات والشيفت ورديتي واعدادات
         $this->assertEqualsCanonicalizing(
-            ['pos', 'busy_tables', 'menu', 'shifts', 'expenses', 'settings'],
+            ['pos', 'busy_tables', 'menu', 'shifts', 'sales_invoices', 'expenses', 'settings'],
             $keys
         );
-        $this->assertCount(6, $keys);
+        $this->assertCount(7, $keys);
 
         // التأكد من أن البيع هو الأبرز (Hero)
         $this->assertTrue($available['pos']['is_hero'] ?? false);
@@ -34,7 +34,6 @@ class SidebarNavigationTest extends TestCase
         $this->assertArrayNotHasKey('categories', $available);
         $this->assertArrayNotHasKey('recipes', $available);
         $this->assertArrayNotHasKey('shifts_management', $available);
-        $this->assertArrayNotHasKey('sales_invoices', $available);
         $this->assertArrayNotHasKey('inventory', $available);
         $this->assertArrayNotHasKey('customers', $available);
         $this->assertArrayNotHasKey('employees', $available);
@@ -71,7 +70,7 @@ class SidebarNavigationTest extends TestCase
             'sidebar_order' => null,
         ]);
 
-        $customOrder = ['expenses', 'shifts', 'pos', 'menu', 'busy_tables', 'settings'];
+        $customOrder = ['expenses', 'shifts', 'pos', 'menu', 'busy_tables', 'settings', 'sales_invoices'];
 
         $response = $this->actingAs($employee)->postJson(route('user.sidebar_order.update'), [
             'order' => $customOrder,

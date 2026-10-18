@@ -47,6 +47,29 @@ class ComprehensiveAnalyticsAndUserGuideTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_analytics_with_tables_and_orders_renders_successfully(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $table1 = Table::create(['name' => 'T1', 'is_active' => true]);
+        $table2 = Table::create(['name' => 'T2', 'is_active' => true]);
+
+        Order::create([
+            'order_number' => 'ORD-101',
+            'table_id' => $table1->id,
+            'type' => 'dine-in',
+            'status' => 'open',
+            'payment_status' => 'pending',
+            'subtotal' => 50,
+            'total' => 50,
+            'created_by' => $admin->id,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('analytics.comprehensive'));
+        $response->assertOk();
+        $response->assertViewHas('busyTablesNow', 1);
+        $response->assertViewHas('totalTables', 2);
+    }
+
     public function test_cashier_cannot_access_comprehensive_analytics(): void
     {
         $cashier = User::factory()->create([

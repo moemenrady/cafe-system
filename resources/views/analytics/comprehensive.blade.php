@@ -455,8 +455,8 @@
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-2.5 px-3 font-mono text-gray-400">#{{ $shift->id }}</td>
                                 <td class="py-2.5 px-3 font-bold text-gray-800">{{ $shift->user ? $shift->user->name : 'غير محدد' }}</td>
-                                <td class="py-2.5 px-3 text-gray-500 font-mono text-[11px]">{{ $shift->created_at->format('d/m H:i') }}</td>
-                                <td class="py-2.5 px-3 font-bold font-mono text-emerald-700">{{ number_format($shift->total_sales ?? 0, 2) }} ج</td>
+                                <td class="py-2.5 px-3 text-gray-500 font-mono text-[11px]">{{ $shift->created_at ? $shift->created_at->format('d/m H:i') : '' }}</td>
+                                <td class="py-2.5 px-3 font-bold font-mono text-emerald-700">{{ number_format($shift->totalSales(), 2) }} ج</td>
                                 <td class="py-2.5 px-3 text-center">
                                     <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold {{ $shift->status === 'open' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600' }}">
                                         {{ $shift->status === 'open' ? 'مفتوحة' : 'مغلقة' }}

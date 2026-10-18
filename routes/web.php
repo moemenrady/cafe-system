@@ -35,7 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
     // 📊 التحليلات الشاملة والذكاء التشغيلي (Analytics)
-    Route::middleware('role:admin|supervisor')->prefix('analytics')->name('analytics.')->group(function () {
+    Route::middleware('role:admin|supervisor|manager')->prefix('analytics')->name('analytics.')->group(function () {
         Route::get('/comprehensive', [\App\Http\Controllers\AnalyticsController::class, 'comprehensive'])->name('comprehensive');
     });
 

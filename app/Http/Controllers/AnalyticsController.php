@@ -76,7 +76,9 @@ class AnalyticsController extends Controller
         // ==========================================
         // 1️⃣ المبيعات والفواتير (Sales & Invoices)
         // ==========================================
-        $invoicesQuery = Invoice::query()->where('status', '!=', 'cancelled');
+        $invoicesQuery = Invoice::query()->where(function ($q) {
+            $q->whereNull('status')->orWhereNotIn('status', ['refunded', 'cancelled']);
+        });
         if ($fromDateTime && $toDateTime) {
             $invoicesQuery->whereBetween('created_at', [$fromDateTime, $toDateTime]);
         }
@@ -84,8 +86,8 @@ class AnalyticsController extends Controller
         $allInvoices = (clone $invoicesQuery)->get();
         $totalRevenue = (float) $allInvoices->sum('total');
         $invoicesCount = $allInvoices->count();
-        $totalDiscounts = (float) $allInvoices->sum('discount_amount');
-        $totalTaxes = (float) $allInvoices->sum('tax_amount');
+        $totalDiscounts = (float) $allInvoices->sum(fn($i) => (float) ($i->discount ?? 0));
+        $totalTaxes = (float) $allInvoices->sum(fn($i) => (float) ($i->tax ?? $i->tax_amount ?? 0));
         $avgInvoiceValue = $invoicesCount > 0 ? round($totalRevenue / $invoicesCount, 2) : 0;
 
         // تفصيل طرق الدفع (Cash, Card/Visa, InstaPay)
@@ -159,12 +161,17 @@ class AnalyticsController extends Controller
         // ==========================================
         // 3️⃣ فواتير الشراء والتوريدات (Purchases & Suppliers)
         // ==========================================
-        $purchasesQuery = PurchaseInvoice::query()->where('status', '!=', 'cancelled');
+        $purchasesQuery = PurchaseInvoice::query()->where(function ($q) {
+            $q->whereNull('status')->orWhere('status', '!=', 'cancelled');
+        });
         if ($fromDateTime && $toDateTime) {
-            $purchasesQuery->whereBetween('invoice_date', [
-                $fromDateTime->toDateString(),
-                $toDateTime->toDateString(),
-            ]);
+            $purchasesQuery->where(function ($q) use ($fromDateTime, $toDateTime) {
+                $q->whereBetween('invoice_date', [$fromDateTime->toDateString(), $toDateTime->toDateString()])
+                  ->orWhere(function ($sub) use ($fromDateTime, $toDateTime) {
+                      $sub->whereNull('invoice_date')
+                          ->whereBetween('created_at', [$fromDateTime, $toDateTime]);
+                  });
+            });
         }
         $allPurchases = (clone $purchasesQuery)->with('supplier')->get();
         $totalPurchases = (float) $allPurchases->sum('net_amount');
@@ -228,9 +235,11 @@ class AnalyticsController extends Controller
         $peakHoursRevenue = array_fill(0, 24, 0.0);
 
         foreach ($allInvoices as $inv) {
-            $hr = (int) $inv->created_at->format('G');
-            $peakHoursData[$hr]++;
-            $peakHoursRevenue[$hr] += (float) $inv->total;
+            if ($inv->created_at) {
+                $hr = (int) $inv->created_at->format('G');
+                $peakHoursData[$hr]++;
+                $peakHoursRevenue[$hr] += (float) $inv->total;
+            }
         }
 
         // ==========================================
@@ -249,10 +258,10 @@ class AnalyticsController extends Controller
         $tableOrdersStats = [];
 
         foreach ($allOrders as $order) {
-            $type = strtolower(trim((string) $order->order_type));
-            if ($type === 'dine-in' || $order->table_id !== null) {
+            $type = strtolower(trim((string) ($order->type ?? $order->order_type)));
+            if ($type === 'dine-in' || $type === 'dine_in' || $order->table_id !== null) {
                 $dineInCount++;
-                $tblName = $order->table ? ($order->table->name ?? 'ترابيزة ' . $order->table->table_number) : 'صالة غير محددة';
+                $tblName = $order->table ? ($order->table->name ?? 'ترابيزة ' . ($order->table->table_number ?? $order->table->id)) : ($order->table_number ? 'ترابيزة ' . $order->table_number : 'صالة عامة');
                 if (!isset($tableOrdersStats[$tblName])) {
                     $tableOrdersStats[$tblName] = ['count' => 0, 'revenue' => 0.0];
                 }
@@ -267,7 +276,7 @@ class AnalyticsController extends Controller
         uasort($tableOrdersStats, fn($a, $b) => $b['count'] <=> $a['count']);
 
         $totalTables = Table::count();
-        $busyTablesNow = Table::where('status', 'busy')->count();
+        $busyTablesNow = Table::whereHas('activeOrders')->count();
 
         // ==========================================
         // 7️⃣ تحليلات الورديات والخزينة (Shifts Intelligence)
@@ -280,8 +289,8 @@ class AnalyticsController extends Controller
         $shiftsCount = $allShifts->count();
         $openShiftsCount = $allShifts->where('status', 'open')->count();
         $closedShiftsCount = $allShifts->where('status', 'closed')->count();
-        $shiftsTotalSales = (float) $allShifts->sum('total_sales');
-        $shiftsTotalExpenses = (float) $allShifts->sum('total_expenses');
+        $shiftsTotalSales = (float) $allShifts->sum(fn($s) => $s->totalSales());
+        $shiftsTotalExpenses = (float) $allShifts->sum(fn($s) => (float) ($s->expenses_total ?? 0));
 
         // ==========================================
         // 8️⃣ المسار الزمني اليومي للرسم البياني (Timeline Trend)
@@ -292,19 +301,19 @@ class AnalyticsController extends Controller
         $timelineProfit = [];
 
         // إذا كانت الفترة محددة بيوم أو يومين، نعرض الساعات أو الأيام، وإلا نعرض الأيام
-        $rangeStart = $fromDateTime ? $fromDateTime->copy()->startOfDay() : ($allInvoices->min('created_at') ?? Carbon::today()->subDays(14));
-        $rangeEnd = $toDateTime ? $toDateTime->copy()->endOfDay() : Carbon::now();
+        $rangeStart = $fromDateTime ? $fromDateTime->copy()->startOfDay() : ($allInvoices->min('created_at') ? Carbon::parse($allInvoices->min('created_at'))->startOfDay() : Carbon::today()->subDays(14)->startOfDay());
+        $rangeEnd = $toDateTime ? $toDateTime->copy()->endOfDay() : Carbon::now()->endOfDay();
 
         // حصر الأيام في الفترة المختارة
         $diffDays = $rangeStart->diffInDays($rangeEnd);
         if ($diffDays > 60) {
             // تجميع شهري في الفترات الكبيرة جداً
-            $periodMonths = CarbonPeriod::create($rangeStart->startOfMonth(), '1 month', $rangeEnd->endOfMonth());
+            $periodMonths = CarbonPeriod::create($rangeStart->copy()->startOfMonth(), '1 month', $rangeEnd->copy()->endOfMonth());
             foreach ($periodMonths as $date) {
                 $mKey = $date->format('Y-m');
                 $mLabel = $date->translatedFormat('M Y');
-                $rev = $allInvoices->filter(fn($i) => $i->created_at->format('Y-m') === $mKey)->sum('total');
-                $exp = $allExpenses->filter(fn($e) => $e->created_at->format('Y-m') === $mKey)->sum('amount');
+                $rev = $allInvoices->filter(fn($i) => $i->created_at && $i->created_at->format('Y-m') === $mKey)->sum('total');
+                $exp = $allExpenses->filter(fn($e) => $e->created_at && $e->created_at->format('Y-m') === $mKey)->sum('amount');
                 $prof = $rev - $exp;
 
                 $timelineDates[] = $mLabel;
@@ -314,12 +323,12 @@ class AnalyticsController extends Controller
             }
         } else {
             // تجميع يومي
-            $periodDays = CarbonPeriod::create($rangeStart, $rangeEnd);
+            $periodDays = CarbonPeriod::create($rangeStart->copy()->startOfDay(), $rangeEnd->copy()->startOfDay());
             foreach ($periodDays as $date) {
                 $dKey = $date->toDateString();
                 $dLabel = $date->translatedFormat('d M');
-                $rev = $allInvoices->filter(fn($i) => $i->created_at->toDateString() === $dKey)->sum('total');
-                $exp = $allExpenses->filter(fn($e) => $e->created_at->toDateString() === $dKey)->sum('amount');
+                $rev = $allInvoices->filter(fn($i) => $i->created_at && $i->created_at->toDateString() === $dKey)->sum('total');
+                $exp = $allExpenses->filter(fn($e) => $e->created_at && $e->created_at->toDateString() === $dKey)->sum('amount');
                 $prof = $rev - $exp;
 
                 $timelineDates[] = $dLabel;

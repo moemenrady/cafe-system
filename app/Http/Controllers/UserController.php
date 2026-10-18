@@ -246,33 +246,64 @@ class UserController extends Controller
     public function updateSidebarOrder(Request $request)
     {
         $request->validate([
-            'order'   => 'required|array',
-            'order.*' => 'string',
+            'order'       => 'nullable|array',
+            'order.*'     => 'string',
+            'group_order' => 'nullable|array',
+            'group_order.*' => 'string',
+            'main_tab'    => 'nullable|string',
         ]);
 
         $user = $request->user();
-        $user->sidebar_order = $request->order;
+
+        // تحديث ترتيب المجموعات الـ 5 الرئيسية
+        if ($request->has('group_order') && is_array($request->group_order)) {
+            $user->sidebar_group_order = array_values($request->group_order);
+        } elseif ($request->has('order') && is_array($request->order)) {
+            // التوافق في حالة إرسال المجموعات في مفتاح order
+            $allGroups = array_keys(\App\Models\User::getSidebarGroupsDefinition());
+            $isGroupOrder = count(array_intersect($request->order, $allGroups)) > 0;
+            if ($isGroupOrder) {
+                $user->sidebar_group_order = array_values($request->order);
+            } else {
+                $user->sidebar_order = array_values($request->order);
+            }
+        }
+
+        // تحديث التاب الأساسية الافتراضية للحساب
+        if ($request->filled('main_tab')) {
+            $available = $user->getAvailableSidebarItems();
+            if (isset($available[$request->main_tab])) {
+                $user->main_tab = $request->main_tab;
+            }
+        }
+
         $user->save();
 
         return response()->json([
-            'success' => true,
-            'message' => 'تم حفظ ترتيب القائمة بنجاح.',
-            'order'   => $user->sidebar_order,
+            'success'     => true,
+            'message'     => 'تم حفظ إعدادات تخصيص القائمة والتاب الأساسية بنجاح.',
+            'group_order' => $user->sidebar_group_order,
+            'main_tab'    => $user->getMainTabKey(),
+            'main_route'  => route($user->getMainTabRoute()),
         ]);
     }
 
     /**
-     * استعادة الترتيب الافتراضي للقائمة الجانبية
+     * استعادة الترتيب الافتراضي للقائمة الجانبية والتاب الأساسية
      */
     public function resetSidebarOrder(Request $request)
     {
         $user = $request->user();
         $user->sidebar_order = null;
+        $user->sidebar_group_order = null;
+        $user->main_tab = null;
         $user->save();
 
         return response()->json([
-            'success' => true,
-            'message' => 'تمت استعادة الترتيب الافتراضي بنجاح.',
+            'success'    => true,
+            'message'    => 'تمت استعادة الترتيب الافتراضي والتاب الأساسية بنجاح.',
+            'main_tab'   => $user->getMainTabKey(),
+            'main_route' => route($user->getMainTabRoute()),
         ]);
     }
 

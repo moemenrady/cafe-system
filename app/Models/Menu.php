@@ -56,6 +56,16 @@ class Menu extends Model
         return $this->hasMany(Recipe::class, 'menu_item_id', 'id');
     }
 
+    /**
+     * احتساب تكلفة تحضير الصنف بناءً على مجموع تكاليف خامات الوصفة
+     */
+    public function getCostAttribute(): float
+    {
+        return (float) $this->recipes->sum(function ($recipe) {
+            return (float) ($recipe->ingredient_cost ?? 0);
+        });
+    }
+
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);

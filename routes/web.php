@@ -34,7 +34,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ⚙️ الإعدادات – الصفحة الرئيسية (تمرر بيانات المستخدمين للأدمن والمشرف)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
-    // ⚙️ تخصيص ترتيب القائمة الجانبية (متاح للجميع)
+    // 📊 التحليلات الشاملة والذكاء التشغيلي (Analytics)
+    Route::middleware('role:admin|supervisor')->prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/comprehensive', [\App\Http\Controllers\AnalyticsController::class, 'comprehensive'])->name('comprehensive');
+    });
+
+    // 📖 دليل الاستخدام التفاعلي (User Guide - متاح لجميع مستخدمي النظام)
+    Route::get('/user-guide', [\App\Http\Controllers\UserGuideController::class, 'index'])->name('user_guide.index');
+
+    // ⚙️ تخصيص ترتيب القائمة الجانبية والتاب الأساسية (متاح للجميع)
     Route::post('/user/sidebar-order', [UserController::class, 'updateSidebarOrder'])->name('user.sidebar_order.update');
     Route::post('/user/sidebar-order/reset', [UserController::class, 'resetSidebarOrder'])->name('user.sidebar_order.reset');
 

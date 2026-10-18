@@ -21,7 +21,7 @@ class AuthenticatedSessionController extends Controller
   {
     if (Auth::check()) {
       $user = Auth::user();
-      $targetRoute = $user->isManager() ? 'dashboard' : 'pos.index';
+      $targetRoute = $user->getMainTabRoute();
       return redirect()->route($targetRoute);
     }
 
@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
       return back()->withErrors(['email' => 'من فضلك فعّل بريدك الإلكتروني أولًا.']);
     }
 
-    $targetRoute = $user->isManager() ? 'dashboard' : 'pos.index';
+    $targetRoute = $user->getMainTabRoute();
     return redirect()->route($targetRoute);
   }
 

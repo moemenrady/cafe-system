@@ -22,9 +22,17 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // لو المستخدم ليس مديراً (موظف / كاشير / باريستا) -> يتم تحويله لصفحة البيع POS فقط
+        // لو المستخدم ليس مديراً -> تحويل للتاب الأساسية الخاصة به (مثل POS)
         if (!$user->isManager()) {
-            return redirect()->route('pos.index');
+            return redirect()->route($user->getMainTabRoute());
+        }
+
+        // إذا دخل على الرابط الرئيسي (/) وكان قد اختار تاب أساسية أخرى غير لوحة التحكم -> تحويل إليها
+        if ($request->path() === '/' || $request->path() === '') {
+            $mainKey = $user->getMainTabKey();
+            if ($mainKey !== 'dashboard') {
+                return redirect()->route($user->getMainTabRoute());
+            }
         }
 
         $today = Carbon::today();

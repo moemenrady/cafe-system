@@ -151,110 +151,160 @@
             </button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto px-3.5 py-3 space-y-4 text-xs font-medium">
+        <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-3.5 text-xs font-medium">
             @if (auth()->check())
                 @php
-                    $navItems = auth()->user()->getOrderedSidebarItems();
-                    $posItem = $navItems['pos'] ?? null;
-                    $remainingItems = collect($navItems)->filter(fn($item, $key) => $key !== 'pos');
-
-                    // تجميع العناصر حسب الجروب والساب جروب
-                    $groupedSections = [];
-                    foreach ($remainingItems as $key => $item) {
-                        $grpKey = $item['group'] ?? 'general';
-                        $subKey = $item['subgroup'] ?? 'default';
-                        if (!isset($groupedSections[$grpKey])) {
-                            $groupedSections[$grpKey] = [
-                                'label'      => $item['group_label'] ?? '',
-                                'icon'       => $item['group_icon'] ?? 'fa-solid fa-layer-group',
-                                'subgroups'  => [],
-                            ];
-                        }
-                        if (!isset($groupedSections[$grpKey]['subgroups'][$subKey])) {
-                            $groupedSections[$grpKey]['subgroups'][$subKey] = [
-                                'label' => $item['subgroup_label'] ?? null,
-                                'items' => [],
-                            ];
-                        }
-                        $groupedSections[$grpKey]['subgroups'][$subKey]['items'][$key] = $item;
+                    $authUser = auth()->user();
+                    $mainTabItem = $authUser->getMainTabItem();
+                    $currentRoute = request()->route() ? request()->route()->getName() : '';
+                    $isMainTabActive = false;
+                    if ($currentRoute === $mainTabItem['route']) {
+                        $isMainTabActive = true;
+                    } elseif ($mainTabItem['key'] === 'pos') {
+                        $isMainTabActive = request()->routeIs('pos.*') || request()->is('pos*');
+                    } elseif ($mainTabItem['key'] === 'dashboard') {
+                        $isMainTabActive = request()->routeIs('dashboard*') || (request()->path() === '/' && !request()->routeIs('pos.*'));
+                    } elseif ($mainTabItem['key'] === 'tables') {
+                        $isMainTabActive = request()->routeIs('tables.*') && !request()->routeIs('tables.busy_tables');
+                    } elseif ($mainTabItem['key'] === 'busy_tables') {
+                        $isMainTabActive = request()->routeIs('tables.busy_tables') || request()->is('tables/busy*');
+                    } elseif ($mainTabItem['key'] === 'shifts_management') {
+                        $isMainTabActive = (request()->routeIs('shifts.index', 'shifts.show') || request()->is('shifts')) && !request()->routeIs('shifts.my_shift');
+                    } elseif ($mainTabItem['key'] === 'shifts') {
+                        $isMainTabActive = request()->routeIs('shifts.my_shift') || request()->is('shifts/my-shift*');
+                    } elseif ($mainTabItem['key'] === 'analytics_comprehensive') {
+                        $isMainTabActive = request()->routeIs('analytics.*') || request()->is('analytics*');
+                    } elseif ($mainTabItem['key'] === 'user_guide') {
+                        $isMainTabActive = request()->routeIs('user_guide.*') || request()->is('user-guide*');
+                    } else {
+                        $routePrefix = explode('.', $mainTabItem['route'])[0];
+                        $isMainTabActive = request()->routeIs($routePrefix . '.*') || (isset($mainTabItem['active_pattern']) && request()->is($mainTabItem['active_pattern']));
                     }
+
+                    $orderedGroups = $authUser->getOrderedSidebarGroups();
                 @endphp
 
-                {{-- 1. زر البيع الرئيسي الأكثر وضوحاً وتميزاً (Hero POS Button) --}}
-                @if ($posItem)
-                    @php
-                        $isPosActive = request()->routeIs('pos.*') || request()->is('pos*');
-                    @endphp
-                    <div class="mb-3">
-                        <a href="{{ route($posItem['route']) }}"
-                           class="relative group block p-3 rounded-2xl transition-all duration-300 {{ $isPosActive ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-lg shadow-amber-500/30 ring-2 ring-amber-400' : 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-600/20 hover:from-amber-500 hover:to-orange-500 border border-amber-500/40 text-amber-300 hover:text-white shadow-md hover:shadow-amber-500/25' }}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl {{ $isPosActive ? 'bg-white/20 text-white' : 'bg-amber-500 text-white group-hover:bg-white/20' }} flex items-center justify-center text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 shrink-0">
-                                    <i class="fa-solid fa-cash-register"></i>
+                {{-- 1. زر التاب الأساسية الأكثر وضوحاً وتميزاً (Hero Main Tab Button) --}}
+                <div class="mb-3">
+                    <a href="{{ route($mainTabItem['route']) }}"
+                       class="relative group block p-3.5 rounded-2xl transition-all duration-300 {{ $isMainTabActive ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-lg shadow-amber-500/30 ring-2 ring-amber-400' : 'bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-600/20 hover:from-amber-500 hover:to-orange-500 border border-amber-500/35 text-amber-300 hover:text-white shadow-sm hover:shadow-amber-500/25' }}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl {{ $isMainTabActive ? 'bg-white/20 text-white' : 'bg-amber-500 text-white group-hover:bg-white/20' }} flex items-center justify-center text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 shrink-0">
+                                <i class="{{ $mainTabItem['icon'] }}"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="font-black text-sm tracking-wide truncate" data-ar="{{ $mainTabItem['title'] }}" data-en="{{ $mainTabItem['title_en'] ?? $mainTabItem['title'] }}">{{ $mainTabItem['title'] }}</span>
+                                    <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0 {{ $isMainTabActive ? 'bg-white/25 text-white' : 'bg-amber-500/30 text-amber-200 group-hover:bg-white/20 group-hover:text-white' }}">رئيسي</span>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between gap-1">
-                                        <span class="font-black text-sm tracking-wide truncate" data-ar="البيع (POS)" data-en="POS / Sales">البيع (POS)</span>
-                                        <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0 {{ $isPosActive ? 'bg-white/25 text-white' : 'bg-amber-500/30 text-amber-200 group-hover:bg-white/20 group-hover:text-white' }}">رئيسي</span>
+                                <p class="text-[11px] {{ $isMainTabActive ? 'text-amber-100' : 'text-gray-400 group-hover:text-amber-100' }} truncate mt-0.5" data-ar="{{ $mainTabItem['subtitle'] ?? 'الوصول السريع الأساسي' }}" data-en="{{ $mainTabItem['title_en'] ?? 'Quick Access' }}">{{ $mainTabItem['subtitle'] ?? 'الوصول السريع الأساسي' }}</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                {{-- 2. المجموعات الـ 4 أو الـ 5 بدون أي عناوين فرعية وبنظام أكورديون تفاعلي سلس --}}
+                <div class="space-y-2.5" id="sidebarAccordionContainer">
+                    @foreach ($orderedGroups as $grpKey => $group)
+                        @php
+                            // فحص هل يحتوي هذا الجروب على التاب النشطة حالياً لفتحه تلقائياً
+                            $hasActiveTab = false;
+                            foreach ($group['items'] as $itemKey => $item) {
+                                $cRoute = request()->route() ? request()->route()->getName() : '';
+                                if ($cRoute === $item['route']) {
+                                    $hasActiveTab = true;
+                                    break;
+                                } elseif ($item['key'] === 'tables' && request()->routeIs('tables.*') && !request()->routeIs('tables.busy_tables')) {
+                                    $hasActiveTab = true;
+                                    break;
+                                } elseif ($item['key'] === 'busy_tables' && (request()->routeIs('tables.busy_tables') || request()->is('tables/busy*'))) {
+                                    $hasActiveTab = true;
+                                    break;
+                                } elseif ($item['key'] === 'shifts_management' && ((request()->routeIs('shifts.index', 'shifts.show') || request()->is('shifts')) && !request()->routeIs('shifts.my_shift'))) {
+                                    $hasActiveTab = true;
+                                    break;
+                                } elseif ($item['key'] === 'shifts' && (request()->routeIs('shifts.my_shift') || request()->is('shifts/my-shift*'))) {
+                                    $hasActiveTab = true;
+                                    break;
+                                } elseif ($item['key'] === 'analytics_comprehensive' && (request()->routeIs('analytics.*') || request()->is('analytics*'))) {
+                                    $hasActiveTab = true;
+                                    break;
+                                } elseif ($item['key'] === 'user_guide' && (request()->routeIs('user_guide.*') || request()->is('user-guide*'))) {
+                                    $hasActiveTab = true;
+                                    break;
+                                } else {
+                                    $rPrefix = explode('.', $item['route'])[0];
+                                    if (request()->routeIs($rPrefix . '.*') || (isset($item['active_pattern']) && request()->is($item['active_pattern']))) {
+                                        $hasActiveTab = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
+
+                        <div class="sidebar-accordion-group rounded-2xl bg-gray-900/50 border border-gray-800/80 overflow-hidden transition-all duration-200" data-group="{{ $grpKey }}">
+                            {{-- رأس الجروب (Accordion Header) --}}
+                            <button type="button"
+                                    onclick="toggleSidebarGroup('{{ $grpKey }}')"
+                                    class="w-full flex items-center justify-between px-3.5 py-3 text-right hover:bg-gray-800/60 transition group cursor-pointer select-none {{ $hasActiveTab ? 'bg-gray-800/40 text-white' : 'text-gray-300' }}">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-8 h-8 rounded-xl bg-gray-800 border border-gray-700/60 text-cafePrimary flex items-center justify-center text-xs group-hover:scale-105 transition shrink-0 shadow-xs">
+                                        <i class="{{ $group['icon'] }}"></i>
                                     </div>
-                                    <p class="text-[10px] {{ $isPosActive ? 'text-amber-100' : 'text-gray-400 group-hover:text-amber-100' }} truncate mt-0.5" data-ar="نقطة البيع السريع والطلبات" data-en="Fast Sales & Orders">نقطة البيع السريع والطلبات</p>
+                                    <span class="font-bold text-xs sm:text-[13px] tracking-wide truncate">
+                                        {{ $group['label'] }}
+                                    </span>
                                 </div>
-                            </div>
-                        </a>
-                    </div>
-                @endif
-
-                {{-- 2. الجروبات والساب جروبز الذكية --}}
-                <div class="space-y-4">
-                    @foreach ($groupedSections as $grpKey => $section)
-                        <div class="sidebar-group space-y-1">
-                            {{-- رأس الجروب --}}
-                            <div class="flex items-center gap-2 px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                <i class="{{ $section['icon'] }} text-cafePrimary text-xs opacity-75"></i>
-                                <span>{{ $section['label'] }}</span>
-                            </div>
-
-                            {{-- الساب جروبز والعناصر --}}
-                            <div class="space-y-1">
-                                @foreach ($section['subgroups'] as $subKey => $subgroup)
-                                    @if ($subgroup['label'] && count($section['subgroups']) > 1)
-                                        <div class="px-3 pt-2 pb-0.5 text-[9px] font-bold text-gray-500 flex items-center gap-1.5 opacity-80">
-                                            <span class="w-1 h-1 rounded-full bg-cafePrimary/60"></span>
-                                            <span>{{ $subgroup['label'] }}</span>
-                                        </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    @if($hasActiveTab)
+                                        <span class="w-2 h-2 rounded-full bg-cafePrimary animate-pulse"></span>
                                     @endif
+                                    <span class="text-[10px] text-gray-500 font-mono px-2 py-0.5 rounded-lg bg-gray-800/80 border border-gray-700/50">
+                                        {{ count($group['items']) }}
+                                    </span>
+                                    <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 group-chevron-{{ $grpKey }} transition-transform duration-200 {{ $hasActiveTab ? 'rotate-180 text-cafePrimary' : '' }}"></i>
+                                </div>
+                            </button>
 
-                                    @foreach ($subgroup['items'] as $itemKey => $item)
-                                        @php
-                                            $currentRoute = request()->route() ? request()->route()->getName() : '';
-                                            $isActive = false;
-                                            if ($currentRoute === $item['route']) {
-                                                $isActive = true;
-                                            } elseif ($item['key'] === 'tables') {
-                                                $isActive = request()->routeIs('tables.*') && !request()->routeIs('tables.busy_tables');
-                                            } elseif ($item['key'] === 'busy_tables') {
-                                                $isActive = request()->routeIs('tables.busy_tables') || request()->is('tables/busy*');
-                                            } elseif ($item['key'] === 'shifts_management') {
-                                                $isActive = (request()->routeIs('shifts.index', 'shifts.show') || request()->is('shifts')) && !request()->routeIs('shifts.my_shift');
-                                            } elseif ($item['key'] === 'shifts') {
-                                                $isActive = request()->routeIs('shifts.my_shift') || request()->is('shifts/my-shift*');
-                                            } else {
-                                                $routePrefix = explode('.', $item['route'])[0];
-                                                $isActive = request()->routeIs($routePrefix . '.*') || (isset($item['active_pattern']) && request()->is($item['active_pattern']));
-                                            }
-                                        @endphp
+                            {{-- محتوى التابات الداخلية (Accordion Content) --}}
+                            <div id="group-content-{{ $grpKey }}"
+                                 class="sidebar-group-content {{ $hasActiveTab ? '' : 'hidden' }} px-2 pb-2.5 pt-1 space-y-1">
+                                @foreach ($group['items'] as $itemKey => $item)
+                                    @php
+                                        $cRoute = request()->route() ? request()->route()->getName() : '';
+                                        $isActive = false;
+                                        if ($cRoute === $item['route']) {
+                                            $isActive = true;
+                                        } elseif ($item['key'] === 'tables') {
+                                            $isActive = request()->routeIs('tables.*') && !request()->routeIs('tables.busy_tables');
+                                        } elseif ($item['key'] === 'busy_tables') {
+                                            $isActive = request()->routeIs('tables.busy_tables') || request()->is('tables/busy*');
+                                        } elseif ($item['key'] === 'shifts_management') {
+                                            $isActive = (request()->routeIs('shifts.index', 'shifts.show') || request()->is('shifts')) && !request()->routeIs('shifts.my_shift');
+                                        } elseif ($item['key'] === 'shifts') {
+                                            $isActive = request()->routeIs('shifts.my_shift') || request()->is('shifts/my-shift*');
+                                        } elseif ($item['key'] === 'analytics_comprehensive') {
+                                            $isActive = request()->routeIs('analytics.*') || request()->is('analytics*');
+                                        } elseif ($item['key'] === 'user_guide') {
+                                            $isActive = request()->routeIs('user_guide.*') || request()->is('user-guide*');
+                                        } else {
+                                            $routePrefix = explode('.', $item['route'])[0];
+                                            $isActive = request()->routeIs($routePrefix . '.*') || (isset($item['active_pattern']) && request()->is($item['active_pattern']));
+                                        }
+                                    @endphp
 
-                                        <a href="{{ route($item['route']) }}"
-                                           class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 group {{ $isActive ? 'active-tab font-bold shadow-xs' : 'hover:text-white hover:bg-gray-800' }}">
-                                            <div class="flex items-center gap-3 min-w-0">
-                                                <i class="{{ $item['icon'] }} text-cafePrimary group-hover:scale-110 transition-transform shrink-0"></i>
-                                                <span class="truncate" data-ar="{{ $item['title'] }}" data-en="{{ $item['title_en'] ?? $item['title'] }}">{{ $item['title'] }}</span>
+                                    <a href="{{ route($item['route']) }}"
+                                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group {{ $isActive ? 'bg-sky-500/15 text-sky-300 font-black border-r-3 border-sky-400 shadow-2xs' : 'text-gray-300 hover:text-white hover:bg-gray-800/80 font-medium' }}">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs {{ $isActive ? 'text-sky-300' : 'text-gray-400 group-hover:text-cafePrimary' }} transition shrink-0">
+                                                <i class="{{ $item['icon'] }}"></i>
                                             </div>
-                                            @if ($isActive)
-                                                <span class="w-1.5 h-1.5 rounded-full bg-cafePrimary shrink-0"></span>
-                                            @endif
-                                        </a>
-                                    @endforeach
+                                            <span class="truncate text-xs sm:text-[13px] leading-tight" data-ar="{{ $item['title'] }}" data-en="{{ $item['title_en'] ?? $item['title'] }}">{{ $item['title'] }}</span>
+                                        </div>
+                                        @if ($isActive)
+                                            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0 shadow-sm shadow-sky-400"></span>
+                                        @endif
+                                    </a>
                                 @endforeach
                             </div>
                         </div>
@@ -264,12 +314,12 @@
                 {{-- زر مخصص لإعادة ترتيب القائمة الجانبية مرتبط بالحساب --}}
                 <div class="pt-3 border-t border-gray-800/80 mt-3">
                     <button type="button" onclick="openSidebarReorderModal()"
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-xs group">
+                            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-xs group">
                         <div class="flex items-center gap-2.5">
                             <i class="fa-solid fa-arrows-up-down text-cafePrimary group-hover:scale-110 transition-transform"></i>
-                            <span data-ar="تخصيص ترتيب القائمة" data-en="Customize Sidebar">تخصيص ترتيب القائمة</span>
+                            <span data-ar="تخصيص القائمة والتاب الأساسية" data-en="Customize Sidebar & Main Tab">تخصيص القائمة والتاب الأساسية</span>
                         </div>
-                        <i class="fa-solid fa-gear text-[10px] text-gray-500 group-hover:text-cafePrimary transition-colors"></i>
+                        <i class="fa-solid fa-sliders text-[11px] text-gray-500 group-hover:text-cafePrimary transition-colors"></i>
                     </button>
                 </div>
             @endif
@@ -404,19 +454,19 @@
         </div>
     </main>
 
-    {{-- مودال تخصيص وإعادة ترتيب عناصر القائمة الجانبية (Reorder Sidebar Modal) --}}
+    {{-- مودال تخصيص وإعادة ترتيب القائمة واختيار التاب الأساسية --}}
     @auth
     <div id="reorderSidebarModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs hidden transition-opacity duration-300">
-        <div class="bg-white rounded-3xl max-w-md w-full max-h-[85vh] shadow-2xl flex flex-col overflow-hidden text-right border border-gray-100 animate-slide-in" dir="rtl">
+        <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] shadow-2xl flex flex-col overflow-hidden text-right border border-gray-100 animate-slide-in" dir="rtl">
             {{-- Modal Header --}}
             <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg shadow-inner">
-                        <i class="fa-solid fa-arrows-up-down"></i>
+                        <i class="fa-solid fa-sliders"></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-black text-gray-800">ترتيب القائمة الجانبية</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">رتب العناصر بسهولة وسيتم حفظ الترتيب في حسابك</p>
+                        <h3 class="text-base font-black text-gray-800">تخصيص القائمة والتاب الأساسية</h3>
+                        <p class="text-[11px] text-gray-400 mt-0.5">اختر التاب الرئيسية لحسابك ورتب المجموعات الخمسة بسهولة</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeSidebarReorderModal()" class="w-8 h-8 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition">
@@ -424,47 +474,82 @@
                 </button>
             </div>
 
-            {{-- Modal Body: List of Items --}}
-            <div class="p-4 overflow-y-auto flex-1 space-y-2" id="modalSidebarList">
-                @php
-                    $modalItems = auth()->user()->getOrderedSidebarItems();
-                @endphp
-                @foreach ($modalItems as $key => $item)
-                    <div data-key="{{ $key }}" class="modal-sidebar-item flex items-center justify-between p-2.5 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-gray-100/70 transition">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs {{ ($item['is_hero'] ?? false) ? 'bg-amber-500 text-white' : 'bg-white text-gray-700 border border-gray-200' }}">
-                                <i class="{{ $item['icon'] }}"></i>
-                            </div>
-                            <div>
-                                <span class="font-bold text-xs text-gray-800 block">{{ $item['title'] }}</span>
-                                <span class="text-[9px] text-gray-400 font-medium">{{ $item['group_label'] ?? '' }}</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button type="button" onclick="moveModalItemUp(this)" class="w-7 h-7 rounded-lg bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأعلى">
-                                <i class="fa-solid fa-arrow-up text-[10px]"></i>
-                            </button>
-                            <button type="button" onclick="moveModalItemDown(this)" class="w-7 h-7 rounded-lg bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأسفل">
-                                <i class="fa-solid fa-arrow-down text-[10px]"></i>
-                            </button>
-                        </div>
+            {{-- Modal Body --}}
+            <div class="p-5 overflow-y-auto flex-1 space-y-5">
+                {{-- 1. اختيار التاب الأساسية (Main Tab) --}}
+                <div class="space-y-2 bg-amber-50/40 p-4 rounded-2xl border border-amber-100">
+                    <label class="block text-xs font-black text-gray-800 flex items-center gap-2">
+                        <i class="fa-solid fa-star text-amber-500"></i>
+                        <span>التاب الأساسية المفضلة (Hero Tab & Default Landing):</span>
+                    </label>
+                    <p class="text-[11px] text-gray-500 leading-relaxed">
+                        هذه التاب ستظهر أعلى القائمة الجانبية بتصميم Hero المميز مثل صفحة البيع، وسيتم تحويلك إليها فور تسجيل الدخول.
+                    </p>
+                    @php
+                        $userAvailItems = auth()->user()->getAvailableSidebarItems();
+                        $currentMainKey = auth()->user()->getMainTabKey();
+                    @endphp
+                    <select id="modalMainTabSelect" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-300">
+                        @foreach ($userAvailItems as $mKey => $mItem)
+                            <option value="{{ $mKey }}" {{ $currentMainKey === $mKey ? 'selected' : '' }}>
+                                {{ $mItem['title'] }} ({{ $mItem['group_label'] ?? '' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- 2. ترتيب المجموعات الـ 4 أو الـ 5 (Reorder Groups) --}}
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-black text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-up-down text-sky-500"></i>
+                            <span>ترتيب المجموعات الرئيسية (التابات بالداخل ثابتة):</span>
+                        </label>
+                        <span class="text-[10px] text-gray-400 font-bold">استخدم الأسهم للترتيب</span>
                     </div>
-                @endforeach
+
+                    <div class="space-y-2" id="modalGroupList">
+                        @php
+                            $modalGroups = auth()->user()->getOrderedSidebarGroups();
+                        @endphp
+                        @foreach ($modalGroups as $gKey => $gData)
+                            <div data-group-key="{{ $gKey }}" class="modal-group-item flex items-center justify-between p-3 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-gray-100/70 transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-white border border-gray-200 text-cafePrimary flex items-center justify-center text-xs shadow-xs">
+                                        <i class="{{ $gData['icon'] }}"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-xs text-gray-800 block">{{ $gData['label'] }}</span>
+                                        <span class="text-[10px] text-gray-400 font-medium">مجموعة تضم {{ count($gData['items']) }} تابات ثابتة</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button type="button" onclick="moveModalGroupUp(this)" class="w-7 h-7 rounded-lg bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأعلى">
+                                        <i class="fa-solid fa-arrow-up text-[10px]"></i>
+                                    </button>
+                                    <button type="button" onclick="moveModalGroupDown(this)" class="w-7 h-7 rounded-lg bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأسفل">
+                                        <i class="fa-solid fa-arrow-down text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
 
             {{-- Modal Footer --}}
             <div class="p-4 border-t border-gray-100 bg-gray-50/70 flex items-center justify-between gap-2">
-                <button type="button" onclick="resetSidebarOrderModal()" class="px-3 py-2 text-xs font-bold text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition">
+                <button type="button" onclick="resetSidebarOrderModal()" class="px-3.5 py-2 text-xs font-bold text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition">
                     <i class="fa-solid fa-rotate-left ml-1"></i>
                     استعادة الافتراضي
                 </button>
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="closeSidebarReorderModal()" class="px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition">
+                    <button type="button" onclick="closeSidebarReorderModal()" class="px-3.5 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition">
                         إلغاء
                     </button>
-                    <button type="button" onclick="saveSidebarOrderModal()" id="modalSaveOrderBtn" class="px-4 py-2 text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white rounded-xl shadow-xs transition active:scale-95 flex items-center gap-1.5">
+                    <button type="button" onclick="saveSidebarOrderModal()" id="modalSaveOrderBtn" class="px-5 py-2 text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white rounded-xl shadow-xs transition active:scale-95 flex items-center gap-1.5">
                         <i class="fa-solid fa-floppy-disk"></i>
-                        <span>حفظ الترتيب</span>
+                        <span>حفظ التخصيص</span>
                     </button>
                 </div>
             </div>
@@ -476,6 +561,29 @@
     @stack('modals')
 
     <script>
+        // دالة تبديل مجموعات الأكورديون في القائمة الجانبية (Accordion with auto-close)
+        function toggleSidebarGroup(grpKey) {
+            const targetContent = document.getElementById('group-content-' + grpKey);
+            const targetChevron = document.querySelector('.group-chevron-' + grpKey);
+            const isCurrentlyOpen = targetContent && !targetContent.classList.contains('hidden');
+
+            // إغلاق جميع المجموعات المفتوحة الأخرى تلقائياً
+            document.querySelectorAll('.sidebar-group-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll('[class*="group-chevron-"]').forEach(chevron => {
+                chevron.classList.remove('rotate-180', 'text-cafePrimary');
+            });
+
+            // لو كانت المجموعة المستهدفة مغلقة -> فتحها
+            if (!isCurrentlyOpen && targetContent) {
+                targetContent.classList.remove('hidden');
+                if (targetChevron) {
+                    targetChevron.classList.add('rotate-180', 'text-cafePrimary');
+                }
+            }
+        }
+
         function openSidebarReorderModal() {
             const modal = document.getElementById('reorderSidebarModal');
             if (modal) modal.classList.remove('hidden');
@@ -486,22 +594,23 @@
             if (modal) modal.classList.add('hidden');
         }
 
-        function moveModalItemUp(btn) {
-            const item = btn.closest('.modal-sidebar-item');
+        function moveModalGroupUp(btn) {
+            const item = btn.closest('.modal-group-item');
             const prev = item.previousElementSibling;
             if (prev) item.parentNode.insertBefore(item, prev);
         }
 
-        function moveModalItemDown(btn) {
-            const item = btn.closest('.modal-sidebar-item');
+        function moveModalGroupDown(btn) {
+            const item = btn.closest('.modal-group-item');
             const next = item.nextElementSibling;
             if (next) item.parentNode.insertBefore(next, item);
         }
 
         async function saveSidebarOrderModal() {
             const btn = document.getElementById('modalSaveOrderBtn');
-            const items = document.querySelectorAll('#modalSidebarList .modal-sidebar-item');
-            const order = Array.from(items).map(el => el.dataset.key);
+            const groupItems = document.querySelectorAll('#modalGroupList .modal-group-item');
+            const groupOrder = Array.from(groupItems).map(el => el.dataset.groupKey);
+            const mainTab = document.getElementById('modalMainTabSelect') ? document.getElementById('modalMainTabSelect').value : null;
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> <span>جاري الحفظ...</span>';
@@ -514,7 +623,10 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ order: order })
+                    body: JSON.stringify({
+                        group_order: groupOrder,
+                        main_tab: mainTab
+                    })
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -526,12 +638,12 @@
                 alert('حدث خطأ أثناء الحفظ.');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>حفظ الترتيب</span>';
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>حفظ التخصيص</span>';
             }
         }
 
         async function resetSidebarOrderModal() {
-            if (!confirm('هل تريد استعادة الترتيب الافتراضي للقائمة؟')) return;
+            if (!confirm('هل تريد استعادة الترتيب الافتراضي للقائمة والتاب الأساسية؟')) return;
 
             try {
                 const res = await fetch('{{ route('user.sidebar_order.reset') }}', {

@@ -29,44 +29,87 @@
         </span>
     </div>
 
-    {{-- قسم 1: تخصيص وترتيب عناصر القائمة الجانبية (Sidebar Reordering) --}}
+    {{-- قسم 1: التاب الأساسية المفضلة (Hero Main Tab & Landing) --}}
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 space-y-4">
+        <div class="border-b border-gray-100 pb-3">
+            <h3 class="text-sm sm:text-base font-black text-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-star text-amber-500"></i>
+                <span>التاب الأساسية المفضلة لحسابك (Hero Main Tab)</span>
+            </h3>
+            <p class="text-xs text-gray-400 mt-0.5">
+                اختر التاب التي تريدها أن تكون صفحتك الرئيسية. ستظهر التاب بأعلى القائمة الجانبية بنمط Hero المميز، وسيتم توجيهك إليها تلقائياً فور تسجيل الدخول أو زيارة النظام.
+            </p>
+        </div>
+
+        @php
+            $availableTabs = auth()->user()->getAvailableSidebarItems();
+            $currentMainKey = auth()->user()->getMainTabKey();
+        @endphp
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="mainTabCardsGrid">
+            @foreach($availableTabs as $tKey => $tItem)
+                @php
+                    $isMain = ($currentMainKey === $tKey);
+                @endphp
+                <div onclick="selectMainTabCard('{{ $tKey }}')"
+                     data-tab-key="{{ $tKey }}"
+                     class="main-tab-card cursor-pointer p-3.5 rounded-2xl border transition-all duration-200 flex items-start gap-3 relative select-none {{ $isMain ? 'bg-amber-500/10 border-amber-500 ring-2 ring-amber-400/50' : 'bg-gray-50/70 hover:bg-gray-100/70 border-gray-100' }}">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm shrink-0 shadow-xs {{ $isMain ? 'bg-amber-500 text-white' : 'bg-white text-gray-700 border border-gray-200' }}">
+                        <i class="{{ $tItem['icon'] }}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="font-black text-xs text-gray-800 truncate block">{{ $tItem['title'] }}</span>
+                            <span class="main-badge text-[9px] font-bold px-1.5 py-0.5 rounded-md {{ $isMain ? 'bg-amber-500 text-white' : 'hidden' }}">رئيسي</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 truncate block mt-0.5">{{ $tItem['group_label'] ?? '' }}</span>
+                    </div>
+                    <input type="radio" name="selected_main_tab" value="{{ $tKey }}" class="sr-only" {{ $isMain ? 'checked' : '' }}>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- قسم 2: تخصيص وترتيب المجموعات الـ 5 بالقائمة الجانبية (Reorder Groups) --}}
     <div class="bg-white rounded-3xl border border-gray-100 shadow-xs p-5 sm:p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-gray-100 pb-4">
             <div>
                 <h3 class="text-sm sm:text-base font-black text-gray-800 flex items-center gap-2">
                     <i class="fa-solid fa-arrows-up-down text-sky-500"></i>
-                    <span>تخصيص وترتيب القائمة الجانبية</span>
+                    <span>تخصيص وترتيب مجموعات القائمة الجانبية (الأكورديون)</span>
                 </h3>
-                <p class="text-xs text-gray-400 mt-0.5">رتب عناصر القائمة بسهولة عبر أزرار الصعود والهبوط وسيتم حفظ الترتيب في حسابك مباشرة</p>
+                <p class="text-xs text-gray-400 mt-0.5">
+                    التحكم في ترتيب المجموعات الخمسة الرئيسية، بينما تبقى التابات الداخلية ثابتة ومترابطة داخل مجموعتها
+                </p>
             </div>
             <button type="button" onclick="resetSidebarOrderSettings()" class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold transition">
                 <i class="fa-solid fa-rotate-left ml-1"></i>
-                استعادة الترتيب الافتراضي
+                استعادة الافتراضي
             </button>
         </div>
 
         @php
-            $orderedItems = auth()->user()->getOrderedSidebarItems();
+            $orderedGroups = auth()->user()->getOrderedSidebarGroups();
         @endphp
 
-        <div id="settingsSidebarList" class="space-y-2">
-            @foreach($orderedItems as $key => $item)
-                <div data-key="{{ $key }}" class="settings-sidebar-item flex items-center justify-between p-3.5 rounded-2xl border border-gray-100 bg-gray-50/60 hover:bg-gray-100/80 transition">
+        <div id="settingsGroupsList" class="space-y-2.5">
+            @foreach($orderedGroups as $grpKey => $grpData)
+                <div data-group-key="{{ $grpKey }}" class="settings-group-item flex items-center justify-between p-3.5 rounded-2xl border border-gray-100 bg-gray-50/70 hover:bg-gray-100/70 transition">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm {{ $item['is_hero'] ?? false ? 'bg-sky-500 text-white' : 'bg-white text-gray-700 border border-gray-200 shadow-2xs' }}">
-                            <i class="{{ $item['icon'] }}"></i>
+                        <div class="w-10 h-10 rounded-xl bg-white border border-gray-200 text-cafePrimary flex items-center justify-center text-sm shadow-xs">
+                            <i class="{{ $grpData['icon'] }}"></i>
                         </div>
                         <div>
-                            <span class="font-bold text-gray-800 text-xs sm:text-sm block">{{ $item['title'] }}</span>
-                            <span class="text-[10px] text-gray-400 font-bold">{{ $item['group_label'] ?? '' }}</span>
+                            <span class="font-black text-gray-800 text-xs sm:text-sm block">{{ $grpData['label'] }}</span>
+                            <span class="text-[10px] text-gray-400 font-medium">مجموعة تضم {{ count($grpData['items']) }} تابات ثابتة</span>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-1.5">
-                        <button type="button" onclick="moveItemUp(this)" class="w-8 h-8 rounded-xl bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأعلى">
+                        <button type="button" onclick="moveGroupItemUp(this)" class="w-8 h-8 rounded-xl bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأعلى">
                             <i class="fa-solid fa-arrow-up text-xs"></i>
                         </button>
-                        <button type="button" onclick="moveItemDown(this)" class="w-8 h-8 rounded-xl bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأسفل">
+                        <button type="button" onclick="moveGroupItemDown(this)" class="w-8 h-8 rounded-xl bg-white hover:bg-sky-50 text-gray-600 hover:text-sky-600 border border-gray-200 flex items-center justify-center transition" title="تحريك لأسفل">
                             <i class="fa-solid fa-arrow-down text-xs"></i>
                         </button>
                     </div>
@@ -77,7 +120,7 @@
         <div class="pt-3 flex justify-end">
             <button type="button" onclick="saveSettingsSidebarOrder()" id="saveOrderBtn" class="px-6 py-3 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition active:scale-95">
                 <i class="fa-solid fa-floppy-disk"></i>
-                <span>حفظ الترتيب الحالي في الحساب</span>
+                <span>حفظ التخصيص والترتيب في حسابك</span>
             </button>
         </div>
     </div>
@@ -663,16 +706,46 @@
 
 @push('scripts')
 <script>
-    function moveItemUp(btn) {
-        const item = btn.closest('.settings-sidebar-item');
+    // اختيار كارت التاب الأساسية بصرياً
+    function selectMainTabCard(key) {
+        document.querySelectorAll('.main-tab-card').forEach(card => {
+            const isTarget = card.getAttribute('data-tab-key') === key;
+            const badge = card.querySelector('.main-badge');
+            const iconBox = card.querySelector('.w-10');
+            const radio = card.querySelector('input[type="radio"]');
+
+            if (isTarget) {
+                card.classList.add('bg-amber-500/10', 'border-amber-500', 'ring-2', 'ring-amber-400/50');
+                card.classList.remove('bg-gray-50/70', 'border-gray-100');
+                if (badge) badge.classList.remove('hidden');
+                if (iconBox) {
+                    iconBox.classList.add('bg-amber-500', 'text-white');
+                    iconBox.classList.remove('bg-white', 'text-gray-700', 'border', 'border-gray-200');
+                }
+                if (radio) radio.checked = true;
+            } else {
+                card.classList.remove('bg-amber-500/10', 'border-amber-500', 'ring-2', 'ring-amber-400/50');
+                card.classList.add('bg-gray-50/70', 'border-gray-100');
+                if (badge) badge.classList.add('hidden');
+                if (iconBox) {
+                    iconBox.classList.remove('bg-amber-500', 'text-white');
+                    iconBox.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-200');
+                }
+                if (radio) radio.checked = false;
+            }
+        });
+    }
+
+    function moveGroupItemUp(btn) {
+        const item = btn.closest('.settings-group-item');
         const prev = item.previousElementSibling;
         if (prev) {
             item.parentNode.insertBefore(item, prev);
         }
     }
 
-    function moveItemDown(btn) {
-        const item = btn.closest('.settings-sidebar-item');
+    function moveGroupItemDown(btn) {
+        const item = btn.closest('.settings-group-item');
         const next = item.nextElementSibling;
         if (next) {
             item.parentNode.insertBefore(next, item);
@@ -681,8 +754,11 @@
 
     async function saveSettingsSidebarOrder() {
         const btn = document.getElementById('saveOrderBtn');
-        const items = document.querySelectorAll('#settingsSidebarList .settings-sidebar-item');
-        const order = Array.from(items).map(el => el.dataset.key);
+        const items = document.querySelectorAll('#settingsGroupsList .settings-group-item');
+        const groupOrder = Array.from(items).map(el => el.dataset.groupKey);
+
+        const checkedRadio = document.querySelector('input[name="selected_main_tab"]:checked');
+        const selectedMainTab = checkedRadio ? checkedRadio.value : null;
 
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> <span>جاري الحفظ...</span>';
@@ -695,11 +771,14 @@
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ order: order })
+                body: JSON.stringify({
+                    group_order: groupOrder,
+                    main_tab: selectedMainTab
+                })
             });
             const data = await res.json();
             if (data.success) {
-                alert('تم حفظ ترتيب القائمة بنجاح! سيتم تحديث الصفحة لتطبيق الترتيب الجديد.');
+                alert('تم حفظ إعدادات التخصيص والتاب الأساسية بنجاح!');
                 window.location.reload();
             } else {
                 alert('حدث خطأ أثناء الحفظ.');
@@ -708,12 +787,12 @@
             alert('حدث خطأ أثناء الحفظ.');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>حفظ الترتيب الحالي في الحساب</span>';
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>حفظ التخصيص والترتيب في حسابك</span>';
         }
     }
 
     async function resetSidebarOrderSettings() {
-        if (!confirm('هل تريد استعادة الترتيب الافتراضي للقائمة؟')) return;
+        if (!confirm('هل تريد استعادة الترتيب الافتراضي للقائمة والتاب الأساسية؟')) return;
 
         try {
             const res = await fetch('{{ route('user.sidebar_order.reset') }}', {

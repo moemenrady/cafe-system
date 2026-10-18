@@ -75,14 +75,30 @@
                 </div>
 
                 {{-- اسم المورد --}}
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">
-                        اسم المورد / الشركة <span class="text-rose-500">*</span>
-                    </label>
-                    <input type="text" name="supplier_name" id="supplierNameInput"
-                        value="{{ old('supplier_name') }}" required
-                        placeholder="مثال: شركة النيل للألبان، بن عبد المعبود..."
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-bold text-gray-700">
+                            المورد / الشركة <span class="text-rose-500">*</span>
+                        </label>
+                        <a href="{{ route('suppliers.create') }}" target="_blank" class="text-[10px] text-blue-600 hover:underline flex items-center gap-1 font-bold">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>مورد جديد</span>
+                        </a>
+                    </div>
+                    <select name="supplier_id" id="supplierSelect" onchange="handleSupplierSelect(this)"
                         class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-gray-900 font-bold focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                        <option value="">-- اختر مورد مسجل أو اختر جديد --</option>
+                        @foreach($suppliers as $s)
+                            <option value="{{ $s->id }}" data-name="{{ $s->name }}" {{ (string)old('supplier_id', $selectedSupplierId ?? '') === (string)$s->id ? 'selected' : '' }}>{{ $s->name }} {{ $s->company_name ? '('.$s->company_name.')' : '' }}</option>
+                        @endforeach
+                        <option value="new" {{ old('supplier_id') === 'new' ? 'selected' : '' }}>
+                            ➕ مورد جديد (كتابة يدوية)
+                        </option>
+                    </select>
+                    <input type="text" name="supplier_name" id="supplierNameInput"
+                        value="{{ old('supplier_name', ($selectedSupplierId ? ($suppliers->firstWhere('id', $selectedSupplierId)?->name ?? '') : '')) }}"
+                        placeholder="اكتب اسم المورد هنا..."
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-900 font-bold focus:ring-2 focus:ring-blue-500 focus:outline-hidden {{ (old('supplier_id') === 'new' || (empty(old('supplier_id', $selectedSupplierId ?? '')) && old('supplier_name'))) ? '' : 'hidden' }}">
                 </div>
 
                 {{-- تاريخ الفاتورة --}}
@@ -568,10 +584,32 @@
         calculateTotals();
     }
 
+    function handleSupplierSelect(select) {
+        const nameInput = document.getElementById('supplierNameInput');
+        if (select.value === 'new') {
+            nameInput.classList.remove('hidden');
+            nameInput.value = '';
+            nameInput.focus();
+        } else if (select.value) {
+            const opt = select.options[select.selectedIndex];
+            nameInput.value = opt.getAttribute('data-name') || opt.text.trim();
+            nameInput.classList.add('hidden');
+        } else {
+            nameInput.classList.remove('hidden');
+            nameInput.value = '';
+        }
+    }
+
     // تهيئة الصفحة بإضافة أول صنف تلقائياً
     document.addEventListener('DOMContentLoaded', function() {
         addNewItemRow();
         handlePaymentStatusChange();
+
+        const supSelect = document.getElementById('supplierSelect');
+        if (supSelect && supSelect.value && supSelect.value !== 'new') {
+            const opt = supSelect.options[supSelect.selectedIndex];
+            document.getElementById('supplierNameInput').value = opt.getAttribute('data-name') || opt.text.trim();
+        }
     });
 </script>
 

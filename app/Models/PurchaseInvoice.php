@@ -14,6 +14,7 @@ class PurchaseInvoice extends Model
 
     protected $fillable = [
         'invoice_number',
+        'supplier_id',
         'supplier_name',
         'invoice_date',
         'total_amount',
@@ -58,6 +59,14 @@ class PurchaseInvoice extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * المورد التابع له الفاتورة
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
     /**

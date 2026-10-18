@@ -24,6 +24,11 @@
         </div>
 
         <div class="flex items-center gap-2 w-full sm:w-auto">
+            <a href="{{ route('suppliers.index') }}"
+                class="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs">
+                <i class="fa-solid fa-truck-field text-blue-600"></i>
+                <span>سجل الموردين</span>
+            </a>
             <a href="{{ route('purchase-invoices.create') }}"
                 class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-md shadow-blue-600/25">
                 <i class="fa-solid fa-plus"></i>
@@ -289,7 +294,14 @@
 
                                         {{-- اسم المورد --}}
                                         <td class="p-3.5">
-                                            <div class="font-black text-gray-900">{{ $invoice->supplier_name }}</div>
+                                            @if($invoice->supplier_id)
+                                                <a href="{{ route('suppliers.show', $invoice->supplier_id) }}" class="font-black text-gray-900 hover:text-blue-600 transition flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-truck-field text-blue-500 text-[10px]"></i>
+                                                    <span>{{ $invoice->supplier_name }}</span>
+                                                </a>
+                                            @else
+                                                <div class="font-black text-gray-900">{{ $invoice->supplier_name }}</div>
+                                            @endif
                                             @if($invoice->notes)
                                                 <span class="text-[10px] text-gray-400 truncate max-w-[150px] block mt-0.5">
                                                     {{ $invoice->notes }}

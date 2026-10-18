@@ -99,7 +99,14 @@
             {{-- بيانات المورد --}}
             <div class="space-y-1">
                 <span class="text-gray-400 font-bold block text-[11px]">بيانات المورد / الشركة:</span>
-                <strong class="text-sm font-black text-gray-900 block">{{ $purchaseInvoice->supplier_name }}</strong>
+                @if($purchaseInvoice->supplier_id)
+                    <a href="{{ route('suppliers.show', $purchaseInvoice->supplier_id) }}" class="text-sm font-black text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1.5">
+                        <i class="fa-solid fa-truck-field text-blue-500 text-xs"></i>
+                        <span>{{ $purchaseInvoice->supplier_name }}</span>
+                    </a>
+                @else
+                    <strong class="text-sm font-black text-gray-900 block">{{ $purchaseInvoice->supplier_name }}</strong>
+                @endif
                 <span class="text-[11px] text-gray-500 block">توريد مواد خام للمخزن</span>
             </div>
 

@@ -6,6 +6,7 @@ use App\Models\InventoryItem;
 use App\Models\InventoryMovement;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceItem;
+use App\Models\Supplier;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -116,7 +117,7 @@ class PurchaseInvoiceController extends Controller
     /**
      * فورم إنشاء فاتورة شراء جديدة
      */
-    public function create()
+    public function create(Request $request)
     {
         $nextInvoiceNumber = PurchaseInvoice::generateNextInvoiceNumber();
         $units = ['كجم', 'جرام', 'لتر', 'مل', 'علبة', 'كرتونة', 'باكت', 'شيكارة', 'قطعة', 'زجاجة'];
@@ -129,11 +130,16 @@ class PurchaseInvoiceController extends Controller
             ->orderBy('name')
             ->get();
 
+        $suppliers = Supplier::orderBy('name')->get();
+        $selectedSupplierId = $request->query('supplier_id');
+
         return view('purchase_invoices.create', compact(
             'nextInvoiceNumber',
             'units',
             'categories',
-            'allInventoryItems'
+            'allInventoryItems',
+            'suppliers',
+            'selectedSupplierId'
         ));
     }
 
@@ -144,7 +150,8 @@ class PurchaseInvoiceController extends Controller
     {
         $request->validate([
             'invoice_number' => 'nullable|string|max:100|unique:purchase_invoices,invoice_number',
-            'supplier_name'  => 'required|string|max:255',
+            'supplier_id'    => 'nullable|exists:suppliers,id',
+            'supplier_name'  => 'nullable|string|max:255',
             'invoice_date'   => 'required|date',
             'payment_method' => 'required|string',
             'payment_status' => 'required|string',
@@ -161,14 +168,28 @@ class PurchaseInvoiceController extends Controller
             'items.*.category'      => 'nullable|string',
             'items.*.notes'         => 'nullable|string',
         ], [
-            'supplier_name.required' => 'يرجى إدخال اسم المورد.',
             'invoice_date.required'  => 'يرجى تحديد تاريخ الفاتورة.',
             'items.required'         => 'يجب إضافة صنف واحد على الأقل في الفاتورة.',
             'items.*.name.required'  => 'يرجى تحديد اسم كل صنف.',
             'items.*.quantity.min'   => 'كمية الصنف يجب أن تكون أكبر من صفر.',
         ]);
 
-        return DB::transaction(function () use ($request) {
+        $supplierId = $request->supplier_id;
+        $supplierName = trim((string) $request->supplier_name);
+
+        if ($supplierId) {
+            $supplier = Supplier::find($supplierId);
+            if ($supplier) {
+                $supplierName = $supplier->name;
+            }
+        } elseif (!empty($supplierName)) {
+            $supplier = Supplier::firstOrCreate(['name' => $supplierName]);
+            $supplierId = $supplier->id;
+        } else {
+            return back()->withErrors(['supplier_name' => 'يرجى اختيار أو تحديد اسم المورد.'])->withInput();
+        }
+
+        return DB::transaction(function () use ($request, $supplierId, $supplierName) {
             // 1. حساب إجماليات الأصناف
             $totalAmount = 0.0;
             foreach ($request->items as $itemData) {
@@ -198,7 +219,8 @@ class PurchaseInvoiceController extends Controller
             // 2. إنشاء الفاتورة
             $invoice = PurchaseInvoice::create([
                 'invoice_number'   => $invoiceNumber,
-                'supplier_name'    => $request->supplier_name,
+                'supplier_id'      => $supplierId,
+                'supplier_name'    => $supplierName,
                 'invoice_date'     => $request->invoice_date,
                 'total_amount'     => $totalAmount,
                 'discount'         => $discount,
@@ -304,6 +326,8 @@ class PurchaseInvoiceController extends Controller
             ->orderBy('name')
             ->get();
 
+        $suppliers = Supplier::orderBy('name')->get();
+
         $initialItems = $purchaseInvoice->items->map(function ($item) {
             return [
                 'id'                => $item->id,
@@ -322,6 +346,7 @@ class PurchaseInvoiceController extends Controller
             'units',
             'categories',
             'allInventoryItems',
+            'suppliers',
             'initialItems'
         ));
     }
@@ -332,7 +357,8 @@ class PurchaseInvoiceController extends Controller
     public function update(Request $request, PurchaseInvoice $purchaseInvoice)
     {
         $request->validate([
-            'supplier_name'  => 'required|string|max:255',
+            'supplier_id'    => 'nullable|exists:suppliers,id',
+            'supplier_name'  => 'nullable|string|max:255',
             'invoice_date'   => 'required|date',
             'payment_method' => 'required|string',
             'payment_status' => 'required|string',
@@ -347,7 +373,22 @@ class PurchaseInvoiceController extends Controller
             'items.*.unit_price'    => 'required|numeric|min:0',
         ]);
 
-        return DB::transaction(function () use ($request, $purchaseInvoice) {
+        $supplierId = $request->supplier_id;
+        $supplierName = trim((string) $request->supplier_name);
+
+        if ($supplierId) {
+            $supplier = Supplier::find($supplierId);
+            if ($supplier) {
+                $supplierName = $supplier->name;
+            }
+        } elseif (!empty($supplierName)) {
+            $supplier = Supplier::firstOrCreate(['name' => $supplierName]);
+            $supplierId = $supplier->id;
+        } else {
+            return back()->withErrors(['supplier_name' => 'يرجى اختيار أو تحديد اسم المورد.'])->withInput();
+        }
+
+        return DB::transaction(function () use ($request, $purchaseInvoice, $supplierId, $supplierName) {
             // 1. التراجع عن الكميات القديمة في المخزن
             foreach ($purchaseInvoice->items as $oldItem) {
                 if ($oldItem->inventoryItem) {
@@ -384,7 +425,8 @@ class PurchaseInvoiceController extends Controller
 
             // 3. تحديث الفاتورة
             $purchaseInvoice->update([
-                'supplier_name'    => $request->supplier_name,
+                'supplier_id'      => $supplierId,
+                'supplier_name'    => $supplierName,
                 'invoice_date'     => $request->invoice_date,
                 'total_amount'     => $totalAmount,
                 'discount'         => $discount,

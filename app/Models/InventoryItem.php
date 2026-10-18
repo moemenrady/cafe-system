@@ -16,12 +16,16 @@ class InventoryItem extends Model
         'category',
         'quantity',
         'unit',
+        'recipe_unit',
+        'purchase_unit',
+        'conversion_factor',
         'reorder_level',
         'unit_price',
     ];
 
     protected $casts = [
-        'unit_price'    => 'decimal:2',
+        'unit_price'        => 'decimal:2',
+        'conversion_factor' => 'decimal:2',
     ];
 
     protected $appends = [

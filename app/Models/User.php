@@ -387,8 +387,21 @@ class User extends Authenticatable implements MustVerifyEmail
             ],
         ];
 
-        // فواتير الشراء خاصة بالمدراء
+        // فواتير الشراء والموردين خاصة بالمدراء
         if ($this->isManager()) {
+            $items['suppliers'] = [
+                'key'            => 'suppliers',
+                'title'          => 'الموردين',
+                'title_en'       => 'Suppliers',
+                'route'          => 'suppliers.index',
+                'active_pattern' => 'suppliers*',
+                'icon'           => 'fa-solid fa-truck-field',
+                'group'          => 'inventory',
+                'group_label'    => 'المخزن والمشتريات',
+                'group_icon'     => 'fa-solid fa-boxes-stacked',
+                'subgroup'       => 'purchases',
+                'subgroup_label' => 'المشتريات والتوريدات',
+            ];
             $items['purchase_invoices'] = [
                 'key'            => 'purchase_invoices',
                 'title'          => 'فواتير الشراء',

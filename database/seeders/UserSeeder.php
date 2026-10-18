@@ -11,43 +11,51 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 1. حساب المدير العام (Admin)
-        User::create([
-            'name' => 'المدير العام',
-            'email' => 'admin@cafe.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'is_active' => true,
-            'email_verified_at' => now(), // 🌟 أضف هذا السطر هنا
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@cafe.com'],
+            [
+                'name'              => 'المدير العام',
+                'password'          => Hash::make('password'),
+                'role'              => 'admin',
+                'is_active'         => true,
+                'email_verified_at' => now(),
+            ]
+        );
 
         // 2. حساب المشرف (Supervisor)
-        User::create([
-            'name' => 'المشرف أحمد',
-            'email' => 'supervisor@cafe.com',
-            'password' => Hash::make('password'),
-            'role' => 'supervisor',
-            'is_active' => true,
-            'email_verified_at' => now(), // 🌟 وهذا السطر هنا
-        ]);
+        User::firstOrCreate(
+            ['email' => 'supervisor@cafe.com'],
+            [
+                'name'              => 'المشرف أحمد',
+                'password'          => Hash::make('password'),
+                'role'              => 'supervisor',
+                'is_active'         => true,
+                'email_verified_at' => now(),
+            ]
+        );
 
         // 3. حساب الكاشير (Cashier)
-        User::create([
-            'name' => 'كاشير الويتر محمد',
-            'email' => 'cashier@cafe.com',
-            'password' => Hash::make('password'),
-            'role' => 'cashier',
-            'is_active' => true,
-            'email_verified_at' => now(), // 🌟 وهذا السطر هنا
-        ]);
+        User::firstOrCreate(
+            ['email' => 'cashier@cafe.com'],
+            [
+                'name'              => 'كاشير الويتر محمد',
+                'password'          => Hash::make('password'),
+                'role'              => 'cashier',
+                'is_active'         => true,
+                'email_verified_at' => now(),
+            ]
+        );
 
         // 4. حساب الباريستا (Barista)
-        User::create([
-            'name' => 'باريستا صانع القهوة',
-            'email' => 'barista@cafe.com',
-            'password' => Hash::make('password'),
-            'role' => 'barista',
-            'is_active' => true,
-            'email_verified_at' => now(), // 🌟 وهذا السطر هنا
-        ]);
+        User::firstOrCreate(
+            ['email' => 'barista@cafe.com'],
+            [
+                'name'              => 'باريستا صانع القهوة',
+                'password'          => Hash::make('password'),
+                'role'              => 'barista',
+                'is_active'         => true,
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

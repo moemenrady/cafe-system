@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\PurchaseInvoiceController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
@@ -36,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // مسارات فواتير الشراء وإدارتها
         Route::get('/inventory/ajax-search', [PurchaseInvoiceController::class, 'searchInventoryItems'])->name('inventory.ajaxSearch');
         Route::resource('purchase-invoices', PurchaseInvoiceController::class);
+        Route::resource('suppliers', SupplierController::class);
         Route::get('/management', function () {
             return view('management.index');
         })->name('management.index');

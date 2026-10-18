@@ -171,13 +171,13 @@
 
                                 {{-- الرصيد --}}
                                 <td class="p-2.5 text-center font-mono font-bold text-gray-900 border-l border-gray-200">
-                                    {{ number_format($item->quantity, $item->unit === 'قطعة' || $item->unit === 'علبة' ? 0 : 2) }}
+                                    {{ (float) $item->quantity }}
                                     <span class="text-[10px] text-gray-400 font-sans block sm:inline">{{ $item->unit }}</span>
                                 </td>
 
                                 {{-- تكلفة الوحدة --}}
                                 <td class="p-2.5 text-left font-mono font-semibold text-gray-700 border-l border-gray-200">
-                                    {{ number_format($item->unit_price, 2) }}
+                                    {{ (float)$item->unit_price < 1 ? number_format($item->unit_price, 4) : number_format($item->unit_price, 2) }}
                                 </td>
 
                                 {{-- القيمة الإجمالية --}}

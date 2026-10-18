@@ -23,7 +23,7 @@ class PurchaseInvoiceItem extends Model
 
     protected $casts = [
         'quantity'   => 'decimal:2',
-        'unit_price' => 'decimal:2',
+        'unit_price' => 'decimal:4',
         'subtotal'   => 'decimal:2',
     ];
 

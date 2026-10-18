@@ -93,7 +93,7 @@
 
                         <div class="space-y-1">
                             <label class="text-xs font-bold text-gray-600 block">سعر الوحدة الواحد</label>
-                            <input type="number" step="0.001" id="unit_price" name="unit_price"
+                            <input type="number" step="0.0001" id="unit_price" name="unit_price"
                                 value="{{ old('unit_price', $defaultUnitPrice) }}"
                                 class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-100 text-gray-800 font-bold outline-none cursor-not-allowed"
                                 placeholder="0.00" readonly>
@@ -146,7 +146,7 @@
                 if (qty > 0 && total >= 0) {
                     const result = total / qty;
                     // تحديث سعر الوحدة مع لفت انتباه المستخدم بتغيير اللون لحظياً (Animation خفيف)
-                    unitPriceInput.value = Number(result.toFixed(3));
+                    unitPriceInput.value = Number(result.toFixed(4));
 
                     unitPriceInput.classList.add('bg-blue-50', 'text-blue-700');
                     setTimeout(() => {

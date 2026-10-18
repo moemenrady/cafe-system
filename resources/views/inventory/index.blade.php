@@ -41,10 +41,11 @@
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                @php $lowStockCount = $items->filter(fn($i) => (float)$i->quantity <= (float)$i->reorder_level)->count(); @endphp
                 <div class="space-y-1">
                     <p class="text-xs font-semibold text-gray-400">أصناف أوشكت على النفاد</p>
-                    <h3 class="text-2xl font-bold text-yellow-600">
-                        {{ $items->where('quantity', '<=', 'reorder_level')->count() }} أصناف</h3>
+                    <h3 class="text-2xl font-bold {{ $lowStockCount > 0 ? 'text-yellow-600' : 'text-emerald-600' }}">
+                        {{ $lowStockCount }} أصناف</h3>
                 </div>
                 <div class="w-12 h-12 bg-yellow-50 text-yellow-500 rounded-xl flex items-center justify-center text-xl">
                     ⚠️
@@ -96,11 +97,11 @@
                         @forelse($items as $item)
                             <tr class="hover:bg-gray-50/80 transition-colors duration-200">
                                 <td class="py-4 px-6 font-semibold text-gray-800 text-base">{{ $item->name }}</td>
-                                <td class="py-4 px-6 font-bold text-gray-900 text-base">{{ $item->quantity }}</td>
+                                <td class="py-4 px-6 font-bold text-gray-900 text-base">{{ (float) $item->quantity }}</td>
                                 <td class="py-4 px-6 text-gray-500 font-medium">{{ $item->unit }}</td>
-                                <td class="py-4 px-6 text-yellow-600 font-medium">{{ $item->reorder_level }}</td>
+                                <td class="py-4 px-6 text-yellow-600 font-medium">{{ (float) $item->reorder_level }}</td>
                                 <td class="py-4 px-6 text-center">
-                                    @if ($item->quantity <= $item->reorder_level)
+                                    @if ((float) $item->quantity <= (float) $item->reorder_level)
                                         <span
                                             class="bg-red-50 text-red-600 py-1 px-3 rounded-full text-xs font-bold border border-red-100">⚠️
                                             محتاج شراء فوراً</span>

@@ -24,7 +24,7 @@ class InventoryItem extends Model
     ];
 
     protected $casts = [
-        'unit_price'        => 'decimal:2',
+        'unit_price'        => 'decimal:4',
         'conversion_factor' => 'decimal:2',
     ];
 

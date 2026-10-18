@@ -176,7 +176,7 @@
                                     <span class="text-gray-500 text-[11px] font-bold mr-1">{{ $item->unit }}</span>
                                 </td>
                                 <td class="p-3.5 text-center font-mono text-gray-700 font-bold">
-                                    {{ number_format($item->unit_price, 2) }} ج
+                                    {{ (float)$item->unit_price < 1 ? number_format($item->unit_price, 4) : number_format($item->unit_price, 2) }} ج
                                 </td>
                                 <td class="p-3.5 text-left font-mono font-black text-gray-900 text-sm">
                                     {{ number_format($item->subtotal, 2) }} ج.م

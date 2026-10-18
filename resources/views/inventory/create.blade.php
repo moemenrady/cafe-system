@@ -69,7 +69,7 @@
 
                         <div class="space-y-1">
                             <label class="text-xs font-bold text-gray-600 block">سعر الوحدة الواحد</label>
-                            <input type="number" step="0.001" id="unit_price" name="unit_price"
+                            <input type="number" step="0.0001" id="unit_price" name="unit_price"
                                 value="{{ old('unit_price') }}"
                                 class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-100 text-gray-500 outline-none cursor-not-allowed"
                                 placeholder="0.00" readonly>
@@ -115,9 +115,9 @@
                 const total = parseFloat(totalPriceInput.value) || 0;
 
                 if (qty > 0 && total >= 0) {
-                    // الحساب وتثبيت النتيجة لـ 3 أرقام عشرية كحد أقصى لدقة الكسور الفضية والجرامات
+                    // الحساب وتثبيت النتيجة لـ 4 أرقام عشرية لدقة السيربات والجرامات
                     const result = total / qty;
-                    unitPriceInput.value = Number(result.toFixed(3));
+                    unitPriceInput.value = Number(result.toFixed(4));
                 } else {
                     unitPriceInput.value = '';
                 }

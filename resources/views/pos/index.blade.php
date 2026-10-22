@@ -183,11 +183,23 @@
             {{-- شبكة بطاقات المنتجات القابلة للتمرير --}}
             <div class="flex-1 overflow-y-auto p-2.5 sm:p-3 pos-scrollbar min-h-0">
                 <div id="menuGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-2.5">
+                    @php
+                        $arAliases = [
+                            'Turkish Coffee'  => 'تركي قهوة تركي ترك',
+                            'French Coffee'   => 'فرنساوي قهوة فرنساوي فرنسي',
+                            'Hazelnut Coffee' => 'بندق يندق قهوة بندق',
+                        ];
+                        $arShort = [
+                            'Turkish Coffee'  => 'تركي',
+                            'French Coffee'   => 'فرنساوي',
+                            'Hazelnut Coffee' => 'بندق',
+                        ];
+                    @endphp
                     @foreach ($menus as $menu)
                         <button type="button"
                             onclick='addItem("{{ $menu->id }}", @json($menu->name), {{ $menu->price }})'
                             data-id="{{ $menu->id }}"
-                            data-name="{{ $menu->name }}"
+                            data-name="{{ $menu->name }} {{ $arAliases[$menu->name] ?? '' }}"
                             data-category="{{ $menu->category_id }}"
                             class="menu-item-card card-touch bg-white hover:bg-blue-50/30 border border-gray-200/80 hover:border-blue-400 rounded-2xl flex flex-col overflow-hidden group transition-all duration-150 active:scale-95 shadow-xs hover:shadow-md relative text-right">
 
@@ -207,6 +219,9 @@
                                 <div class="p-2 sm:p-2.5 flex-1 flex flex-col justify-between">
                                     <span class="font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 group-hover:text-blue-600 transition-colors">
                                         {{ $menu->name }}
+                                        @if(isset($arShort[$menu->name]))
+                                            <span class="text-[11px] font-bold text-amber-700 block">({{ $arShort[$menu->name] }})</span>
+                                        @endif
                                     </span>
                                     <span class="text-[11px] text-gray-400 mt-1 font-medium">
                                         {{ $menu->category->name ?? '' }}
@@ -217,6 +232,9 @@
                                     <div class="flex items-start justify-between gap-1">
                                         <span class="font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">
                                             {{ $menu->name }}
+                                            @if(isset($arShort[$menu->name]))
+                                                <span class="text-[11px] font-bold text-amber-700 block">({{ $arShort[$menu->name] }})</span>
+                                            @endif
                                         </span>
                                         <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                             <i class="fa-solid fa-mug-hot"></i>

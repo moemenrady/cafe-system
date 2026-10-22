@@ -177,10 +177,22 @@
 
                 {{-- قائمة منتجات هذا القسم (Cards Grid) --}}
                 <div class="p-4 sm:p-6" id="cat-body-{{ $category->id }}">
+                    @php
+                        $arAliases = [
+                            'Turkish Coffee'  => 'تركي قهوة تركي ترك',
+                            'French Coffee'   => 'فرنساوي قهوة فرنساوي فرنسي',
+                            'Hazelnut Coffee' => 'بندق يندق قهوة بندق',
+                        ];
+                        $arShort = [
+                            'Turkish Coffee'  => 'تركي',
+                            'French Coffee'   => 'فرنساوي',
+                            'Hazelnut Coffee' => 'بندق',
+                        ];
+                    @endphp
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
                         @forelse($category->menuItems as $item)
                             <div class="menu-product-card bg-gray-50/70 hover:bg-white border border-gray-100 hover:border-amber-200 rounded-2xl p-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between"
-                                 data-product-name="{{ strtolower($item->name) }}">
+                                 data-product-name="{{ strtolower($item->name) }} {{ $arAliases[$item->name] ?? '' }}">
 
                                 <div>
                                     <div class="flex items-start justify-between gap-2 mb-2">
@@ -209,6 +221,9 @@
 
                                     <h4 class="font-extrabold text-gray-800 text-sm product-name leading-snug">
                                         {{ $item->name }}
+                                        @if(isset($arShort[$item->name]))
+                                            <span class="text-xs text-amber-700 font-bold block">({{ $arShort[$item->name] }})</span>
+                                        @endif
                                     </h4>
                                     <p class="text-[10px] text-gray-400 mt-0.5">{{ $category->name }}</p>
                                 </div>

@@ -60,6 +60,19 @@ class UnoMenuAndDailyTrackingTest extends TestCase
         $specialFruitSalad = Menu::where('name', 'Special Fruit salad')->first();
         $this->assertNotNull($specialFruitSalad);
         $this->assertEquals(600.00, (float) $specialFruitSalad->price);
+
+        // التأكد من الأصناف الجديدة (تركي، فرنساوي، بندق)
+        $turkish = Menu::where('name', 'Turkish Coffee')->first();
+        $this->assertNotNull($turkish);
+        $this->assertEquals(40.00, (float) $turkish->price);
+
+        $french = Menu::where('name', 'French Coffee')->first();
+        $this->assertNotNull($french);
+        $this->assertEquals(70.00, (float) $french->price);
+
+        $hazelnut = Menu::where('name', 'Hazelnut Coffee')->first();
+        $this->assertNotNull($hazelnut);
+        $this->assertEquals(70.00, (float) $hazelnut->price);
     }
 
     public function test_menu_index_page_displays_grouped_categories_and_pdf_button(): void

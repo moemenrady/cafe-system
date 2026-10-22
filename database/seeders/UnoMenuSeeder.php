@@ -63,6 +63,9 @@ class UnoMenuSeeder extends Seeder
                 ['name' => 'Americano', 'price' => 90.00],
                 ['name' => 'Hot Chocolate', 'price' => 120.00],
                 ['name' => 'Marshmallow Hot chocolate', 'price' => 130.00],
+                ['name' => 'Turkish Coffee', 'price' => 40.00],
+                ['name' => 'French Coffee', 'price' => 70.00],
+                ['name' => 'Hazelnut Coffee', 'price' => 70.00],
             ],
             'Milk Shake' => [
                 ['name' => 'Nutella', 'price' => 130.00],

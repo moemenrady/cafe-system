@@ -48,6 +48,18 @@
                         class="mt-2 w-full text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300">
                 </div>
                 <div class="overflow-y-auto max-h-[500px] divide-y divide-gray-100" id="menuList">
+                    @php
+                        $arAliases = [
+                            'Turkish Coffee'  => 'تركي قهوة تركي ترك',
+                            'French Coffee'   => 'فرنساوي قهوة فرنساوي فرنسي',
+                            'Hazelnut Coffee' => 'بندق يندق قهوة بندق',
+                        ];
+                        $arShort = [
+                            'Turkish Coffee'  => 'تركي',
+                            'French Coffee'   => 'فرنساوي',
+                            'Hazelnut Coffee' => 'بندق',
+                        ];
+                    @endphp
                     @foreach($menus->groupBy('category.name') as $categoryName => $items)
                     <div class="menu-category">
                         <div class="px-3 py-1.5 bg-gray-50 text-[10px] font-black text-gray-500 uppercase tracking-wider sticky top-0">
@@ -57,9 +69,14 @@
                         <button type="button"
                             onclick="addItem({{ $menu->id }}, '{{ addslashes($menu->name) }}', {{ $menu->price }})"
                             class="menu-item w-full flex items-center justify-between px-3 py-2.5 hover:bg-blue-50 transition text-right group"
-                            data-name="{{ strtolower($menu->name) }}">
+                            data-name="{{ strtolower($menu->name) }} {{ $arAliases[$menu->name] ?? '' }}">
                             <div>
-                                <div class="text-xs font-bold text-gray-800 group-hover:text-blue-700">{{ $menu->name }}</div>
+                                <div class="text-xs font-bold text-gray-800 group-hover:text-blue-700">
+                                    {{ $menu->name }}
+                                    @if(isset($arShort[$menu->name]))
+                                        <span class="text-amber-700 font-bold">({{ $arShort[$menu->name] }})</span>
+                                    @endif
+                                </div>
                                 <div class="text-[10px] text-gray-400">{{ number_format($menu->price, 2) }} ج</div>
                             </div>
                             <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
